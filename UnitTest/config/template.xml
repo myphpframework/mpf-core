@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE config SYSTEM "http://myphpframework.com/dtd/config.dtd" >
+<config>
+    <section name="cache">
+        <value name="cache" type="boolean">false</value>
+    </section>
+</config>

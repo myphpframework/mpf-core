@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="required">Ce champ est obligatoire.</text>
+        <text id="alphanumeric">Must only contain alphanumeric characters</text>
+        <text id="name">Le nom doit contenir des caractères alphabétique uniquement.</text>
+        <text id="numeric">Ce champ doit contenir uniquement des chiffres.</text>
+        <text id="passwordConfirm">La confirmation du mot de passe est invalide.</text>
+        <text id="password">Le mot de passe doit contenir un minimum de 8 caractères.</text>
+        <text id="email">Le courriel entré est invalide.</text>
+        <text id="phone">Le numéro de téléphone entré est invalide.</text>
+        <text id="country">Le pays indiqué est invalide.</text>
+        <text id="state">La province sélectionnée ne correspond pas au pays.</text>
+        <text id="creditCard">Numéro de carte de crédit invalide.</text>
+        <text id="unexpected">Une erreur inattendue s'est produite.</text>
+    </country>
+</i18n>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE languages SYSTEM "http://myphpframework.com/dtd/language.dtd" >
+<languages>
+    <language>
+        <abrv2>fr</abrv2>
+        <abrv3>fra</abrv3>
+        <native>Français</native>
+    </language>
+    <language>
+        <abrv2>en</abrv2>
+        <abrv3>eng</abrv3>
+        <native>English</native>
+    </language>
+    <language>
+        <abrv2>es</abrv2>
+        <abrv3>spa</abrv3>
+        <native>Español</native>
+    </language>
+</languages>

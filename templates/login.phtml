@@ -1,0 +1,69 @@
+<? $text = MPF\Text::byXml('login'); ?>
+<form name="login" method="POST" action="/">
+    <ul>
+        <li><input type="radio" name="type" value="login" id="typeLogin" checked="checked" /><label for="typeLogin"><?= $text->get('labelTypeLogin') ?></label></li>
+        <li><input type="radio" name="type" value="new" id="typeNew" /><label for="typeNew"><?= $text->get('labelTypeNew') ?></label></li>
+    </ul>
+    <div><label for="email"><?= $text->get('labelEmail') ?>:</label><input type="text" id="email" name="email" value="<?= @$_POST['email']; ?>" /></div>
+    <div><label for="password"><?= $text->get('labelPassword') ?>:</label><input type="password" id="password" name="password" value="" autocomplete="off" /></div>
+    <div><label for="passwordConfirm"><?= $text->get('labelConfirm') ?>:</label><input type="password" id="passwordConfirm" name="passwordConfirm" value="" autocomplete="off" /></div>
+    <div><input type="submit" value="<?= $text->get('labelSubmit') ?>" /></div>
+</form>
+<script type="text/javascript">
+$(document).ready(function() {
+    function changeType() {
+        switch ($('[name="type"]:checked').val()) {
+            case 'login':
+                $('[name="passwordConfirm"]').closest('div').fadeOut(250);
+                $('[name="passwordConfirm"]', $form).unvalidate();
+                break;
+            case 'new':
+                $('[name="passwordConfirm"]').closest('div').fadeIn(250);
+                $('[name="passwordConfirm"]', $form).validate('passwordConfirm required');
+                break;
+        }
+    }
+
+    $('[name="type"]').change(function () {
+        changeType();
+    });
+
+    changeType();
+
+    var $form = $('form[name="login"]');
+    $('[name="password"]', $form).validate('password required');
+    $('[name="email"]', $form).validate('email required');
+    $form.submit(function () {
+    //$('[type="button"]').click(function () {
+        $form.validate(function (isValid, invalidFields) {
+            if (!isValid) {
+                $form.addFormErrors(invalidFields);
+                return false;
+            }
+
+            // rectify the action & method for the login service
+            if ($('[name="type"]:checked').val() == 'login') {
+                $form.prop('action', 'mpf_user/'+ $('[name="email"]', $form).val() +'/login');
+                $form.prop('method', 'PUT');
+            } else {
+                $form.prop('action', 'mpf_user/');
+                $form.prop('method', 'POST');
+            }
+
+            mpf.ajaxForm($form, function (error, response) {
+                if (error) {
+                    $form.addFormErrors([{
+                        element: $('ul', $form),
+                        errorMsg: error
+                    }]);
+                    return;
+                }
+
+                document.location.href = '/';
+            });
+            return false;
+        });
+        return false;
+    });
+});
+</script>

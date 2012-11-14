@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="test2">test value 2</text>
+        <text id="test1">test value 1</text>
+        <text id="testReplace">test the @name@ plz!</text>
+        <text id="bbcodeTest">test the [b]name[/b] plz!</text>
+        <text id="bbcodeTestDate">this is an [date]982342348[/date] date...</text>
+        <text id="bbcodeTestDiv">this is an [div class="bob"]hullo[/div] div...</text>
+        <text id="bbcodeTestInception">this is an [div class="bob"]hm or[span class="inception"]hullo[/span]test[/div] div...</text>
+    </country>
+</i18n>

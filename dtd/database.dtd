@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+   TODO: DTD is apparently not valid, find out why...
+
+   An example how to use this DTD from your XML document:
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE databases SYSTEM "http://myphpframework.com/dtd/database.dtd" >
+<databases>
+   <server engine="MYSQL">
+       <host>localhost</host>
+       <port>3306</port>
+       <access type="rw" for="1">
+           <database>newbiverse</database>
+           <login>root</login>
+           <password>1111</password>
+       </access>
+   </server>
+   <server engine="MYSQL">
+       <host>localhost</host>
+       <port>3306</port>
+       <access type="r" for="2">
+           <database>newbiverse</database>
+           <login>root</login>
+           <password>1111</password>
+       </access>
+       <access type="w" for="2">
+           <database>newbiverse</database>
+           <login>root</login>
+           <password>1111</password>
+       </access>
+   </server>
+</databases>
+
+
+-->
+
+<!ELEMENT databases (server)*>
+<!ELEMENT server (host,port,access)>
+<!ATTLIST server engine (MySQL|MySQLi|SQLite|Oracle|MSSQL|PostgreSQL) "MySQLi" #REQUIRED>
+<!ELEMENT host (#PCDATA)>
+<!ELEMENT port (#PCDATA)>
+
+<!ELEMENT access (database,login,password)>
+<!ATTLIST access
+    type (r|w|rw) "rw" #REQUIRED
+    access for CDATA #REQUIRED>
+<!ELEMENT database (#PCDATA)>
+<!ELEMENT login (#PCDATA)>
+<!ELEMENT password (#PCDATA)>

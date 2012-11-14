@@ -1,0 +1,43 @@
+
+The template system offers a Marker system so users can hook themselves in various steps of the
+template compilation process. As of 2011-01-02 there is only 1 Marker available and it is the nocache
+marker. Which gives your the opportunity to have certain peice of your template or subtemplate not to be 
+cached.
+
+The Marker system finds either {myNameIsBob /} or {myNameIsBob}{/myNameIsBob} pattern within templates.
+These are the two types of markers. Single and Wrapper. The single marker MUST be closed like shown "/}"
+otherwise it will not get matched.
+
+It then looks for an object with the name Template_Marker_Mynameisbob. As you can notice everything is put
+to lower case and the first letter of the marker is capitalized. So give your markers a short name if possible.
+Again the system will find the nearest class with that name and will execute it.
+
+Every marker must implements Template_Marker_Interface otherwise it will not be noticed as a real marker.
+
+The interface has only 2 functions and they are as follow:
+/**
+ * This function is called before the template's php code executed
+ *
+ * NOTE: $rawTemplate is the code from the .phtml, or cached template. Thus only the Markers that have a tag in a raw.phtml
+ * or in a cached template will have their ->init() called. This happens in the __constructor of the template. The init() function may be called twice if the cache is invalidated by another marker then the markers are re-initiated on the rawTemplate
+ *
+ * @param Template $template
+ * @param string $rawTemplate
+ */
+public function init(Template $template, &$rawTemplate);
+
+/**
+ * This function is called after the template's php code executed
+ *
+ * NOTE: $templateOutput and $templateCache are equals at this point. Thus only the markers that have a tag after the
+ * first eval of the raw template will have their ->execute() called. This happens in the parse() of the template.
+ *
+ * @param Template $template
+ * @param string $templateOutput
+ * @param string $templateCache
+ */
+public function execute(Template $template, &$templateOutput, &$templateCache);
+
+
+You can add any markers, or override them, by simply adding folders Templates/Marker/ and adding your
+markers classes in that folder and use them. They should follow the naming convention Template_Marker_Namealllowercase.

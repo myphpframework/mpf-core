@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="dbDatabaseNotBootstrapped">Database environment not bootstrapped, please do so with ENV::bootstrap(ENV::DATABASE);</text>
+        <text id="dbInvalidHashAlgo">The algorithm "@algo@" is not supported, please make sure its one of these: "@algoList@"</text>
+        <text id="dbInvalidFieldValue">The field "@fieldName@" for model "@model@" is of wrong value type.</text>
+        <text id="dbInvalidFieldType">The field "@fieldName@" for model "@model@" is of wrong type, must be int,float,string or null.</text>
+        <text id="dbInvalidFieldLength">The field "@fieldName@" for model "@model@" has a greater length than specified in the model.</text>
+        <text id="dbFieldNotNull">The field "@fieldName@" for model "@model@" does not support null value.</text>
+        <text id="dbFieldReadonly">The field "@fieldName@" for model "@model@" is defined as readonly by the model, hence you cannot modify it.</text>
+        <text id="dbInvalidFieldName">Invalid field name "@fieldName@" for model "@model@".</text>
+        <text id="dbInvalidResultResourceType">Invalid result resource type, expected "@expected@" but got "@actual@".</text>
+        <text id="dbInvalidConnectionType">Invalid connection type, expected "@expected@" but got "@actual@".</text>
+        <text id="dbInvalidQuery">The query "@query@" failed to execute properly, see error: @error@</text>
+        <text id="dbConnectInfoNotFound">The the connection information for the database @name@ of the type @dbType@ with the access "@accessType@" could not be found.</text>
+        <text id="dbInvalidAccessType">The database access type "@accessType@" is not valid.</text>
+        <text id="dbInvalidConfig">The database config "@filename@" is invalid, some information are missing.</text>
+        <text id="dbUnsupportType">The type "@type@" is not supported at this time.</text>
+        <text id="dbDuplicateEntry">There is already an entry with value "@value@" for key "@key@" in `@database@`.@table@.</text>
+        <text id="dbModelTooManyPrimaryKeys">The model must have 1 primary key only in order to work properly with status.</text>
+
+        <text id="dbModelMissingStatuses">The model has no statuses</text>
+        <text id="dbModelMissingPhpDoc">The model "@modelName@" requires the phpdoc "@@phpdoc@" to work properly.</text>
+
+        <text id="textFileNotFound">The text file "@filename@" could not be found in: @paths@</text>
+        <text id="textIdNotFound">The text id "@id@" was not found. Available IDs are: @availableIds@</text>
+
+        <text id="bootstrapTypeNotSupported">The bootstrap type "@type@" is unsupported at this time.</text>
+        <text id="configUnknownEnvironment">Unknown environment name "@mpf_env@", make sure it exists in your ini files</text>
+        <text id="configOverlapping">The Config "@config1@" overlaps with another config.</text>
+        <text id="bootstrapUnsupportedType">Unknown environment type "@type@".</text>
+
+        <text id="serviceInvalidRequestMethod">Invalid request method "@method@"</text>
+        <text id="serviceInvalidRequestAction">Invalid request action "@action@"</text>
+        <text id="serviceMissingRequestFields">The request is missing the following fields: "@fields@"</text>
+        <text id="serviceUserAlreadyExists">There is already an account with the email "@email@"</text>
+        <text id="serviceUserNotApproved">Your account has not been approved yet</text>
+        <text id="serviceInvalidCredentials">Invalid credentials</text>
+        <text id="serviceUserSuccessfulLogin">User (#@id@) @email@ successfully logged in</text>
+    </country>
+</i18n>

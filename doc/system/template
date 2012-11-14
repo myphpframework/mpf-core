@@ -1,0 +1,33 @@
+
+The template system is based on the paths that the static object ENV returns for templates.
+It will crawls to those directory to try to find the template you are looking for
+and it will take the nearest template to its location. This gives us the opportunity to
+override certain templates.
+
+All template files must have the extension .phtml
+
+Example:
+Site_Root/
+    index.php
+    templates/
+        layout.phtml
+        header.phtml
+        menu.phtml
+        footer.html
+    someSubFolder/
+        templates/
+            menu.phtml
+        index.php
+        add.php
+
+In this example if load site_root/index.php it well have the menu /templates/menu.phtml
+because it is the nearest to its location. But if we load /someSubFolder/index.php it
+will have the menu /someSubFolder/templates/menu.phtml because its the nearest for that execution.
+
+The template language is php and it is as of 2011-01-02 not monitorized, but in the futur all
+the .phtml will be analyse to enforce a strict use of php within them in developpement mode.
+
+template now has sorte of an error system. in the template bootstrap it highjacks the set_error_handler for all E_USER_*
+and puts the errStr in the GLOBALS['userErrors'] so it can be rendered in a friendly template.
+
+

@@ -1,0 +1,48 @@
+
+
+#### Classes
+
+@Name
+The name of classes should always be seperated by underscores "_" for each directory. Ideally one word between underscores with the first letter capitalized.
+
+.Fails
+class example {}
+class ExampleInterface {}
+class Example-Interface {}
+
+.Wins
+class Example {}
+dir:classes/Example.php
+
+class Example_Interface {}
+dir:classes/Example/Interface.php
+
+
+
+
+
+#### Functions, ANY
+
+@Return
+The return of a function should never change type unless it is returning an object, in that case it can return either an object or null.
+
+.Fails
+function example1()
+{
+   if (someCondition)
+   {
+      return $someArray;
+   }
+   return null;
+}
+
+.Wins
+function example1()
+{
+   $someArray = array();
+   if (someCondition)
+   {
+      $someArray = array(....);
+   }
+   return $someArray;
+}

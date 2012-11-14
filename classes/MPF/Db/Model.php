@@ -1,0 +1,403 @@
+<?php
+
+namespace MPF\Db;
+
+use \MPF\PhpDoc;
+use \MPF\Config;
+use \MPF\Logger;
+
+/**
+ *
+ */
+abstract class Model extends \MPF\PhpDoc {
+    private $md5 = null;
+
+    public static function fromJson($json) {
+        $properties = @json_decode($json);
+        if (null === $properties) {
+            // TODO: Custom exception fromJson error
+            $exception = new \Exception('Bad json, cannot instantiate model');
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $class = get_called_class();
+        $model = new $class();
+        foreach ($properties as $name => $value) {
+            $model->$name = $value;
+        }
+
+        $model->generateMD5();
+        return $model;
+    }
+
+    /*
+     * builds a model from a Db\Entry
+     *
+     * return Model
+     */
+
+    public static function fromDbEntry(Entry $entry) {
+        $class = get_called_class();
+        $model = new $class();
+        foreach ($entry as $name => $value) {
+            $model->$name = $value;
+        }
+
+        $model->generateMD5();
+        return $model;
+    }
+
+    /**
+     *
+     * @param Field $field
+     * @return \MPF\Db\ModelResult
+     */
+    public static function byField(Field $field) {
+        $className = get_called_class();
+        self::generatePhpDoc($className);
+
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
+            $exception = new Exception\ModelMissingPhpDoc($className, PhpDoc::CLASS_DATABASE);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $dbLayer = \MPF\Db::byName(self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE]);
+
+        // no need to call generateMD5 because it ends up calling "fromDbEntry"
+        return $dbLayer->queryModelField($field);
+    }
+
+    /**
+     * Returns the default field properties according to the phpdoc
+     *
+     * @param type $fieldName
+     * @return \MPF\Db\Field
+     */
+    public static function generateField($fieldName, $value=null, $phpdoc=array()) {
+        $className = get_called_class();
+        self::generatePhpDoc($className);
+
+        if (!array_key_exists($fieldName, self::$phpdoc[$className]['properties'])) {
+            $exception = new Exception\InvalidFieldName($fieldName, $className);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        return new \MPF\Db\Field(array_merge(self::$phpdoc[$className]['class'], $phpdoc), $fieldName, $value, self::$phpdoc[$className]['properties'][$fieldName]);
+    }
+
+    final public function __construct() {
+        parent::__construct();
+    }
+
+    final public function updatefromDbEntry(Entry $entry) {
+        foreach ($entry as $name => $value) {
+            $this->$name = $value;
+        }
+        $this->generateMD5();
+    }
+
+    /**
+     *
+     * @return integer
+     */
+    final public function getId() {
+        $primaryFields = $this->getPrimaryFields();
+        if (count($primaryFields) > 1) {
+            $exception = new MPF\Db\Exception\TooManyPrimaryKeys();
+            Logger::Log('Status', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        return $primaryFields[0]->getValue();
+    }
+
+    public function save() {
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$this->className]['class'])) {
+            $exception = new Exception\ModelMissingPhpDoc($this->className, PhpDoc::CLASS_DATABASE);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $dbLayer = \MPF\Db::byName(self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE]);
+        $dbLayer->saveModel($this);
+    }
+
+    /*
+     * @param string $fieldName
+     * @return \MPF\Db\Field
+     */
+
+    public function getField($fieldName) {
+        if (!array_key_exists($fieldName, self::$phpdoc[$this->className]['properties'])) {
+            $exception = new Exception\InvalidFieldName($fieldName, $this->className);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $field = null;
+        if (property_exists($this, $fieldName)) {
+            $field = new \MPF\Db\Field(self::$phpdoc[$this->className]['class'], $fieldName, $this->$fieldName, self::$phpdoc[$this->className]['properties'][$fieldName]);
+        }
+
+        return $field;
+    }
+
+    /**
+     * Returns the fields and their values
+     *
+     * @return \MPF\Db\Field
+     */
+    public function getFields() {
+        $fields = array();
+        foreach (self::$phpdoc[$this->className]['properties'] as $name => $property) {
+            if (empty($property) || !array_key_exists(PhpDoc::PROPERTY_TYPE, $property)) {
+                continue;
+            }
+
+            if (property_exists($this, $name) && $property['declaringClass'] == $this->className) {
+                $fields[] = new \MPF\Db\Field(self::$phpdoc[$this->className]['class'], $name, $this->$name, $property);
+            }
+        }
+        return $fields;
+    }
+
+    /**
+     * Returns the table name the model belongs to
+     *
+     * @return string
+     */
+    public function getTable() {
+        if (property_exists($this, 'table')) {
+            return $this->table;
+        }
+
+        return self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_TABLE];
+    }
+
+    /**
+     *  Returns the primary keys of the model
+     *
+     * @return \MPF\Db\Field[]
+     */
+    public function getPrimaryFields() {
+        $primaryKeys = array();
+        foreach (self::$phpdoc[$this->className]['properties'] as $name => $property) {
+            if (array_key_exists(PhpDoc::PROPERTY_PRIMARY_KEY, $property) && $property[PhpDoc::PROPERTY_PRIMARY_KEY]) {
+                $primaryKeys[] = $this->getField($name);
+            }
+        }
+        return $primaryKeys;
+    }
+
+    /**
+     *
+     * @param string $fieldName
+     * @param mixed $fieldValue
+     */
+    public function setField($fieldName, $fieldValue=null, $returnValue=false) {
+
+        $field = $this->getField($fieldName);
+        if ($field->isReadonly()) {
+            $exception = new Exception\FieldReadonly($fieldName, $this->className);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        if (is_null($fieldValue) && !$field->isNullable()) {
+            $exception = new Exception\FieldNotNull($fieldName, $this->className);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $type = $field->getType();
+        if ($fieldValue && $type) {
+            $length = $field->getTypeLength();
+            if (is_object($fieldValue)) {
+                $exception = new Exception\InvalidFieldType($fieldName, $this->className);
+                Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                throw $exception;
+            }
+
+            switch (strtolower($type)) {
+                case 'enum':
+                    break;
+                case 'datetime':
+                case 'date':
+                    if (!strtotime($fieldValue)) {
+                        $exception = new Exception\InvalidFieldValue($fieldName, $this->className);
+                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                        throw $exception;
+                    }
+                    break;
+                case 'timestamp':
+                case 'int':
+                case 'integer':
+                    if (!is_numeric($fieldValue)) {
+                        $exception = new Exception\InvalidFieldValue($fieldName, $this->className);
+                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                        throw $exception;
+                    }
+                    break;
+                case 'text':
+                    if (!is_string($fieldValue)) {
+                        $exception = new Exception\InvalidFieldValue($fieldName, $this->className);
+                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                        throw $exception;
+                    }
+                    break;
+                case 'string':
+                case 'varchar':
+                    if ($length < strlen($fieldValue)) {
+                        $exception = new Exception\InvalidFieldLength($fieldName, $this->className);
+                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                        throw $exception;
+                    }
+                    break;
+            }
+        }
+
+        if ($field->isPassword()) {
+            // if we are setting it to null we dont generate a password
+            if (!$fieldValue) {
+                return;
+            }
+
+            // search for a salt
+            $salt = '';
+            foreach ($this->getFields() as $property) {
+                if ($property->isSalt()) {
+                    $salt = $property->getValue();
+                    if (!$salt) {
+                        $salt = $this->generateSalt($property->getTypeLength(), $property->getSaltType());
+                        $this->{$property->getName()} = $salt;
+                    }
+                    break;
+                }
+            }
+
+            if (!in_array($field->getPasswordType(), hash_algos())) {
+                $exception = new Exception\InvalidHashAlgo($field->getPasswordType());
+                Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                throw $exception;
+            }
+
+            // put the generated salt in the middle of the password
+            $strlen = strlen($fieldValue);
+            $string = substr($fieldValue, 0, ($strlen / 2)) . $salt . substr($fieldValue, ($strlen / 2), $strlen);
+
+            // put the framework salt in the middle of the password
+            $framworkSalt = Config::get('settings')->framework->salt;
+            $strlen = strlen($string);
+            $string = substr($string, 0, ($strlen / 2)) . $framworkSalt . substr($string, ($strlen / 2), $strlen);
+
+            $fieldValue = hash($field->getPasswordType(), $string);
+        }
+
+        if ($field->hasEncryption()) {
+
+        }
+
+        if ($returnValue) {
+            return $fieldValue;
+        }
+
+        $this->$fieldName = $fieldValue;
+    }
+
+    /**
+     * Exactly like setField but instead of setting the value to the
+     * field it return its value
+     *
+     * @param string $fieldName
+     * @param mixed $fieldValue
+     * @return mixed
+     */
+    public function verifyField($fieldName, $fieldValue=null, $returnValue=false) {
+        return $this->setField($fieldName, $fieldValue, true);
+    }
+
+    private function generateSalt($length, $hashType='sha512') {
+        $salt = '';
+        for ($i = 0; $i < $length; $i++) {
+            $salt .= hash($hashType, Config::get('settings')->framework->salt . time() . uniqid(true));
+        }
+        $salt = base64_encode($salt);
+        $salt = strlen($salt) > $length ? substr($salt, 0, $length) : $salt;
+        return trim(strtr($salt, '/+=', '   '));
+    }
+
+    /**
+     * Returns true if the model has not been saved yet
+     *
+     * @return boolean
+     */
+    public function isNew() {
+        $isNew = true;
+        foreach ($this->getPrimaryFields() as $field) {
+            if ($field->getValue()) {
+                $isNew = false;
+            }
+        }
+        return $isNew;
+    }
+
+    /**
+     * Generates the db entry for the model
+     *
+     * @return \MPF\Db\Entry
+     */
+    public function getDbEntry() {
+        $fieldValues = array();
+        foreach ($this->getFields() as $field) {
+            if ($field->isForeign()) {
+                continue;
+            }
+
+            $fieldValues[$field->getName()] = $field->getValue();
+        }
+
+        ksort($fieldValues);
+        return new \MPF\Db\Entry($fieldValues, $this->getMD5());
+    }
+
+    private function generateMD5() {
+        if ($this->md5 === null) {
+            $fieldValues = array();
+            foreach ($this->getFields() as $field) {
+                if ($field->isForeign()) {
+                    continue;
+                }
+
+                $fieldValues[$field->getName()] = $field->getValue();
+            }
+
+            ksort($fieldValues);
+            $this->md5 = md5(implode('', $fieldValues));
+        }
+    }
+
+    public function getMD5() {
+        return $this->md5;
+    }
+
+    /**
+     * Takes all the properties and their values and makes a json array
+     *
+     * @return string
+     */
+    public function toJson() {
+        $array = array();
+        foreach ($this->getFields() as $field) {
+            if ($field->isPrivate() || $field->isForeign()) {
+                continue;
+            }
+
+            $array[$field->getName()] = $field->getValue();
+        }
+        return json_encode($array);
+    }
+
+}
