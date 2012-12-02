@@ -18,6 +18,7 @@ abstract class PhpDoc {
     const PROPERTY_MODEL = 'model';
     const PROPERTY_RELATION = 'relation';
     const PROPERTY_PRIVATE = 'private';
+    const PROPERTY_DATABASE = 'database';
 
     protected static $phpdoc = array();
 
@@ -51,7 +52,7 @@ abstract class PhpDoc {
      * @return array
      */
     private static function getPhpDoc($rawPhpdoc) {
-        preg_match_all("/@([a-z0-9]+)([a-z0-9 ,\\\]{0,})\n/i", $rawPhpdoc, $matches);
+        preg_match_all("/@([a-z0-9]+)([a-z0-9 \-:,\\\]{0,})\n/i", $rawPhpdoc, $matches);
         $phpdoc = array();
         foreach ($matches[1] as $index => $match) {
             $phpdoc[$match] = true;

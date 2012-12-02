@@ -31,6 +31,7 @@ abstract class ModelStatus extends Model {
     public function setStatus(\MPF\Status $status) {
         $statusField = $this->getStatusField();
         $status->table = $statusField->getTable();
+        $status->database = $statusField->getDatabase();
 
         if ($this->statuses === null) {
             $this->statuses = array();
@@ -60,7 +61,7 @@ abstract class ModelStatus extends Model {
     }
 
     public function save() {
-        $dbLayer = \MPF\Db::byName(self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE]);
+        $dbLayer = \MPF\Db::byName($this->getDatabaseName());
         $dbLayer->transactionStart();
 
         try {
@@ -68,7 +69,7 @@ abstract class ModelStatus extends Model {
 
             // if we didnt alter the statuses we dont need to do anything
             if (is_array($this->statuses)) {
-                
+
                 // if there is no statuses we add the default one
                 if (empty($this->statuses)) {
                     $this->setStatus($this->getDefaultStatus());
@@ -98,8 +99,8 @@ abstract class ModelStatus extends Model {
             $fields = $this->getPrimaryFields();
             $field = Status::generateField('foreignId', $fields[0]->getValue(), array(
                 PhpDoc::CLASS_TABLE => $statusField->getTable(),
+                PhpDoc::CLASS_DATABASE => $statusField->getDatabase(),
             ));
-
             $result = Status::byField($field);
             while($status = $result->fetch()) {
                 $this->statuses[] = $status;

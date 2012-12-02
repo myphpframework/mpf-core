@@ -2,9 +2,9 @@
 use MPF\Config;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/Exception/Config/FileNotFound.php');
-require_once(PATH_FRAMEWORK.'classes/Exception/Config/NameNotFound.php');
-require_once(PATH_FRAMEWORK.'classes/Exception/InvalidXml.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Exception/Config/FileNotFound.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Exception/Config/NameNotFound.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Exception/InvalidXml.php');
 
 class ConfigTest extends PHPUnit_Framework_TestCase
 {

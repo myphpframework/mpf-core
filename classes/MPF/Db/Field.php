@@ -36,6 +36,19 @@ class Field {
     }
 
     /**
+     * Returns the database the field belongs to
+     *
+     * @return string
+     */
+    public function getDatabase() {
+        // for foreign fields we have to give their table not the class one
+        if (array_key_exists(PhpDoc::PROPERTY_DATABASE, $this->options)) {
+            return $this->options[PhpDoc::PROPERTY_DATABASE];
+        }
+        return $this->classPhpDoc[PhpDoc::CLASS_DATABASE];
+    }
+
+    /**
      * Returns the name of the class the field belongs to
      *
      * @return string
@@ -203,7 +216,7 @@ class Field {
                 return array(strtotime($fieldValue), strtotime($dbValue));
                 break;
         }
-        return array($dbValue, $fieldValue);
+        return array($fieldValue, $dbValue);
     }
 
     public function isGreaterThan($value) {
@@ -330,6 +343,10 @@ class Field {
      * @return bool
      */
     public function isNullable() {
+        if (!array_key_exists(PhpDoc::PROPERTY_DEFAULT_VALUE, $this->options)) {
+            return false;
+        }
+
         $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
         if (is_bool($value) && $value) {
             return true;

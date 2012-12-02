@@ -13,7 +13,7 @@ class Config {
      * @param string $filename
      * @return StdObj
      */
-    public static function get($filename) {
+    public static function get($filename, $useCache=true) {
         static $configs = array();
 
         if (!array_key_exists('MPF_ENV', $_SERVER)) {
@@ -26,7 +26,7 @@ class Config {
       </xmp>');
         }
 
-        if (array_key_exists($filename, $configs)) {
+        if ($useCache && array_key_exists($filename, $configs)) {
             return self::getEnv($configs[$filename]);
         }
 
@@ -44,7 +44,6 @@ class Config {
         foreach ($paths as $path) {
             $file = $path . $filename . '.ini';
             if (stream_resolve_include_path($file)) {
-
                 // If its the first file we instantiate the config
                 if ($config === null) {
                     $config = new Config($filename);

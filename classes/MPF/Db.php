@@ -91,7 +91,7 @@ class DB {
 
         foreach (self::$servers->xpath('//server[@engine="' . $dbType . '"]') as $server) {
             foreach ($server->access as $access) {
-                if ($access['type'] == $accessType && $access->database == $name) {
+                if ((string)$access['type'] == $accessType && (string)$access->database == $name) {
                     $host = (string) $server->host;
 
                     // if we have some variables or constants to switch in the host we do so
@@ -103,7 +103,6 @@ class DB {
                             $host = str_replace($matchs[0], constant($matchs[1]), $host);
                         }
                     }
-
                     $dbConnection->setInfo($server['engine'], $host, (int) $server->port, (string) $access->database, (string) $access->login, (string) $access->password, (string)$access->type);
                 }
             }

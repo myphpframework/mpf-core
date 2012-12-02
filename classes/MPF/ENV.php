@@ -276,7 +276,7 @@ namespace MPF\ENV {
 
             if (!in_array($path, self::$paths[$type])) {
                 Logger::Buffer('ENV\Paths', 'adding path "' . $path . '" of type "' . $type . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
-                self::$paths[$type][] = $path;
+                array_unshift(self::$paths[$type], $path);
                 if (self::FOLDER_INCLUDE == $type) {
                     Logger::Buffer('ENV\Paths', 'adding new include path set_include_path:' . implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]), Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
                     set_include_path(implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]));

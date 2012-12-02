@@ -58,6 +58,8 @@ class Session {
      * Destroy the session
      */
     public static function destroy() {
-        session_destroy();
+        session_write_close();
+        session_unset();
+        $_SESSION = array();
     }
 }

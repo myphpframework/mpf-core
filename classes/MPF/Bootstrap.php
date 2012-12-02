@@ -1,4 +1,5 @@
 <?php
+
 namespace MPF;
 
 // TODO: all bootstraps should be able to emit the shutdown event. ENV::bootstrap(ENV::DATABASE)->on('shutdown', function (){});
@@ -6,8 +7,8 @@ namespace MPF;
 /**
  * Represent a table structure in the database
  */
-class Bootstrap
-{
+class Bootstrap {
+
     protected $initialized = false;
 
     /**
@@ -15,8 +16,7 @@ class Bootstrap
      *
      * @return bool
      */
-    public function isInitialized()
-    {
+    public function isInitialized() {
         return $this->initialized;
     }
 
@@ -27,21 +27,14 @@ class Bootstrap
      * @param  string $dir
      * @return bool
      */
-    protected function checkDir($dir)
-    {
-        if ($dir && (!is_dir($dir) || !is_writable($dir)))
-        {
-            // if parent dir is writable we try to create the directory ourselves
-            if (@is_writable(dirname($dir)))
-            {
-                if (@mkdir($dir))
-                {
-                    return true;
-                }
+    protected function checkDir($dir) {
+        if ($dir && (!is_dir($dir) || !is_writable($dir))) {
+            if (!mkdir($dir, 0775, true)) {
+                return false;
             }
-            return false;
         }
 
         return true;
     }
+
 }

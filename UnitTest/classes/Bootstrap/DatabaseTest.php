@@ -5,12 +5,12 @@ use MPF\Config;
 use MPF\Bootstrap\Database;
 
 require_once(__DIR__.'/../../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Exception/InvalidConfig.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Exception/UnsupportedType.php');
-require_once(PATH_FRAMEWORK.'classes/Db.php');
-require_once(PATH_FRAMEWORK.'classes/Bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/Bootstrap/Intheface.php');
-require_once(PATH_FRAMEWORK.'classes/Bootstrap/Database.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Exception/InvalidConfig.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Exception/UnsupportedType.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Bootstrap.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Bootstrap/Intheface.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Bootstrap/Database.php');
 
 class Bootstrap_DatabaseTest extends PHPUnit_Framework_TestCase
 {

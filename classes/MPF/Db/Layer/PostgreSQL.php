@@ -42,6 +42,15 @@ class PostgreSQL extends \MPF\Db\Layer {
         return new Entry($entry);
     }
 
+    /**
+     * Fetches a model from the database
+     *
+     * @param \MPF\Db\Field $field
+     * @return \MPF\Db\Result
+     */
+    public function queryModelField(\MPF\Db\Field $field) {
+    }
+
     public function fetchModels(\MPF\Db\Model $model, $condition='AND') {
 
     }

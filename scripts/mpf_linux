@@ -1,0 +1,241 @@
+#!/usr/bin/env php
+<?php
+
+define('COLOR_LIGHT_RED', "[1;31m");
+define('COLOR_LIGHT_GREEN', "[1;32m");
+define('COLOR_YELLOW', "[1;33m");
+define('COLOR_LIGHT_BLUE', "[1;34m");
+define('COLOR_MAGENTA', "[1;35m");
+define('COLOR_LIGHT_CYAN', "[1;36m");
+define('COLOR_WHITE', "[1;37m");
+define('COLOR_NORMAL', "[0m");
+define('COLOR_BLACK', "[0;30m");
+define('COLOR_RED', "[0;31m");
+define('COLOR_GREEN', "[0;32m");
+define('COLOR_BROWN', "[0;33m");
+define('COLOR_BLUE', "[0;34m");
+define('COLOR_CYAN', "[0;36m");
+define('COLOR_BOLD', "[1m");
+define('COLOR_UNDERSCORE', "[4m");
+define('COLOR_REVERSE', "[7m");
+
+define('REQUIRED_PHP_MAJOR_VERSION', 5);
+define('REQUIRED_PHP_MINOR_VERSION', 3);
+define('REQUIRED_PHP_RELEASE_VERSION', 0);
+
+define('DEFAULT_INSTALLCORE_PATH', '/usr/share/');
+
+$corePath = null;
+
+$header =<<<EOS
+ _  _  ____  ____
+( \/ )(  _ \(  __) Welcome to the installation of [BROWN MyPhpFramework].
+/ \/ \ ) __/ ) _)  Please answer the following simple questions.
+\_)(_/(__)  (__)   They will help us install the framework properly.
+
+####################################################################
+
+
+EOS;
+
+echo text($header);
+
+$steps = array(
+    'checkDependencies',
+    'installCore',
+    'copyBootstrap',
+    'createPublicDir',
+    'cacheDir',
+    'logDir',
+    'generateConfigs',
+    'buckminInstall',
+);
+
+foreach ($steps as $function) {
+    while (!$function()) {}
+}
+
+/**
+ * Verifies the framework dependencies
+ *
+ * @return boolean
+ */
+function checkDependencies() {
+    // PHP Version
+    if (!defined('PHP_MAJOR_VERSION')) {
+        echo text("\n[RED MPF requires PHP v".REQUIRED_PHP_MAJOR_VERSION.".".REQUIRED_PHP_MINOR_VERSION.".".REQUIRED_PHP_RELEASE_VERSION." minimum, sorry]\n");
+        exit;
+    }
+
+    if (PHP_MAJOR_VERSION < REQUIRED_PHP_MAJOR_VERSION ||
+       (PHP_MAJOR_VERSION >= REQUIRED_PHP_MAJOR_VERSION && PHP_MINOR_VERSION < REQUIRED_PHP_MINOR_VERSION) ||
+       (PHP_MAJOR_VERSION >= REQUIRED_PHP_MAJOR_VERSION && PHP_MINOR_VERSION >= REQUIRED_PHP_MINOR_VERSION && PHP_RELEASE_VERSION < REQUIRED_PHP_RELEASE_VERSION)) {
+        echo text("\n[RED MPF requires PHP v".REQUIRED_PHP_MAJOR_VERSION.".".REQUIRED_PHP_MINOR_VERSION.".".REQUIRED_PHP_RELEASE_VERSION." minimum, sorry]\n");
+        exit;
+    }
+
+    // Git is installed
+    $output = `which git`;
+    if (!$output) {
+        echo text("\n[RED The MPF installation script requires git to be installed. Please install git or download MPF-Core manually at http://myphpframework.com]\n");
+        exit;
+    }
+
+    $output = trim(`whoami`);
+    if ($output != 'root') {
+        echo text("\n[RED Script must run as \"][WHITE root][RED \" to work properly.]\n");
+        exit;
+    }
+
+    return true;
+}
+
+/**
+ * Handles installing the MPF-Core to the right place
+ *
+ * @param type $question
+ * @return boolean
+ */
+function installCore() {
+    echo text("Which [GREEN path] will [CYAN MPF-Core] be [GREEN installed] or is [GREEN already installed]?\n[[WHITE ".DEFAULT_INSTALLCORE_PATH."]] ");
+
+    $inputPath = trim(fgets(STDIN));
+    $path = filter_var($inputPath, FILTER_SANITIZE_URL);
+    $path = filter_var($path, FILTER_SANITIZE_SPECIAL_CHARS);
+    if ($path) {
+        $path = realpath($path);
+    }
+
+    if (!$path) {
+        if ($path != $inputPath) {
+            echo text("\n[RED The path \"$path\" is invalid... Make sure the path exists.]\n");
+            return false;
+        }
+
+        $path = DEFAULT_INSTALLCORE_PATH;
+    }
+
+    if (file_exists($path.'/init.php')) {
+        echo text("\n[YELLOW The path \"][WHITE $path][YELLOW \" already exists, skipping core installation.]\n");
+        $GLOBALS['corePath'] = $path.'/';
+        return true;
+    }
+
+    $corePath = filter_var($path.'/MPF-Core/', FILTER_SANITIZE_URL);
+    if (file_exists($corePath)) {
+        echo text("\n[YELLOW The path \"][WHITE $corePath][YELLOW \" already exists, skipping core installation.]\n");
+        $GLOBALS['corePath'] = $corePath;
+        return true;
+    }
+
+    $output = array();
+    echo text("\n[GREEN Cloning MPF-Core to ][WHITE $corePath][GREEN ...]\n");
+    exec("git clone https://github.com/myphpframework/MPF-Core.git $corePath", &$output);
+    if (empty($output)) {
+        echo "\n";
+        return false;
+    }
+
+    $GLOBALS['corePath'] = $corePath;
+    return true;
+}
+
+/**
+ * Copies the bootstrap from the MPF-Core and puts it at the root of the site
+ *
+ * @return boolean
+ */
+function copyBootstrap() {
+    $bootstrapFile = $GLOBALS['corePath'].'includes/bootstrap_template.php';
+    if (!file_exists($bootstrapFile)) {
+        echo text("\n[RED The MPF-Core seems not installed properly, the following file does not exists: \"][WHITE $bootstrapFile][RED \"]\n");
+        return true;
+    }
+
+    $bootstrap = file_get_contents($bootstrapFile);
+    $bootstrap = str_replace(
+        array('{corePath}', '{sitePath}'),
+        array($GLOBALS['corePath'], __DIR__.'/'),
+        $bootstrap
+    );
+    file_put_contents('./bootstrap.php', $bootstrap);
+    echo text("\n[GREEN Generating \"][WHITE ".__DIR__."/bootstrap.php][GREEN \"...]\n");
+
+    // add basic configs
+    return true;
+}
+
+function createPublicDir() {
+    if (!file_exists('./http')) {
+        echo text("[GREEN Creating public directory \"][WHITE ".__DIR__."/http/][GREEN \"...]\n");
+        if (!mkdir('./http')) {
+            echo text("[RED Could not create public directory \"][WHITE ".__DIR__."/http/][RED \"]\n");
+        }
+    }
+    return true;
+}
+
+function cacheDir() {
+    if (!file_exists('./cache')) {
+        echo text("[GREEN Creating cache directory \"][WHITE ".__DIR__."/cache/][GREEN \"...]\n");
+        if (!mkdir('./cache', 0775)) {
+            echo text("[RED Could not create cache directory \"][WHITE ".__DIR__."/cache/][RED \"]\n");
+        }
+    }
+    return true;
+}
+
+function logDir() {
+    if (!file_exists('./logs')) {
+        echo text("[GREEN Creating log directory \"][WHITE ".__DIR__."/logs/][GREEN \"...]\n");
+        if (!mkdir('./logs', 0775)) {
+            echo text("[RED Could not create log directory \"][WHITE ".__DIR__."/logs/][RED \"]\n");
+        }
+    }
+    return true;
+}
+function generateConfigs() {
+    if (!file_exists('./config')) {
+        echo text("[GREEN Creating config directory \"][WHITE ".__DIR__."/config/][GREEN \"...]\n");
+        if (!mkdir('./config')) {
+            echo text("[RED Could not create config directory \"][WHITE ".__DIR__."/config/][RED \"]\n");
+        }
+    }
+    return true;
+}
+
+function buckminInstall() {
+    echo text("Do you want to install the default [CYAN Buckmin (WebAdmin)] ? [Y] ");
+    $answer = trim(fgets(STDIN));
+    $answer = (!$answer || in_array($answer, array('Y', 'y')) ? true : false);
+    var_dump($answer);
+    return true;
+}
+
+/**
+ * Parses the text for console color markers
+ *
+ * @param string $text
+ * @return string
+ */
+function text($text) {
+    preg_match_all("/\[([A-Z]+) (.*?)\]/is", $text, $matches);
+
+    foreach ($matches[2] as $i => $coloredText) {
+        $color = constant('COLOR_'.strtoupper($matches[1][ $i ]));
+        $coloredText = color($coloredText, $color);
+        $text = str_replace($matches[0][ $i ], $coloredText, $text);
+    }
+    return $text;
+}
+
+/**
+ * Adds console color to a give text
+ *
+ * @param string $text
+ * @param string $color
+ * @return string
+ */
+function color($text, $color) {
+    return chr(27).$color.$text.chr(27).COLOR_NORMAL;
+}

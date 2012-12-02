@@ -63,7 +63,7 @@ abstract class Model extends \MPF\PhpDoc {
             throw $exception;
         }
 
-        $dbLayer = \MPF\Db::byName(self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE]);
+        $dbLayer = \MPF\Db::byName($field->getDatabase());
 
         // no need to call generateMD5 because it ends up calling "fromDbEntry"
         return $dbLayer->queryModelField($field);
@@ -121,7 +121,7 @@ abstract class Model extends \MPF\PhpDoc {
             throw $exception;
         }
 
-        $dbLayer = \MPF\Db::byName(self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE]);
+        $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->saveModel($this);
     }
 
@@ -162,6 +162,19 @@ abstract class Model extends \MPF\PhpDoc {
             }
         }
         return $fields;
+    }
+
+    /**
+     * Returns the table name the model belongs to
+     *
+     * @return string
+     */
+    public function getDatabase() {
+        if (property_exists($this, 'database')) {
+            return $this->database;
+        }
+
+        return self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_];
     }
 
     /**

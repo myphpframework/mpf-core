@@ -5,10 +5,12 @@ use MPF\Config;
 use MPF\Template;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/Template/Marker/Intheface.php');
-require_once(PATH_FRAMEWORK.'classes/Template/Marker.php');
-require_once(PATH_FRAMEWORK.'classes/Template/Marker/Nocache.php');
-require_once(PATH_FRAMEWORK.'classes/Template.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Template/Marker/Intheface.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Template/Marker.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Template/Marker/Nocache.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Template.php');
+
+ENV::bootstrap(ENV::TEMPLATE);
 
 class TemplateTest extends PHPUnit_Framework_TestCase
 {
@@ -18,15 +20,15 @@ class TemplateTest extends PHPUnit_Framework_TestCase
         $text = $template->parse();
         $this->assertEquals('this is a get text', $text, 'Did not return the right text');
     }
-    
+
     public function testSetContent()
     {
         $template = Template::getFile('setcontent');
-        $template->setContent('bobid', 'this is content');
+        $template->setContent('this is content', 'faketemplatename');
         $text = $template->parse();
         $this->assertEquals('this is content', $text, 'Did not return the right content');
     }
-    
+
     public function testStartContent()
     {
         $level = ob_get_level();
@@ -37,7 +39,7 @@ class TemplateTest extends PHPUnit_Framework_TestCase
         $text = $template->parse();
         $this->assertEquals('Test 1', $text, 'Did not return the right content');
     }
-    
+
     public function testGetMarkers_NoImplement()
     {
         $template = Template::getFile('noImplementMarkerTest');

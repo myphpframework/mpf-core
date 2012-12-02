@@ -5,24 +5,24 @@ use MPF\Config;
 use MPF\Db;
 
 require_once(__DIR__.'/../../../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Exception/UnsupportedType.php');
-require_once(PATH_FRAMEWORK.'classes/Bootstrap/Intheface.php');
-require_once(PATH_FRAMEWORK.'classes/Bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/Bootstrap/Database.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Exception/UnsupportedType.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Bootstrap/Intheface.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Bootstrap.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Bootstrap/Database.php');
 
-require_once(PATH_FRAMEWORK.'classes/Db/Connection.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Layer/Intheface.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Connection.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Layer/Intheface.php');
 
-require_once(PATH_FRAMEWORK.'classes/Db/Exception/InvalidQuery.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Exception/InvalidQuery.php');
 
-require_once(PATH_FRAMEWORK.'classes/Db/Layer/MySQLi.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Connection/MySQLi.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Layer/MySQLi.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Connection/MySQLi.php');
 
-require_once(PATH_FRAMEWORK.'classes/Db/Layer/PostgreSQL.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Connection/PostgreSQL.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Layer/PostgreSQL.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Connection/PostgreSQL.php');
 
-require_once(PATH_FRAMEWORK.'classes/Db/Layer/SQLite.php');
-require_once(PATH_FRAMEWORK.'classes/Db/Connection/SQLite.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Layer/SQLite.php');
+require_once(PATH_FRAMEWORK.'classes/MPF/Db/Connection/SQLite.php');
 
 ENV::bootstrap(ENV::DATABASE, array('filename'=>'dbTest'));
 
@@ -46,7 +46,7 @@ class Db_Layer_MySQLiTest extends PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('MPF\Db\Exception\InvalidQuery');
         $db = Db::byName('test', $this->dbType);
-        
+
         $result = $db->query('dfdfghdg dfgdg sdfghdfgh');
         $this->fail('The object query should have thrown the Exception_Db_InvalidQuery if the query is invalid.');
         $result->free();

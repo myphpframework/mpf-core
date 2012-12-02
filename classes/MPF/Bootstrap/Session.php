@@ -21,6 +21,10 @@ class Session extends \MPF\Bootstrap implements Intheface {
     public function shutdown() {
         Logger::Log('ENV/Boostrap/Session', 'shutting down session', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
         session_write_close();
+        session_regenerate_id(FALSE);
+        session_unset();
+        $_SESSION = array();
+        session_commit();
     }
 
 }

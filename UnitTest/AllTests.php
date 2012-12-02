@@ -13,6 +13,12 @@ require_once('classes/Db/Layer/MySQLiTest.php');
 //require_once('classes/Db/Layer/PostgreSQLTest.php');
 //require_once('classes/Db/Layer/SQLiteTest.php');
 require_once('classes/Db/ModelTest.php');
+require_once('classes/Db/ModelStatusTest.php');
+require_once('classes/Db/EntryTest.php');
+
+require_once('classes/Bootstrap/DatabaseTest.php');
+require_once('classes/Bootstrap/SessionTest.php');
+//require_once('classes/Bootstrap/TemplateTest.php');
 
 class Framework_AllTests
 {
@@ -26,10 +32,16 @@ class Framework_AllTests
         $suite->addTestSuite('TextTest');
         $suite->addTestSuite('LocaleTest');
 
+        $suite->addTestSuite('Bootstrap_DatabaseTest');
+        $suite->addTestSuite('Bootstrap_SessionTest');
+        //$suite->addTestSuite('Bootstrap_TemplateTest');
+
         $suite->addTestSuite('Db_Layer_MySQLiTest');
         //$suite->addTestSuite('Db_Layer_PostgreSQLTest');
         //$suite->addTestSuite('Db_Layer_SQLiteTest');
         $suite->addTestSuite('ModelTest');
+        $suite->addTestSuite('ModelStatusTest');
+        $suite->addTestSuite('EntryTest');
 
         return $suite;
     }

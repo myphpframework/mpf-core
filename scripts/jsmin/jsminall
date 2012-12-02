@@ -1,0 +1,17 @@
+#!/bin/bash
+
+OUTPUT_TARGET="${!#}"
+
+if [ -f $OUTPUT_TARGET ]; then
+   echo "Output target $OUTPUT_TARGET found, deleting..."
+   rm $OUTPUT_TARGET
+fi
+
+for i in $@
+do
+   if [ "$i"x != "$OUTPUT_TARGET"x ]; then
+     echo "Minifying $i into $OUTPUT_TARGET"
+     jsmin < $i >> $OUTPUT_TARGET
+   fi
+done
+
