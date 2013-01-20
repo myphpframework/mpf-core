@@ -32,7 +32,7 @@ try {
     if (!$buffer) {
         echo '{}';
     }
-} catch (Exception $e) {
+} catch (\Exception $e) {
     ob_end_clean();
     $json = json_encode(array('error' => $e->getMessage()));
     Logger::Log('mpfService.php', 'Response: '.$json, Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);

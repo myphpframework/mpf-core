@@ -13,6 +13,7 @@ ini_set('register_globals', '0');
 
 define('PATH_MPF_CORE', '{corePath}');
 define('PATH_SITE',     '{sitePath}');
+define('URL_SITE',      '{siteUrl}');
 
 define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
 define('CONFIG_CACHE', false);

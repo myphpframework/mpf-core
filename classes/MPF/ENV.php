@@ -250,6 +250,39 @@ namespace MPF\ENV {
         }
 
         /**
+         * Looks up the path for all types and add them
+         *
+         * @param string $path
+         */
+        public function addAll($path) {
+            $folderNames = array(
+                self::FOLDER_BUCKET,
+                self::FOLDER_CONFIG,
+                self::FOLDER_CLASS,
+                self::FOLDER_TEMPLATE,
+                self::FOLDER_I18N,
+                self::FOLDER_INCLUDE,
+            );
+
+            foreach ($folderNames as $type) {
+                if (is_dir($path . $type)) {
+                    $newPath = $path . $type . '/';
+
+                    // if we found the key already in the array we remove it to avoid duplicates
+                    // we still add it to give a chance to re-organise priorities
+                    $foundKey = array_search($newPath, self::$paths[$type]);
+                    if ($foundKey) {
+                        self::$paths[$foundKey] = null;
+                        unset(self::$paths[$type][$foundKey]);
+                    }
+
+                    Logger::log('ENV\Paths', 'Found dir "' . $newPath . '"', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                    array_unshift(self::$paths[$type], $newPath);
+                }
+            }
+        }
+
+        /**
          * Adds a path to the array of paths
          *
          * @param string $type

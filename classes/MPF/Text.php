@@ -119,6 +119,15 @@ class Text {
         return json_encode($this->texts);
     }
 
+    /*
+     * Returns the text file in array format
+     *
+     * @return array
+     */
+    public function toArray() {
+        return $this->texts;
+    }
+
     /**
      * Compiles a list of plugins for the text.
      * Populates the property plugins

@@ -66,7 +66,7 @@ class User extends \MPF\Db\ModelStatus {
      * Statuses for the user
      *
      * @type foreign
-     * @table userStatus
+     * @table user_status
      * @model MPF\Status
      * @relation onetomany
      */

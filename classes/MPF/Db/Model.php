@@ -402,6 +402,15 @@ abstract class Model extends \MPF\PhpDoc {
      * @return string
      */
     public function toJson() {
+        return json_encode($this->toArray());
+    }
+
+    /**
+     * Takes all the properties and their values and makes an array
+     *
+     * @return array
+     */
+    public function toArray() {
         $array = array();
         foreach ($this->getFields() as $field) {
             if ($field->isPrivate() || $field->isForeign()) {
@@ -410,7 +419,7 @@ abstract class Model extends \MPF\PhpDoc {
 
             $array[$field->getName()] = $field->getValue();
         }
-        return json_encode($array);
+        return $array;
     }
 
 }
