@@ -42,7 +42,7 @@ use MPF\ENV\Paths;
         }
 
         public static function getType() {
-            return $_SERVER['MPF_ENV'];
+            return MPF_ENV;
         }
 
         /**

@@ -6,9 +6,9 @@ use MPF\Config;
 use MPF\Bootstrap\Template;
 
 require_once(__DIR__ . '/../../bootstrap.php');
-require_once(PATH_FRAMEWORK . 'classes/MPF/Bootstrap.php');
-require_once(PATH_FRAMEWORK . 'classes/MPF/Bootstrap/Intheface.php');
-require_once(PATH_FRAMEWORK . 'classes/MPF/Bootstrap/Template.php');
+require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap.php');
+require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap/Intheface.php');
+require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap/Template.php');
 
 
 class Bootstrap_TemplateTest extends PHPUnit_Framework_TestCase {

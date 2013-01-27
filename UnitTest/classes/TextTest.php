@@ -5,14 +5,14 @@ use MPF\Config;
 use MPF\Text;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Text/Plugin/Intheface.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Text/Plugin.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Text/Plugin/Replace.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Text/Plugin/BBCode.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Text.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Exception/Text/FileNotFound.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Exception/Text/IdNotFound.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Exception/InvalidXml.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin/Intheface.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin/Replace.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin/BBCode.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Text.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Exception/Text/FileNotFound.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Exception/Text/IdNotFound.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Exception/InvalidXml.php');
 
 class TextTest extends PHPUnit_Framework_TestCase
 {

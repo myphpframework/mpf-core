@@ -1,0 +1,15 @@
+{
+    "author": "Philippe Guilbault <philippe.guilbault@gmail.com>",
+    "name": "MyPhpFramework",
+    "description": "Core classes for MyPhpFramework",
+    "keywords": ["php","framework","orm","status","user","login","auth","phpframework","myphpframework","package","mysql"],
+    "version": "0.1.0",
+    "homepage": "http://myphpframework.com/",
+    "licenses": [{"type": "MIT"}],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/myphpframework/MPF-Core.git"
+    },
+    "dependencies": {
+    }
+}

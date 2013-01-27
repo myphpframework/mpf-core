@@ -16,11 +16,11 @@ class Config {
     public static function get($filename, $useCache=true) {
         static $configs = array();
 
-        if (!array_key_exists('MPF_ENV', $_SERVER)) {
+        if (MPF_ENV === '') {
             die('<xmp>
         #################################################################
-        # The enviroment variable "MPF_ENV" must be set according       #
-        # to your /config/*.ini sections in order for myphpframework    #
+        # The constant "MPF_ENV" must be set according to your          #
+        # /config/*.ini sections in order for myphpframework            #
         # to work correctly. See documentation.                         #
         #################################################################
       </xmp>');
@@ -71,13 +71,13 @@ class Config {
      * @return stdClass
      */
     private static function getEnv(Config $config) {
-        if (!array_key_exists($_SERVER['MPF_ENV'], $config->configs)) {
-            throw new Exception\Config\EnvironmentNotFound('Enviroment "' . $_SERVER['MPF_ENV'] . '" does not exist in the config file!');
+        if (!array_key_exists(MPF_ENV, $config->configs)) {
+            throw new Exception\Config\EnvironmentNotFound('Enviroment "' . MPF_ENV . '" does not exist in the config file!');
         }
 
-        $return = $config->configs[$_SERVER['MPF_ENV']];
-        if (array_key_exists($_SERVER['MPF_ENV'], $config->extends)) {
-            $extendName = $config->extends[$_SERVER['MPF_ENV']];
+        $return = $config->configs[MPF_ENV];
+        if (array_key_exists(MPF_ENV, $config->extends)) {
+            $extendName = $config->extends[MPF_ENV];
             $return = array_merge_recursive_simple($config->configs[$extendName], $return);
         }
 

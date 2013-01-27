@@ -1,6 +1,6 @@
 <?php
 
-$_SERVER['MPF_ENV'] = 'development';
+MPF_ENV = 'development';
 
 define('TIMER_START', microtime(true));
 //date_default_timezone_set('America/Montreal');

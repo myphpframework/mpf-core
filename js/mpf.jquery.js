@@ -42,7 +42,7 @@ mpf.ajax = function ajax(url, querystring, method, callback) {
                 callback('Unexpected error', response);
             }
 
-            if (!response.hasOwnProperty('error')) {
+            if (response.hasOwnProperty('success') && response.success) {
                 callback(null, response);
             } else if (response.hasOwnProperty('error')) {
                 callback(response.error, response);

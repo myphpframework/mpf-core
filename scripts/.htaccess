@@ -1,0 +1,7 @@
+
+Options -Indexes +FollowSymLinks
+DirectoryIndex index.php
+
+RewriteEngine on
+RewriteRule \btemplates\b|\bclasses\b|\bi18n\b|\bconfig\b|\binclude\b|\bbuckets\b - [F]
+

@@ -11,15 +11,19 @@ ini_set('short_open_tag',   '1');
 ini_set('register_globals', '0');
 //ini_set('memory_limit',     '128M');
 
-define('PATH_MPF_CORE', '{corePath}');
-define('PATH_SITE',     '{sitePath}');
-define('URL_SITE',      '{siteUrl}');
+define('URL_SITE',      '');
+define('MPF_ENV',       '');
+
+define('PATH_SITE',     '');
+define('PATH_MPF_CORE', '');
 
 define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
 define('CONFIG_CACHE', false);
 define('CONFIG_CACHE_PATH', PATH_SITE.'cache/configs/');
 
-require(PATH_MPF_CORE .'init.php');
+if (PATH_MPF_CORE != '' && stream_resolve_include_path(PATH_MPF_CORE .'init.php')) {
+    require(PATH_MPF_CORE .'init.php');
+}
 
 $cssFiles = array();
 $jsFiles = array();

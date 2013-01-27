@@ -5,10 +5,10 @@ use MPF\Config;
 use MPF\Template;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Template/Marker/Intheface.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Template/Marker.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Template/Marker/Nocache.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Template.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Template/Marker/Intheface.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Template/Marker.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Template/Marker/Nocache.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Template.php');
 
 ENV::bootstrap(ENV::TEMPLATE);
 

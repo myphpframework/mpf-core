@@ -6,7 +6,7 @@ use MPF\User;
 use MPF\Db;
 
 require_once(__DIR__.'/../../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Db/Model.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Db/Model.php');
 require_once(__DIR__.'/../../ModelExample.php');
 
 ENV::bootstrap(ENV::DATABASE, array('filename' => 'dbTest'));

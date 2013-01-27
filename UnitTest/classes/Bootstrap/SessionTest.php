@@ -6,9 +6,9 @@ use MPF\Config;
 use MPF\Bootstrap\Session;
 
 require_once(__DIR__ . '/../../bootstrap.php');
-require_once(PATH_FRAMEWORK . 'classes/MPF/Bootstrap.php');
-require_once(PATH_FRAMEWORK . 'classes/MPF/Bootstrap/Intheface.php');
-require_once(PATH_FRAMEWORK . 'classes/MPF/Bootstrap/Session.php');
+require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap.php');
+require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap/Intheface.php');
+require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap/Session.php');
 
 //ENV::bootstrap(ENV::DATABASE, array('filename' => 'dbTest'));
 //ENV::bootstrap(ENV::SESSION);

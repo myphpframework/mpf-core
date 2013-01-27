@@ -23,7 +23,7 @@ define('REQUIRED_PHP_MAJOR_VERSION', 5);
 define('REQUIRED_PHP_MINOR_VERSION', 3);
 define('REQUIRED_PHP_RELEASE_VERSION', 0);
 
-define('DEFAULT_INSTALLCORE_PATH', '/usr/share/');
+define('DEFAULT_INSTALLCORE_PATH', '/usr/share');
 
 $corePath = null;
 
@@ -48,7 +48,6 @@ $steps = array(
     'cacheDir',
     'logDir',
     'generateConfigs',
-    'buckminInstall',
 );
 
 foreach ($steps as $function) {
@@ -146,7 +145,7 @@ function installCore() {
  * @return boolean
  */
 function copyBootstrap() {
-    $bootstrapFile = $GLOBALS['corePath'].'includes/bootstrap_template.php';
+    $bootstrapFile = $GLOBALS['corePath'].'scripts/bootstrap_template.php';
     if (!file_exists($bootstrapFile)) {
         echo text("\n[RED The MPF-Core seems not installed properly, the following file does not exists: \"][WHITE $bootstrapFile][RED \"]\n");
         return true;
@@ -201,14 +200,6 @@ function generateConfigs() {
             echo text("[RED Could not create config directory \"][WHITE ".__DIR__."/config/][RED \"]\n");
         }
     }
-    return true;
-}
-
-function buckminInstall() {
-    echo text("Do you want to install the default [CYAN Buckmin (WebAdmin)] ? [Y] ");
-    $answer = trim(fgets(STDIN));
-    $answer = (!$answer || in_array($answer, array('Y', 'y')) ? true : false);
-    var_dump($answer);
     return true;
 }
 

@@ -7,7 +7,7 @@ use MPF\Language;
 use MPF\Country;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_FRAMEWORK.'classes/MPF/Locale.php');
+require_once(PATH_MPF_CORE.'classes/MPF/Locale.php');
 
 class LocaleTest extends PHPUnit_Framework_TestCase
 {
