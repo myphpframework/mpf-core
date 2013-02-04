@@ -70,6 +70,25 @@ abstract class Model extends \MPF\PhpDoc {
     }
 
     /**
+     *
+     * @param \MPF\Db\ModelLinkTable $linkTable
+     * @return \MPF\Db\ModelResult
+     */
+    public static function byLinkTable(\MPF\Db\ModelLinkTable $linkTable) {
+        $className = get_called_class();
+        self::generatePhpDoc($className);
+
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
+            $exception = new Exception\ModelMissingPhpDoc($className, PhpDoc::CLASS_DATABASE);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $dbLayer = \MPF\Db::byName($linkTable->database);
+        return $dbLayer->queryModelLinkTable($linkTable);
+    }
+
+    /**
      * Returns the default field properties according to the phpdoc
      *
      * @param type $fieldName
@@ -114,6 +133,17 @@ abstract class Model extends \MPF\PhpDoc {
         return $primaryFields[0]->getValue();
     }
 
+    public function delete() {
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$this->className]['class'])) {
+            $exception = new Exception\ModelMissingPhpDoc($this->className, PhpDoc::CLASS_DATABASE);
+            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
+        $dbLayer = \MPF\Db::byName($this->getDatabase());
+        $dbLayer->deleteModel($this);
+    }
+
     public function save() {
         if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$this->className]['class'])) {
             $exception = new Exception\ModelMissingPhpDoc($this->className, PhpDoc::CLASS_DATABASE);
@@ -129,7 +159,6 @@ abstract class Model extends \MPF\PhpDoc {
      * @param string $fieldName
      * @return \MPF\Db\Field
      */
-
     public function getField($fieldName) {
         if (!array_key_exists($fieldName, self::$phpdoc[$this->className]['properties'])) {
             $exception = new Exception\InvalidFieldName($fieldName, $this->className);
@@ -174,7 +203,7 @@ abstract class Model extends \MPF\PhpDoc {
             return $this->database;
         }
 
-        return self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_];
+        return self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE];
     }
 
     /**

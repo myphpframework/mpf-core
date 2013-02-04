@@ -19,9 +19,12 @@
         <text id="dbUnsupportType">The type "@type@" is not supported at this time.</text>
         <text id="dbDuplicateEntry">There is already an entry with value "@value@" for key "@key@" in `@database@`.@table@.</text>
         <text id="dbModelTooManyPrimaryKeys">The model must have 1 primary key only in order to work properly with status.</text>
+        <text id="dbModelNoManyPrimaryKeys">The model must have 1 primary key atleast to work properly.</text>
 
         <text id="dbModelMissingStatuses">The model has no statuses</text>
         <text id="dbModelMissingPhpDoc">The model "@modelName@" requires the phpdoc "@@phpdoc@" to work properly.</text>
+
+        <text id="fileNotWritable">The file "@filename@" is not writable!</text>
 
         <text id="textFileNotFound">The text file "@filename@" could not be found in: @paths@</text>
         <text id="textIdNotFound">The text id "@id@" was not found. Available IDs are: @availableIds@</text>

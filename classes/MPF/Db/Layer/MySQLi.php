@@ -74,8 +74,57 @@ class MySQLi extends \MPF\Db\Layer {
         $result = $this->query($this->getSelectByField($field), true);
 
         $modelResult = new \MPF\Db\ModelResult($result, $field->getClass());
-        $modelResult->on('fetch', array($this, 'cacheDbEntry', $field->getTable()));
+        #$modelResult->on('fetch', array($this, 'cacheDbEntry', $field->getTable()));
         return $modelResult;
+    }
+
+    protected function getSelectByField(\MPF\Db\Field $field, $count=false) {
+        $select = "SELECT count(*) count ";
+        if (!$count) {
+            $select = "SELECT * ";
+        }
+
+        $where = 'WHERE `' . $field->getName() . '` ' . $field->getOperator() . ' ' . $this->formatQueryValue($field);
+        $sql = $select .' FROM `' . $field->getTable() . '` ' . $where;
+        return $sql;
+    }
+
+    /**
+     * Fetches models from the database via a link table
+     *
+     * @param \MPF\Db\ModelLinkTable $linkTable
+     * @return \MPF\Db\ModelResult
+     */
+    public function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable) {
+        #$entriesFound = $this->searchCacheByLinkTable($linkTable);
+        #if (!empty($entriesFound)) {
+        #    return new \MPF\Db\ModelCacheResult($entriesFound, $field->getClass());
+        #}
+
+        $result = $this->query($this->getSelectByModelLinkTable($linkTable));
+
+        $modelResult = new \MPF\Db\ModelResult($result, $linkTable->targetField->getClass());
+        $modelResult->on('fetch', array($this, 'cacheDbEntry', $linkTable->targetField->getTable()));
+        return $modelResult;
+    }
+
+    protected function getSelectByModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, $count=false) {
+        $knownFieldName = '`'.$linkTable->knownField->getLinkFieldName().'`';
+        $linkTableName = '`'.$linkTable->table.'`';
+
+        $innerjoin = '';
+        $from = " FROM $linkTableName ";
+        $select = "SELECT count(*) count ";
+        if (!$count) {
+            $targetTableName = '`'.$linkTable->targetField->getTable().'`';
+            $targetFieldForeignName = '`'.$linkTable->targetField->getLinkFieldName().'`';
+            $targetFieldName = '`'.$linkTable->targetField->getName().'`';
+            $select = "SELECT $targetTableName.* ";
+            $innerjoin = "INNER JOIN $targetTableName ON $linkTableName.$targetFieldForeignName=$targetTableName.$targetFieldName ";
+        }
+
+        $where = "WHERE $linkTableName.$knownFieldName " . $linkTable->knownField->getOperator() . " " . $this->formatQueryValue($linkTable->knownField);
+        return $select . $from . $innerjoin . $where;
     }
 
     /**
@@ -91,46 +140,63 @@ class MySQLi extends \MPF\Db\Layer {
         return (int)$dbEntry['count'];
     }
 
-    protected function getSelectByField(\MPF\Db\Field $field, $count=false) {
-        $mysqli = $this->getConnectionResource();
+    /**
+     * Deletes a model from the database
+     *
+     * @param \MPF\Db\Model $model
+     */
+    public function deleteModel(\MPF\Db\Model $model) {
+        try {
+            $where = '';
+            $fallback_where = array();
+            foreach ($model->getFields() as $field) {
+                if ($field->isPrimaryKey()) {
+                    $where = ' `'. $field->getName() .'`='. $this->formatQueryValue($field) .' ';
+                }
+                $fallback_where[] = ' `'. $field->getName() .'`='. $this->formatQueryValue($field) .' ';
+            }
 
-        if ($count) {
-            $select = "SELECT count(*) count ";
-        } else {
-            $select = "SELECT * ";
+            if (!$where) {
+                $where = implode(' AND ', $fallback_where);
+            }
+
+            $result = $this->query('DELETE FROM `'. $model->getTable() .'` WHERE '. $where .';');
+
+        } catch (InvalidQuery $e) {
+            if (preg_match('/duplicate/i', $e->result->getError())) {
+                $exception = new DuplicateEntry($e->result, $model->getTable());
+                Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                throw $exception;
+            }
+
+            throw $e;
         }
-
-        $where = 'WHERE `' . $field->getName() . '` ' . $field->getOperator() . ' "' . $mysqli->real_escape_string($field->getValue()) . '"';
-        $sql = $select .' FROM `' . $field->getTable() . '` ' . $where;
-        return $sql;
     }
 
     /**
      * Saves a model to the database
      *
+     * @throws \MPF\Db\Exception\DuplicateEntry
      * @param \MPF\Db\Model $model
      */
     public function saveModel(\MPF\Db\Model $model) {
-        $mysqli = $this->getConnectionResource();
         $fields = $model->getFields();
 
         if ($model->isNew()) {
             $fieldValues = array();
+            $queryValues = array();
             foreach ($fields as $field) {
                 if ($field->isForeign()) {
                     continue;
                 }
 
-                $value = $field->getValue();
-                // if we have no value but a default value, we use it
-                if (null === $value && $field->getDefaultValue()) {
-                    $value = $field->getDefaultValue();
-                }
-                $fieldValues[$field->getName()] = $mysqli->real_escape_string($value);
+                $fieldValues[$field->getName()] = $field->getValue();
+                $queryValues[$field->getName()] = $this->formatQueryValue($field);
             }
 
             try {
-                $result = $this->query('INSERT INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($fieldValues)) . '`) VALUES ("' . implode('","', array_values($fieldValues)) . '");');
+                $result = $this->query('INSERT INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($queryValues)) . '`) VALUES (' . implode(',', array_values($queryValues)) . ');');
+
             } catch (InvalidQuery $e) {
                 if (preg_match('/duplicate/i', $e->result->getError())) {
                     $exception = new DuplicateEntry($e->result, $model->getTable());
@@ -158,9 +224,9 @@ class MySQLi extends \MPF\Db\Layer {
                 }
 
                 if ($field->isPrimaryKey()) {
-                    $where = '`'. $field->getName() .'`="'. $field->getValue() .'"';
+                    $where = '`'. $field->getName() .'`='. $this->formatQueryValue($field) .'';
                 } else {
-                    $sql .= '`' . $field->getName() . '`="' . $mysqli->real_escape_string($field->getValue()) . '",';
+                    $sql .= '`' . $field->getName() . '`=' . $this->formatQueryValue($field) . ',';
                 }
             }
 
@@ -172,6 +238,29 @@ class MySQLi extends \MPF\Db\Layer {
 
             $this->cacheDbEntry($model->getDbEntry(), $model->getTable());
         }
+    }
+
+    private function formatQueryValue(\MPF\Db\Field $field) {
+        $mysqli = $this->getConnectionResource();
+        if ($field->getValue() === null) {
+            $value = 'NULL';
+        } else {
+            switch (strtolower($field->getType())) {
+                default:
+                case 'timestamp':
+                case 'datetime':
+                case 'date':
+                case 'varchar':
+                    $value = '"'.$mysqli->real_escape_string($field->getValue()).'"';
+                    break;
+                case 'float':
+                case 'int':
+                case 'integer':
+                    $value = $mysqli->real_escape_string($field->getValue());
+                    break;
+            }
+        }
+        return $value;
     }
 
     /**

@@ -1,4 +1,4 @@
-var mpf = {}, mpfTexts = {};
+var mpf = {}, mpfTexts = {}, mpfRestUrl = '/rest/';
 
 mpf.ajaxForm = function ajaxForm($form, callback) {
     var data = [];
@@ -76,7 +76,7 @@ mpf.text = function text(filename, id) {
         return mpfTexts[ filename ][id];
     }
 
-    mpf.ajaxGet('/mpf_text/'+filename, function (error, response) {
+    mpf.ajaxGet(mpfRestUrl+'text/'+filename, function (error, response) {
         if (error) {
             console.error(error);
             return;

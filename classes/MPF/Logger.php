@@ -32,6 +32,7 @@ class Logger {
      * Appends a line to a log file
      *
      * @static
+     * @throws \MPF\Exception\FileNotWritable
      * @param  string $className
      * @param  string $message
      * @param  bit $level
@@ -64,7 +65,9 @@ class Logger {
             foreach (self::$buffer as $log) {
                 if (($log['level'] == ($currentLogLevel & $log['level'])) || (self::LEVEL_ALL == $currentLogLevel)) {
                     if (($log['category'] == ($currentLogCategory & $log['category'])) || (self::LEVEL_ALL == $currentLogCategory)) {
-                        @file_put_contents($logFile, $log['message'], FILE_APPEND);
+                        if (!@file_put_contents($logFile, $log['message'], FILE_APPEND)) {
+                            throw new Exception\FileNotWritable($logFile);
+                        }
                     }
                 }
             }
@@ -75,7 +78,9 @@ class Logger {
         if (($level == ($currentLogLevel & $level)) || (self::LEVEL_ALL == $currentLogLevel)) {
             if (($category == ($currentLogCategory & $category)) || (self::LEVEL_ALL == $currentLogCategory)) {
                 $microseconds = explode('.', sprintf('%0.4f', microtime(true)));
-                @file_put_contents($logFile, '[' . date('Y-m-d H:i:s.'.$microseconds[1]) . '][' . getmypid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . $message . "\n", FILE_APPEND);
+                if (!@file_put_contents($logFile, '[' . date('Y-m-d H:i:s.'.$microseconds[1]) . '][' . getmypid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . $message . "\n", FILE_APPEND)) {
+                    throw new Exception\FileNotWritable($logFile);
+                }
             }
         }
     }

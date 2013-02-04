@@ -10,32 +10,40 @@ use MPF\Logger;
 abstract class Layer implements Layer\Intheface {
     protected static $modelCache = array();
 
-    /**
-     * Contains the connections for the current db layer
-     *
-     * @var \MPF\Db\Connection[]
-     */
-    private $connections = array();
-
-    public function __construct(Connection $connection) {
-        $connection->setId(0);
-        $this->connections[] = $connection;
-    }
+    public abstract function transactionStart();
+    public abstract function transactionCommit();
+    public abstract function transactionRollback();
 
     /**
-     * Execute a query without fetching the rows if any.
+     * Fetches a model from the database
      *
-     * @throws Exception\Db\InvalidConnectionType
-     * @throws Exception\Db\InvalidQuery
-     * @param string $query
-     * @return Result
+     * @param \MPF\Db\Field $field
+     * @return \MPF\Db\Result
      */
-    public function query($query, $isReadOnly=false) {
-        $query = $this->sanitizeQuery($query);
-        $result = new Result($query, $this->getFirstAvailableConnection($isReadOnly), $this);
-        Logger::Log('Db/Layer', $query, Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
-        return $this->executeQuery($result);
-    }
+    public abstract function queryModelField(\MPF\Db\Field $field);
+
+    /**
+     * Fetches models from the database via a link table
+     *
+     * @param \MPF\Db\ModelLinkTable $linkTable
+     * @return \MPF\Db\ModelResult
+     */
+    public abstract function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable);
+
+    /**
+     * Saves a model to the database
+     *
+     * @throws \MPF\Db\Exception\DuplicateEntry
+     * @param \MPF\Db\Model $model
+     */
+    public abstract function saveModel(\MPF\Db\Model $model);
+
+    /**
+     * Deletes a model from the database
+     *
+     * @param \MPF\Db\Model $model
+     */
+    public abstract function deleteModel(\MPF\Db\Model $model);
 
     /**
      * This function does what it can to make the query valid for its engine.
@@ -79,12 +87,31 @@ abstract class Layer implements Layer\Intheface {
     protected abstract function getRowsAffected(Result $result);
 
     /**
-     * Fetches a model from the database
+     * Contains the connections for the current db layer
      *
-     * @param \MPF\Db\Field $field
-     * @return \MPF\Db\Result
+     * @var \MPF\Db\Connection[]
      */
-    public abstract function queryModelField(\MPF\Db\Field $field);
+    private $connections = array();
+
+    public function __construct(Connection $connection) {
+        $connection->setId(0);
+        $this->connections[] = $connection;
+    }
+
+    /**
+     * Execute a query without fetching the rows if any.
+     *
+     * @throws Exception\Db\InvalidConnectionType
+     * @throws Exception\Db\InvalidQuery
+     * @param string $query
+     * @return Result
+     */
+    public function query($query, $isReadOnly=false) {
+        $query = $this->sanitizeQuery($query);
+        $result = new Result($query, $this->getFirstAvailableConnection($isReadOnly), $this);
+        Logger::Log('Db/Layer', $query, Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+        return $this->executeQuery($result);
+    }
 
     /**
      * Caches the dbEntry in memory

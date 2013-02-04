@@ -14,6 +14,7 @@ class ModelCacheResult extends \MPF\Db\ModelResult {
      * @var \MPF\Db\Entry[]
      */
     protected $entries = null;
+    protected $cursor = 0;
 
     /**
      *
@@ -25,10 +26,12 @@ class ModelCacheResult extends \MPF\Db\ModelResult {
         $this->rowsTotal = count($dbEntries);
         $this->rowsAffected = 0;
         $this->className = $className;
+        $this->cursor = 0;
     }
 
     public function free() {
         $this->entries = null;
+        $this->cursor = 0;
     }
 
     /**
@@ -37,16 +40,10 @@ class ModelCacheResult extends \MPF\Db\ModelResult {
      * @return \MPF\Db\Model
      */
     public function fetch() {
-        static $i = 0;
-
-        if ($i >= count($this->entries)) {
-            $i = 0;
-        }
-
-        if (isSet($this->entries[$i])) {
+        if (isSet($this->entries[$this->cursor])) {
             $className = $this->className;
-            $entry = $className::fromDbEntry($this->entries[$i]);
-            $i++;
+            $entry = $className::fromDbEntry($this->entries[$this->cursor]);
+            $this->cursor++;
             return $entry;
         }
 

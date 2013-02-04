@@ -14,6 +14,7 @@ class Field {
     private $classPhpDoc;
     private $options = array();
     private $operator = null;
+    private $linkFieldName = '';
 
     public function __construct($classPhpDoc, $name, $value, $options) {
         $this->classPhpDoc = $classPhpDoc;
@@ -66,8 +67,8 @@ class Field {
         if (array_key_exists(PhpDoc::PROPERTY_DEFAULT_VALUE, $this->options)) {
             $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
 
-            // if we only have a true boolean, @default was specified with no value thus allow nulls
-            if (is_bool($value) && $value) {
+            // @default was specified with no value thus allow nulls
+            if (!$value || $value == 'null' || $value === null) {
                 return null;
             }
 
@@ -94,7 +95,25 @@ class Field {
      * @return mixed
      */
     public function getValue() {
-        return $this->value;
+        return (!$this->value ? $this->getDefaultValue() : $this->value);
+    }
+
+    /**
+     * Used for linktables
+     *
+     * @return string
+     */
+    public function getLinkFieldName() {
+        return $this->linkFieldName;
+    }
+
+    /**
+     * Used for linktables
+     *
+     * @param string $name
+     */
+    public function setLinkFieldName($name) {
+        $this->linkFieldName = $name;
     }
 
     /**
@@ -348,7 +367,8 @@ class Field {
         }
 
         $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
-        if (is_bool($value) && $value) {
+        var_dump($value);
+        if ($value === null) {
             return true;
         }
         return false;

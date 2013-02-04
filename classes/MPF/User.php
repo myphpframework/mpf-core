@@ -94,7 +94,8 @@ class User extends \MPF\Db\ModelStatus {
      * @return \MPF\User
      */
     public static function create(Email $email) {
-        $newUser = new User();
+        $class = get_called_class();
+        $newUser = new $class();
         $newUser->setEmail($email);
         return $newUser;
     }

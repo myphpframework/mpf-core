@@ -61,7 +61,7 @@ abstract class ModelStatus extends Model {
     }
 
     public function save() {
-        $dbLayer = \MPF\Db::byName($this->getDatabaseName());
+        $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->transactionStart();
 
         try {
@@ -114,10 +114,12 @@ abstract class ModelStatus extends Model {
      * @return \MPF\Db\Field
      */
     final protected function getStatusField() {
+        $statusFields = array();
         foreach (self::$phpdoc[$this->className]['properties'] as $name => $property) {
-            if (empty($property) || !isSet($property[ PhpDoc::PROPERTY_MODEL ]) || !isSet($property[ PhpDoc::PROPERTY_TABLE ]) ) {
+            if (empty($property) || !isSet($property[ PhpDoc::PROPERTY_MODEL ])) {
                 continue;
             }
+
 
             if (property_exists($this, $name) && $property['declaringClass'] == $this->className) {
                 $statusFields[] = new \MPF\Db\Field(self::$phpdoc[$this->className]['class'], $name, $this->$name, $property);
@@ -125,7 +127,7 @@ abstract class ModelStatus extends Model {
         }
 
         if (empty($statusFields) || count($statusFields) > 1) {
-            $exception = new ModelMissingPhpDoc($this->className, 'status');
+            $exception = new Exception\ModelMissingPhpDoc($this->className, 'status');
             Logger::Log('Db/ModelStatus', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
             throw $exception;
         }

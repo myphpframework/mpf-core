@@ -108,6 +108,12 @@ class DB {
             }
         }
 
+        if (!$dbConnection->isInfoValid()) {
+            $exception = new \MPF\Db\Exception\ConnectInfoNotFound($name, $dbType, $accessType);
+            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
         return $dbConnection;
     }
 
