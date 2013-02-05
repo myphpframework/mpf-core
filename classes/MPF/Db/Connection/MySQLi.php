@@ -10,6 +10,7 @@ class MySQLi extends \MPF\Db\Connection {
      * @var mysqli
      */
     public $resource = null;
+    public $transactions = 0;
 
     /**
      * Tries to connect to the database server thru the dbLayer

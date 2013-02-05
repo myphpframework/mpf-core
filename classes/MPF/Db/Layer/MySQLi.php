@@ -45,16 +45,28 @@ class MySQLi extends \MPF\Db\Layer {
     }
 
     public function transactionStart() {
+        $mysqli = $this->getFirstAvailableConnection();
+        $mysqli->transactions++;
+
         $result = $this->query('START TRANSACTION;');
         $result->free();
     }
 
     public function transactionCommit() {
-        $result = $this->query('COMMIT;');
-        $result->free();
+        $mysqli = $this->getFirstAvailableConnection();
+        $mysqli->transactions--;
+
+        // only commit if there is no commit transactions pending
+        if ($mysqli->transactions == 0) {
+            $result = $this->query('COMMIT;');
+            $result->free();
+        }
     }
 
     public function transactionRollback() {
+        $mysqli = $this->getFirstAvailableConnection();
+        $mysqli->transactions--;
+
         $result = $this->query('ROLLBACK;');
         $result->free();
     }
