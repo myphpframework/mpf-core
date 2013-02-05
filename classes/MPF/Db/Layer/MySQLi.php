@@ -56,10 +56,16 @@ class MySQLi extends \MPF\Db\Layer {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions--;
 
-        // only commit if there is no commit transactions pending
+        // only commit if there is no transactions pending
         if ($mysqli->transactions == 0) {
-            $result = $this->query('COMMIT;');
-            $result->free();
+            // if we have but one request to rollback we do so for everything
+            if ($mysqli->rollbacks > 0) {
+                $result = $this->query('ROLLBACK;');
+                $result->free();
+            } else {
+                $result = $this->query('COMMIT;');
+                $result->free();
+            }
         }
     }
 
@@ -67,8 +73,12 @@ class MySQLi extends \MPF\Db\Layer {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions--;
 
-        $result = $this->query('ROLLBACK;');
-        $result->free();
+        if ($mysqli->transactions == 0) {
+            $result = $this->query('ROLLBACK;');
+            $result->free();
+        } else {
+            $mysqli->rollbacks++;
+        }
     }
 
     /**

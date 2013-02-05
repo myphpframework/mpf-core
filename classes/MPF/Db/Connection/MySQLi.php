@@ -11,6 +11,7 @@ class MySQLi extends \MPF\Db\Connection {
      */
     public $resource = null;
     public $transactions = 0;
+    public $rollbacks = 0;
 
     /**
      * Tries to connect to the database server thru the dbLayer
