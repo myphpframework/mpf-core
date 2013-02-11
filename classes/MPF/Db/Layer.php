@@ -18,17 +18,20 @@ abstract class Layer implements Layer\Intheface {
      * Fetches a model from the database
      *
      * @param \MPF\Db\Field $field
+     * @param \MPF\Db\Field $fields
+     * @param \MPF\Db\Page $page
      * @return \MPF\Db\Result
      */
-    public abstract function queryModelField(\MPF\Db\Field $field);
+    public abstract function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page=null);
 
     /**
      * Fetches models from the database via a link table
      *
      * @param \MPF\Db\ModelLinkTable $linkTable
+     * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public abstract function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable);
+    public abstract function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null);
 
     /**
      * Saves a model to the database
@@ -142,7 +145,7 @@ abstract class Layer implements Layer\Intheface {
      * @param \MPF\Db\Field $field
      * @return \MPF\Db\Entry
      */
-    protected function searchCacheByModelField(\MPF\Db\Field $field) {
+    protected function searchCacheByModelField(\MPF\Db\Field $field, \MPF\Db\Page $page=null) {
         if (!array_key_exists($field->getTable(), self::$modelCache)) {
             return array();
         }
@@ -155,6 +158,7 @@ abstract class Layer implements Layer\Intheface {
 
         $entriesFound = array();
         foreach (self::$modelCache[ $field->getTable() ] as $dbEntry) {
+             // TODO: Since introduction of the page system in the ORM there is a problem with the cache where we dont filter de cached entries by it and they are not "ordered by"
              if ($field->matches($dbEntry[ $field->getName() ])) {
                 $entriesFound[] = $dbEntry;
             }
@@ -163,7 +167,7 @@ abstract class Layer implements Layer\Intheface {
         // we only check the count if its NOT a primary key. Or if its a primary key with a special operator (Not an equal)
         if (!$field->isPrimaryKey() || ($field->isPrimaryKey() && $field->hasOperator())) {
             // if we dont have the same count as the database we return nothing
-            $count = $this->resultCountByField($field);
+            $count = $this->resultCountByField($field, $page);
             $countCache = count($entriesFound);
             Logger::Log('Db/Layer', 'Searching \MPF\Db\Entry cache, result: cache('.$countCache.')  db('.$count.')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
             if ($count != $countCache) {

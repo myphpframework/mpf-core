@@ -19,6 +19,7 @@ abstract class PhpDoc {
     const PROPERTY_RELATION = 'relation';
     const PROPERTY_PRIVATE = 'private';
     const PROPERTY_DATABASE = 'database';
+    const PROPERTY_LINKNAME = 'linkname';
 
     protected static $phpdoc = array();
 

@@ -89,6 +89,10 @@ class Field {
         return null;
     }
 
+    public function getRelationship() {
+        return (array_key_exists(PhpDoc::PROPERTY_RELATION, $this->options) ? $this->options[PhpDoc::PROPERTY_RELATION] : '');
+    }
+
     /**
      * Returns the value of the field
      *
@@ -104,6 +108,9 @@ class Field {
      * @return string
      */
     public function getLinkFieldName() {
+        if (!$this->linkFieldName) {
+            return (array_key_exists(PhpDoc::PROPERTY_LINKNAME, $this->options) ? $this->options[PhpDoc::PROPERTY_LINKNAME] : '');
+        }
         return $this->linkFieldName;
     }
 
@@ -121,7 +128,7 @@ class Field {
      */
     public function setValue($value) {
         if (array_key_exists(PhpDoc::PROPERTY_RELATION, $this->options)
-         && in_array(strtolower($this->options[PhpDoc::PROPERTY_RELATION]), array('manytomany', 'onetomany'))) {
+         && in_array(strtolower($this->options[PhpDoc::PROPERTY_RELATION]), array('manytomany', 'onetomany', 'onetoone'))) {
             if (!is_array($this->value)) {
                 $this->value = array();
             }
@@ -367,7 +374,6 @@ class Field {
         }
 
         $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
-        var_dump($value);
         if ($value === null) {
             return true;
         }

@@ -12,7 +12,7 @@ class ModelLinkTable {
      *
      * @var \MPF\Db\Field
      */
-    public $knownField;
+    public $knownFields;
 
     /**
      *
@@ -32,8 +32,8 @@ class ModelLinkTable {
      */
     public $database;
 
-    public function __construct(\MPF\Db\Field $knownField, \MPF\Db\Field $targetField, $databaseName, $tableName) {
-        $this->knownField = $knownField;
+    public function __construct($knownFields, \MPF\Db\Field $targetField, $databaseName, $tableName) {
+        $this->knownFields = $knownFields;
         $this->targetField = $targetField;
         $this->table = $tableName;
         $this->database = $databaseName;

@@ -85,53 +85,96 @@ class MySQLi extends \MPF\Db\Layer {
      * Fetches a model from the database
      *
      * @param \MPF\Db\Field $field
+     * @param \MPF\Db\Field $fields
+     * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public function queryModelField(\MPF\Db\Field $field) {
-        $entriesFound = $this->searchCacheByModelField($field);
+    public function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page=null) {
+        $entriesFound = $this->searchCacheByModelField($field, $page);
         if (!empty($entriesFound)) {
             return new \MPF\Db\ModelCacheResult($entriesFound, $field->getClass());
         }
 
-        $result = $this->query($this->getSelectByField($field), true);
+        $result = $this->query($this->getSelectByField($field, $fields), true, $page);
 
         $modelResult = new \MPF\Db\ModelResult($result, $field->getClass());
-        #$modelResult->on('fetch', array($this, 'cacheDbEntry', $field->getTable()));
+        $modelResult->on('fetch', array($this, 'cacheDbEntry', $field->getTable()));
         return $modelResult;
     }
 
-    protected function getSelectByField(\MPF\Db\Field $field, $count=false) {
+    /**
+     * Fetches a model from the database
+     *
+     * @param \MPF\Db\Field $queryField
+     * @param \MPF\Db\Field $fields
+     * @param bool $count
+     * @param \MPF\Db\Page $page
+     * @return \MPF\Db\ModelResult
+     */
+    protected function getSelectByField(\MPF\Db\Field $queryField, $fields, $count=false, \MPF\Db\Page $page=null) {
         $select = "SELECT count(*) count ";
         if (!$count) {
             $select = "SELECT * ";
         }
 
-        $where = 'WHERE `' . $field->getName() . '` ' . $field->getOperator() . ' ' . $this->formatQueryValue($field);
-        $sql = $select .' FROM `' . $field->getTable() . '` ' . $where;
-        return $sql;
+        $from = ' FROM `' . $queryField->getTable() . '` ';
+        $where = 'WHERE `' . $queryField->getName() . '` ' . $queryField->getOperator() . ' ' . $this->formatQueryValue($queryField);
+
+        // find the primary key
+        $primaryKeys = array();
+        foreach ($fields as $field) {
+            if ($field->isPrimaryKey()) {
+                $primaryKeys[] = $field;
+            }
+        }
+
+        // we inner join only if we have a primary key
+        if (count($primaryKeys) == 1) {
+            // only fetch foreign keys of they are onetoone relationship
+            $innerjoins = array();
+            foreach ($fields as $field) {
+                if ($field->isForeign() && $field->getRelationship() == 'onetoone') {
+                    $innerjoins[ $field->getTable() ] = ' INNER JOIN `'.$field->getTable().'` ON `' . $primaryKeys[0]->getTable() . '`.'.$primaryKeys[0]->getName().'=`' . $field->getTable() . '`.'.$field->getLinkFieldName().' ';
+                }
+            }
+        }
+
+        $limit = '';
+        if ($page) {
+            $offset = ($page->number == 1 ? 0 : ($page->number-1) * $page->amount);
+            $limit = ' LIMIT '.$offset.', '.$page->amount;
+
+            // we must get the total amount of results for the page object
+            $result = $this->query('SELECT count(*) count '. $from . substr($where, 0, -3));
+            $entry = $result->fetch();
+            $page->total = $entry['count'];
+            $result->free();
+        }
+
+        return $select . $from . implode(' ',  $innerjoins) . $where . $limit;
     }
 
     /**
      * Fetches models from the database via a link table
      *
      * @param \MPF\Db\ModelLinkTable $linkTable
+     * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable) {
+    public function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null) {
         #$entriesFound = $this->searchCacheByLinkTable($linkTable);
         #if (!empty($entriesFound)) {
         #    return new \MPF\Db\ModelCacheResult($entriesFound, $field->getClass());
         #}
 
-        $result = $this->query($this->getSelectByModelLinkTable($linkTable));
+        $result = $this->query($this->getSelectByModelLinkTable($linkTable, false, $page));
 
         $modelResult = new \MPF\Db\ModelResult($result, $linkTable->targetField->getClass());
         $modelResult->on('fetch', array($this, 'cacheDbEntry', $linkTable->targetField->getTable()));
         return $modelResult;
     }
 
-    protected function getSelectByModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, $count=false) {
-        $knownFieldName = '`'.$linkTable->knownField->getLinkFieldName().'`';
+    protected function getSelectByModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, $count=false, \MPF\Db\Page $page=null) {
         $linkTableName = '`'.$linkTable->table.'`';
 
         $innerjoin = '';
@@ -141,22 +184,39 @@ class MySQLi extends \MPF\Db\Layer {
             $targetTableName = '`'.$linkTable->targetField->getTable().'`';
             $targetFieldForeignName = '`'.$linkTable->targetField->getLinkFieldName().'`';
             $targetFieldName = '`'.$linkTable->targetField->getName().'`';
-            $select = "SELECT $targetTableName.* ";
+            $select = "SELECT * ";
             $innerjoin = "INNER JOIN $targetTableName ON $linkTableName.$targetFieldForeignName=$targetTableName.$targetFieldName ";
         }
 
-        $where = "WHERE $linkTableName.$knownFieldName " . $linkTable->knownField->getOperator() . " " . $this->formatQueryValue($linkTable->knownField);
-        return $select . $from . $innerjoin . $where;
+        $where = "WHERE ";
+        foreach ($linkTable->knownFields as $knownField) {
+            $where .= ' `'.$knownField->getLinkFieldName().'` = '.$this->formatQueryValue($knownField).' AND';
+        }
+
+        $limit = '';
+        if ($page) {
+            $offset = ($page->number == 1 ? 0 : ($page->number-1) * $page->amount);
+            $limit = ' LIMIT '.$offset.', '.$page->amount;
+
+            // we must get the total amount of results for the page object
+            $result = $this->query('SELECT count(*) count '. $from . $innerjoin . substr($where, 0, -3));
+            $entry = $result->fetch();
+            $page->total = $entry['count'];
+            $result->free();
+        }
+
+        return $sql = $select . $from . $innerjoin . substr($where, 0, -3) . $limit;
     }
 
     /**
      * Returns the amount of rows the query should be giving
      *
      * @param \MPF\Db\Field $field
+     * @param \MPF\Db\Page $page
      * @return int
      */
-    public function resultCountByField(\MPF\Db\Field $field) {
-        $result = $this->query($this->getSelectByField($field, true), true);
+    public function resultCountByField(\MPF\Db\Field $field, \MPF\Db\Page $page=null) {
+        $result = $this->query($this->getSelectByField($field, true, $page), true);
         $dbEntry = $result->fetch();
         $result->free();
         return (int)$dbEntry['count'];
@@ -207,9 +267,14 @@ class MySQLi extends \MPF\Db\Layer {
         if ($model->isNew()) {
             $fieldValues = array();
             $queryValues = array();
+            $hasPrimaryKeys = false;
             foreach ($fields as $field) {
                 if ($field->isForeign()) {
                     continue;
+                }
+
+                if ($field->isPrimaryKey()) {
+                    $hasPrimaryKeys = true;
                 }
 
                 $fieldValues[$field->getName()] = $field->getValue();
@@ -217,7 +282,12 @@ class MySQLi extends \MPF\Db\Layer {
             }
 
             try {
-                $result = $this->query('INSERT INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($queryValues)) . '`) VALUES (' . implode(',', array_values($queryValues)) . ');');
+                $operation = 'INSERT';
+                // if it has no primary keys (link tables?) we use a REPLACE
+                if (!$hasPrimaryKeys) {
+                    $operation = 'REPLACE';
+                }
+                $result = $this->query($operation.' INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($queryValues)) . '`) VALUES (' . implode(',', array_values($queryValues)) . ');');
 
             } catch (InvalidQuery $e) {
                 if (preg_match('/duplicate/i', $e->result->getError())) {
@@ -231,7 +301,9 @@ class MySQLi extends \MPF\Db\Layer {
 
             // TODO: How to set primary key(s?) properly, knowing that the primary key needs to be an autoincrement in order for all this to work... model phpdoc?
             // TODO: what if the primary field name is not id?
-            $fieldValues['id'] = $result->getConnection()->resource->insert_id;
+            if ($hasPrimaryKeys) {
+                $fieldValues['id'] = $result->getConnection()->resource->insert_id;
+            }
             $dbEntry = new Entry($fieldValues);
             $result->free();
 

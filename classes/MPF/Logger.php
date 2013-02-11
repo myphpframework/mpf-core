@@ -78,7 +78,7 @@ class Logger {
         if (($level == ($currentLogLevel & $level)) || (self::LEVEL_ALL == $currentLogLevel)) {
             if (($category == ($currentLogCategory & $category)) || (self::LEVEL_ALL == $currentLogCategory)) {
                 $microseconds = explode('.', sprintf('%0.4f', microtime(true)));
-                if (!@file_put_contents($logFile, '[' . date('Y-m-d H:i:s.'.$microseconds[1]) . '][' . getmypid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . $message . "\n", FILE_APPEND)) {
+                if (!@file_put_contents($logFile, '[' . date('Y-m-d H:i:s.'.$microseconds[1]) . '][' . getmypid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . str_replace("\n", ' ', $message) . "\n", FILE_APPEND)) {
                     throw new Exception\FileNotWritable($logFile);
                 }
             }
@@ -104,7 +104,7 @@ class Logger {
         self::$buffer[] = array(
             'level' => $level,
             'category' => $category,
-            'message' => '[      BUFFERED LOG      ][' . posix_getpid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . $message . "\n",
+            'message' => '[      BUFFERED LOG      ][' . posix_getpid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . str_replace("\n", ' ', $message) . "\n",
         );
     }
 

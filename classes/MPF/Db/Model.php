@@ -53,7 +53,7 @@ abstract class Model extends \MPF\PhpDoc {
      * @param Field $field
      * @return \MPF\Db\ModelResult
      */
-    public static function byField(Field $field) {
+    public static function byField(Field $field, \MPF\Db\Page $page=null) {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
@@ -66,7 +66,7 @@ abstract class Model extends \MPF\PhpDoc {
         $dbLayer = \MPF\Db::byName($field->getDatabase());
 
         // no need to call generateMD5 because it ends up calling "fromDbEntry"
-        return $dbLayer->queryModelField($field);
+        return $dbLayer->queryModelField($field, self::generateFields(), $page);
     }
 
     /**
@@ -74,7 +74,7 @@ abstract class Model extends \MPF\PhpDoc {
      * @param \MPF\Db\ModelLinkTable $linkTable
      * @return \MPF\Db\ModelResult
      */
-    public static function byLinkTable(\MPF\Db\ModelLinkTable $linkTable) {
+    public static function byLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null) {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
@@ -85,7 +85,27 @@ abstract class Model extends \MPF\PhpDoc {
         }
 
         $dbLayer = \MPF\Db::byName($linkTable->database);
-        return $dbLayer->queryModelLinkTable($linkTable);
+        return $dbLayer->queryModelLinkTable($linkTable, $page);
+    }
+
+    /**
+     * Returns the default field properties according to the phpdoc
+     *
+     * @param type $fieldName
+     * @return \MPF\Db\Field
+     */
+    public static function generateFields($phpdoc=array()) {
+        $className = get_called_class();
+        self::generatePhpDoc($className);
+
+        $fields = array();
+        foreach (self::$phpdoc[$className]['properties'] as $fieldName => $info) {
+            if (array_key_exists('type', $info)) {
+                $fields[] = new \MPF\Db\Field(array_merge(self::$phpdoc[$className]['class'], $phpdoc), $fieldName, null, self::$phpdoc[$className]['properties'][$fieldName]);
+            }
+        }
+
+        return $fields;
     }
 
     /**
@@ -442,12 +462,13 @@ abstract class Model extends \MPF\PhpDoc {
     public function toArray() {
         $array = array();
         foreach ($this->getFields() as $field) {
-            if ($field->isPrivate() || $field->isForeign()) {
+            if ($field->isPrivate()) {
                 continue;
             }
 
             $array[$field->getName()] = $field->getValue();
         }
+
         return $array;
     }
 
