@@ -145,7 +145,7 @@ class MySQLi extends \MPF\Db\Layer {
             $limit = ' LIMIT '.$offset.', '.$page->amount;
 
             // we must get the total amount of results for the page object
-            $result = $this->query('SELECT count(*) count '. $from . substr($where, 0, -3));
+            $result = $this->query('SELECT count(*) count '. $from . substr($where, 0, -3), true);
             $entry = $result->fetch();
             $page->total = $entry['count'];
             $result->free();
@@ -199,7 +199,7 @@ class MySQLi extends \MPF\Db\Layer {
             $limit = ' LIMIT '.$offset.', '.$page->amount;
 
             // we must get the total amount of results for the page object
-            $result = $this->query('SELECT count(*) count '. $from . $innerjoin . substr($where, 0, -3));
+            $result = $this->query('SELECT count(*) count '. $from . $innerjoin . substr($where, 0, -3), true);
             $entry = $result->fetch();
             $page->total = $entry['count'];
             $result->free();

@@ -1,7 +1,5 @@
 <?php
 
-MPF_ENV = 'development';
-
 define('TIMER_START', microtime(true));
 //date_default_timezone_set('America/Montreal');
 
@@ -11,7 +9,9 @@ ini_set('short_open_tag',   '1');
 ini_set('register_globals', '0');
 //ini_set('memory_limit',     '128M');
 
-define('PATH_MPF_CORE', '/var/www/MPF-Core/');
+define('MPF_ENV', 'development');
+
+define('PATH_MPF_CORE', '/var/www/mpf-Core/');
 define('PATH_SITE',     __DIR__.'/');
 
 define('CONFIG_PRIORITY_FOLDER', '/tmp/mpf/');

@@ -1,6 +1,11 @@
+
+<IfModule mod_suphp.c>
+SetEnv suPHPInstalled 1
+#suPHP_ConfigPath {path}
+</IfModule>
+
 Options -Indexes +FollowSymLinks
 DirectoryIndex index.php
 
 RewriteEngine on
 RewriteRule \btemplates\b|\bclasses\b|\bi18n\b|\bconfig\b|\binclude\b|\bbuckets\b - [F]
-

@@ -11,11 +11,11 @@ ini_set('short_open_tag',   '1');
 ini_set('register_globals', '0');
 //ini_set('memory_limit',     '128M');
 
-define('URL_SITE',      '');
-define('MPF_ENV',       '');
+define('URL_SITE',      '{URL_SITE}');
+define('MPF_ENV',       '{MPF_ENV}');
 
-define('PATH_SITE',     '');
-define('PATH_MPF_CORE', '');
+define('PATH_SITE',     '{PATH_SITE}');
+define('PATH_MPF_CORE', '{PATH_MPF_CORE}');
 
 define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
 define('CONFIG_CACHE', false);
