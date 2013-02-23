@@ -166,6 +166,7 @@ function createDbConfig() {
 
     $databaseXML = simplexml_load_file($databaseFile);
 
+    // test
 }
 
 function createUserTables() {
