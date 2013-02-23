@@ -144,9 +144,20 @@ function webadmin() {
     return array('success' => true);
 }
 
-if (isset($_GET['ajax'])) {
+function testDbConnection() {
+    error_reporting(0);
+    ini_set('display_errors', 'off');
+    $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
+    if ($mysqli->connect_error) {
+        return array('success' => false, 'error' => $mysqli->connect_error);
+    }
+
+    return array('success' => true);
+}
+
+if (isset($_REQUEST['ajax'])) {
     $result = array('success' => false);
-    switch ($_GET['ajax']) {
+    switch ($_REQUEST['ajax']) {
         case 'dependencies':
             $result = dependencies();
             break;
@@ -164,6 +175,9 @@ if (isset($_GET['ajax'])) {
             break;
         case 'configHtaccess':
             $result = configHtaccess();
+            break;
+        case 'testDbConnection':
+            $result = testDbConnection();
             break;
     }
 
@@ -264,6 +278,59 @@ if (isset($_GET['ajax'])) {
         #form_mysql {
 
         }
+
+        #db_forms,
+        #db_types {
+            clear:both;
+            display:block;
+            text-align: center;
+            padding: 4px;
+        }
+        #db_types li {
+            display: inline;
+        }
+
+        #db_forms li input[type="text"], #db_forms li input[type="password"] {
+            width: 120px;
+            border: 1px solid;
+            border-color: #666 #DDD #DDD #666;
+            padding: 2px;
+
+            background-color: #FEE;
+            color: #777;
+        }
+
+        #db_forms li input[type="text"].changed, #db_forms li input[type="password"].changed {
+            background-color: #EFE;
+            color: #333;
+        }
+
+        #db_forms li input[type="button"] {
+            width: 126px;
+        }
+
+        #db_forms li input[disabled="disabled"]{
+            background-color: #EEE;
+        }
+
+        .errorGlow {
+            -webkit-transition: -webkit-box-shadow 0.5s ease-out;
+            -moz-transition: -moz-box-shadow 0.5s ease-out;
+            transition: box-shadow 0.5s ease-out;
+            -webkit-box-shadow: 0px 0px 3px red;
+            -moz-box-shadow: 0px 0px 3px red;
+            box-shadow: 0px 0px 3px red;
+        }
+        p.note {
+            background-color: #FFFFBD;
+            padding: 16px;
+            border: 1px solid #B2B24F;
+            -moz-border-radius: 8px;
+            -webkit-border-radius: 8px;
+            -khtml-border-radius: 8px;
+            border-radius: 8px;
+            color: #646400;
+        }
     </style>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script type="text/javascript" src="//fgnass.github.com/spin.js/dist/spin.min.js"></script>
@@ -318,19 +385,20 @@ if (isset($_GET['ajax'])) {
     <li>
         <div id="databaseInfo">&#183;</div>
         <label>Database Connection</label>
-        <ul>
+        <ul id="db_types">
             <li><input type="radio" name="db_type" checked="checked" value="mysql" id="mysql" /><label for="mysql">MySQL</label></li>
             <li><input type="radio" name="db_type" disabled="disabled" value="postgres" id="postgres" /><label for="postgres">Postgres</label></li>
             <li><input type="radio" name="db_type" disabled="disabled" value="sqlite" id="sqlite" /><label for="sqlite">SQLite</label></li>
         </ul>
-        <ul>
+        <ul id="db_forms">
             <li id="form_mysql">
-                <input type="text" name="db_host" value="localhost" />
-                <input type="text" name="db_port" value="3306" />
-                <input type="text" name="db_name" value="database name"/>
-                <input type="text" name="db_login" value="username" />
-                <input type="text" name="db_pwd" value="Password" />
-                <input type="button" name="db_test" value="Test Connection" />
+                <p class="note">The <u>database name</u> must be <u>myphpframework</u>.</p>
+                <input type="text" name="db_host" value="dp host" data-default="dp host" />
+                <input type="text" name="db_port" value="db port" data-default="db port" />
+                <input type="text" name="db_name" value="myphpframework" disabled="disabled" />
+                <input type="text" name="db_login" value="username" data-default="username" />
+                <input type="text" name="db_pwd" value="password" data-default="password" />
+                <input type="button" value="Test Connection" />
             </li>
         </ul>
     </li>
@@ -414,16 +482,16 @@ $.fn.spin = function(opts) {
   return this;
 };
 
-function getParameterByName(name)
-{
+function getParameterByName(name) {
   name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
   var regexS = "[\\?&]" + name + "=([^&#]*)";
   var regex = new RegExp(regexS);
   var results = regex.exec(window.location.search);
-  if(results == null)
+  if(results == null) {
     return "";
-  else
+  } else {
     return decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
 }
 
 function ajax(url, querystring, method, callback) {
@@ -463,6 +531,9 @@ function ajax(url, querystring, method, callback) {
 };
 
 $(document).ready(function () {
+    var check = '&#10003;',
+        spinOpts = {color: "#000",lines: 10, length: 3, radius: 3, width: 1};
+
     //https://api.github.com/repos/Bwen/NoobHTTP/git/refs/tags
     ajax('https://api.github.com/repos/myphpframework/mpf-core/git/refs/tags', 'GET', function (error, result) {
         if ($.isArray(result)) {
@@ -488,9 +559,7 @@ $(document).ready(function () {
             $htaccess = $('#htaccess'),
             $configBootstrap = $('#configBootstrap'),
             $configHtaccess = $('#configHtaccess'),
-            $success = $('li.success'),
-            check = '&#10003;',
-            spinOpts = {color: "#000",lines: 10, length: 3, radius: 3, width: 1};
+            $success = $('li.success');
 
         // reset ui
         $downloadMPF.html('&#183;').removeClass('error');
@@ -502,12 +571,6 @@ $(document).ready(function () {
         $('#installWebInterface').hide();
         $('.webadmin').hide();
         $('li.error').remove();
-
-        function showError($element, error) {
-            $element.addClass('error');
-            $('div', $element.closest('li')).html('X');
-            $('<li class="error">'+error+'</li>').insertAfter($element.closest('li'));
-        }
 
         $dependencies.html('&nbsp;').spin(spinOpts);
         ajax('mpf_install.php', 'ajax=dependencies', 'GET', function (error, result) {
@@ -585,10 +648,8 @@ $(document).ready(function () {
 
     $('input[name="webadmin"]').click(function (event, options) {
         $(this).hide();
-        var $databaseInfo = $('#databaseInfo'),
-            //$success = $('li.success'),
-            check = '&#10003;',
-            spinOpts = {color: "#000",lines: 10, length: 3, radius: 3, width: 1};
+        var $databaseInfo = $('#databaseInfo')
+            //$success = $('li.success');
 
         $databaseInfo.html('&#183;').removeClass('error');
         //$success.hide();
@@ -604,13 +665,6 @@ $(document).ready(function () {
                 });
             });
         }
-
-        function showError($element, error) {
-            $element.addClass('error');
-            $('div', $element.closest('li')).html('X');
-            $('<li class="error">'+error+'</li>').insertAfter($element.closest('li'));
-        }
-
     });
 
     $('input[name="db_pwd"]').focus(function () {
@@ -620,45 +674,74 @@ $(document).ready(function () {
             $input.val('');
         }
     });
+
     $('input[name="db_pwd"]').blur(function () {
         var $input = $(this);
-        if ($input.val() == "") {
+        if ($input.val() == "" || $input.val() == $input.attr('data-default')) {
             $input.prop('type', 'text');
-            $input.val('Password');
         }
     });
 
-    $('input[name="db_host"]').blur(function () {
+    $('input[name="db_login"],input[name="db_pwd"],input[name="db_host"],input[name="db_port"]').focus(function () {
         var $input = $(this);
-        if ($input.val() == "") {
-            $input.val('localhost');
+        if ($input.val() == $input.attr('data-default')) {
+            $input.val('');
         }
     });
 
-    $('input[name="db_port"]').blur(function () {
+    $('input[name="db_pwd"],input[name="db_login"],input[name="db_host"],input[name="db_port"]').blur(function () {
         var $input = $(this);
-        if ($input.val() == "") {
-            $input.val('3306');
+        if ($input.val() == "" || $input.val() == $input.attr('data-default')) {
+            $input.val($input.attr('data-default'));
+            $input.removeClass('changed');
+        } else {
+            $input.addClass('changed');
         }
     });
 
-    $('input[name="db_name"]').blur(function () {
-        var $input = $(this);
-        if ($input.val() == "") {
-            $input.val('database name');
+    $('#webadmin input[type="button"]').click(function () {
+        var $databaseInfo = $('#databaseInfo'),
+            db_type = $('input[name="db_type"]').val(),
+            data = '';
+            //$success = $('li.success');
+
+        if ($('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled)').length > 0) {
+            $('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled)').addClass('errorGlow');
+            setTimeout(function () {
+                $('#form_'+db_type+' input[type="text"]').removeClass('errorGlow');
+                $('#form_'+db_type+' input[type="password"]').removeClass('errorGlow');
+            }, 1000);
+            return;
         }
+
+        $('#form_'+db_type+' input').each(function (index, element) {
+           data += $(element).prop('name') +'='+ $(element).val() +'&';
+        });
+        data += 'ajax=testDbConnection';
+
+        $('li.error').remove();
+        $databaseInfo.html('&nbsp;').spin(spinOpts);
+        ajax('mpf_install.php', data, 'POST', function (error, result) {
+            $databaseInfo.spin(false);
+            if (error) {
+                showError($databaseInfo, error);
+                return;
+            }
+
+            $databaseInfo.addClass('success');
+        })
     });
 
-    $('input[name="db_login"]').blur(function () {
-        var $input = $(this);
-        if ($input.val() == "") {
-            $input.val('username');
-        }
-    });
+    function showError($element, error) {
+        $element.addClass('error');
+        $('div', $element.closest('li')).html('X');
+        $('<li class="error">'+error+'</li>').insertAfter($element.closest('li'));
+    }
 
     if (getParameterByName('webadmin_walkthrough')) {
         $('input[name="webadmin"]').trigger('click', {instant: true});
     }
+
 });
 </script>
 </body>

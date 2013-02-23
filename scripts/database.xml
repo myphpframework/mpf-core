@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE databases SYSTEM "http://myphpframework.com/dtd/database.dtd" >
+<databases>
+   <server engine="MySQLi">
+       <host />
+       <port />
+       <access type="rw">
+           <database />
+           <login />
+           <password />
+       </access>
+   </server>
+</databases>

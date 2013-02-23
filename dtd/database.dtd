@@ -9,7 +9,7 @@
    <server engine="MYSQL">
        <host>localhost</host>
        <port>3306</port>
-       <access type="rw" for="1">
+       <access type="rw">
            <database>newbiverse</database>
            <login>root</login>
            <password>1111</password>
@@ -18,12 +18,12 @@
    <server engine="MYSQL">
        <host>localhost</host>
        <port>3306</port>
-       <access type="r" for="2">
+       <access type="r">
            <database>newbiverse</database>
            <login>root</login>
            <password>1111</password>
        </access>
-       <access type="w" for="2">
+       <access type="w">
            <database>newbiverse</database>
            <login>root</login>
            <password>1111</password>
@@ -42,8 +42,7 @@
 
 <!ELEMENT access (database,login,password)>
 <!ATTLIST access
-    type (r|w|rw) "rw" #REQUIRED
-    access for CDATA #REQUIRED>
+    type (r|w|rw) "rw" #REQUIRED>
 <!ELEMENT database (#PCDATA)>
 <!ELEMENT login (#PCDATA)>
 <!ELEMENT password (#PCDATA)>
