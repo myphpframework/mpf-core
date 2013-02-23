@@ -1,3 +1,4 @@
+
 CREATE TABLE IF NOT EXISTS `user` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `creationDate` datetime NOT NULL,

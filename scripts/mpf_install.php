@@ -133,6 +133,94 @@ function configBootstrap() {
     return array('success' => true);
 }
 
+function testDbConnection() {
+    error_reporting(0);
+    ini_set('display_errors', 'off');
+
+    if (isset($_POST['db_type']) && in_array($_POST['db_type'], array('mysql'))) {
+
+        if ($_POST['db_type'] == 'mysql') {
+            $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
+            if ($mysqli->connect_error) {
+                $mysqli->close();
+                return array('success' => false, 'error' => $mysqli->connect_error);
+            }
+
+            $mysqli->close();
+            return array('success' => true);
+        }
+    }
+
+    return array('success' => false, 'error' => 'Unsupported database type');
+}
+
+function createDbConfig() {
+    return array('success' => false, 'error' => 'Not Implemented');
+
+    $databaseFile = realpath('.').'/config/database.xml';
+    if (!stream_resolve_include_path($databaseFile)) {
+        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/database.xml '.$databaseFile.'  && echo "succes"')) {
+            return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/</span><span class="filename">database.xml</span>.');
+        }
+    }
+
+    $databaseXML = simplexml_load_file($databaseFile);
+
+}
+
+function createUserTables() {
+    $systemUser = \MPF\User::SYSTEM();
+    if ($systemUser) {
+        return array('success' => true);
+    }
+
+    if ($_POST['db_type'] == 'mysql') {
+        $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
+        if ($mysqli->connect_error) {
+            return array('success' => false, 'error' => $mysqli->connect_error);
+        }
+
+        $mysqli->autocommit(FALSE);
+        $mysqli->query('START TRANSACTION;');
+        $errors = '';
+        $userTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_POST['db_type'].'/user.sql');
+        if ($mysqli->multi_query($userTable)) {
+            do {
+                if (!$mysqli->next_result()) {
+                    $errors .= $mysqli->error."\n";
+                    break;
+                }
+            } while ($mysqli->more_results());
+        } else {
+            $errors .= $mysqli->error."\n";
+        }
+
+        $statusTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_POST['db_type'].'/user_status.sql');
+        if ($mysqli->multi_query($statusTable)) {
+            do {
+                if (!$mysqli->next_result()) {
+                    $errors .= $mysqli->error."\n";
+                    break;
+                }
+            } while ($mysqli->more_results());
+        } else {
+            $errors .= $mysqli->error."\n";
+        }
+
+        if ($errors) {
+            $mysqli->rollback();
+            $mysqli->close();
+            return array('success' => false, 'error' => $errors);
+        }
+        $mysqli->commit();
+        $mysqli->close();
+
+        return array('success' => true);
+    }
+
+    return array('success' => false, 'error' => 'Unsupport database type');
+}
+
 function webadmin() {
     $htacessFile = realpath('.').'/mpf-admin/';
     if (!stream_resolve_include_path($htacessFile)) {
@@ -144,41 +232,18 @@ function webadmin() {
     return array('success' => true);
 }
 
-function testDbConnection() {
-    error_reporting(0);
-    ini_set('display_errors', 'off');
-    $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
-    if ($mysqli->connect_error) {
-        return array('success' => false, 'error' => $mysqli->connect_error);
-    }
-
-    return array('success' => true);
-}
-
 if (isset($_REQUEST['ajax'])) {
-    $result = array('success' => false);
+    $result = array('success' => false, 'error' => 'Ajax function not found');
     switch ($_REQUEST['ajax']) {
-        case 'dependencies':
-            $result = dependencies();
-            break;
-        case 'downloadMPF':
-            $result = downloadMPF();
-            break;
-        case 'bootstrap':
-            $result = bootstrap();
-            break;
-        case 'htaccess':
-            $result = htaccess();
-            break;
-        case 'configBootstrap':
-            $result = configBootstrap();
-            break;
-        case 'configHtaccess':
-            $result = configHtaccess();
-            break;
-        case 'testDbConnection':
-            $result = testDbConnection();
-            break;
+        case 'dependencies':     $result = dependencies();     break;
+        case 'downloadMPF':      $result = downloadMPF();      break;
+        case 'bootstrap':        $result = bootstrap();        break;
+        case 'htaccess':         $result = htaccess();         break;
+        case 'configBootstrap':  $result = configBootstrap();  break;
+        case 'configHtaccess':   $result = configHtaccess();   break;
+        case 'testDbConnection': $result = testDbConnection(); break;
+        case 'createDbConfig':   $result = createDbConfig();   break;
+        case 'createUserTables': $result = createUserTables(); break;
     }
 
     header('Content-Type: application/json');
@@ -191,7 +256,7 @@ if (isset($_REQUEST['ajax'])) {
     <link rel="icon" type="image/ico" href="/images/favicon.ico"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf8"/>
     <meta http-equiv="Content-Language" content="en"/>
-    <meta name="description" content="Web interface that lets your administer certain portion of the MyPhpFramework"/>
+    <meta name="description" content="Web interface that lets your administer certain portion of MyPhpFramework"/>
     <meta name="keywords" content="PHP,framework,admin,mpf,myphpframework"/>
     <meta name="author" content="Philippe Guilbault"/>
     <meta name="copyright" content="Yes plz."/>
@@ -305,7 +370,7 @@ if (isset($_REQUEST['ajax'])) {
             color: #333;
         }
 
-        #db_forms li input[type="button"] {
+        #db_forms li input[type="submit"] {
             width: 126px;
         }
 
@@ -322,14 +387,21 @@ if (isset($_REQUEST['ajax'])) {
             box-shadow: 0px 0px 3px red;
         }
         p.note {
-            background-color: #FFFFBD;
+            background-color: #FFFFE3;
+            background: #FFFFE3 -webkit-gradient(linear, left top, left bottom, from(#FFF), to(#FFFFE3)) no-repeat;
+            background: #FFFFE3 -moz-linear-gradient(top, #FFF, #FFFFE3) no-repeat;
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFF, endColorstr=#FFFFE3) no-repeat;
+            -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFF, endColorstr=#FFFFE3)" no-repeat;
+
             padding: 16px;
-            border: 1px solid #B2B24F;
+            border: 1px solid;
+            border-color: #F9F9F9 #B2B24F #B2B24F #F9F9F9;
             -moz-border-radius: 8px;
             -webkit-border-radius: 8px;
             -khtml-border-radius: 8px;
             border-radius: 8px;
             color: #646400;
+
         }
     </style>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
@@ -393,22 +465,24 @@ if (isset($_REQUEST['ajax'])) {
         <ul id="db_forms">
             <li id="form_mysql">
                 <p class="note">The <u>database name</u> must be <u>myphpframework</u>.</p>
-                <input type="text" name="db_host" value="dp host" data-default="dp host" />
-                <input type="text" name="db_port" value="db port" data-default="db port" />
-                <input type="text" name="db_name" value="myphpframework" disabled="disabled" />
-                <input type="text" name="db_login" value="username" data-default="username" />
-                <input type="text" name="db_pwd" value="password" data-default="password" />
-                <input type="button" value="Test Connection" />
+                <form name="mysql" method="get">
+                    <input type="text" name="db_host" value="dp host" data-default="dp host" />
+                    <input type="text" name="db_port" value="db port" data-default="db port" />
+                    <input type="text" name="db_name" value="myphpframework" disabled="disabled" />
+                    <input type="text" name="db_login" value="username" data-default="username" />
+                    <input type="text" name="db_pwd" value="password" data-default="password" />
+                    <input type="submit" value="Test Connection" />
+                </form>
             </li>
         </ul>
     </li>
     <li>
-        <div id="createUserTables">&#183;</div>
-        <label>Creating user and its status tables</label>
+        <div id="createDbConfig">&#183;</div>
+        <label>Creating config/database.xml</label>
     </li>
     <li>
-        <div id="databaseInfo3">&#183;</div>
-        <label>Configuring bootstrap</label>
+        <div id="createUserTables">&#183;</div>
+        <label>Creating user and its status tables</label>
     </li>
     <li>
         <div id="databaseInfo4">&#183;</div>
@@ -636,7 +710,7 @@ $(document).ready(function () {
                                 $success.show();
                                 $('#installWebInterface').show();
                                 $('html, body').animate({scrollTop: $(document).height()}, 'slow');
-                                var newURL = location.href + (location.search ? "&" : "?") + "webadmin_walkthrough=1";
+                                var newURL = location.href.replace('webadmin_walkthrough=1', '') + (location.search ? "&" : "?") + "webadmin_walkthrough=1";
                                 history.replaceState({}, '', newURL);
                             });
                         });
@@ -699,11 +773,20 @@ $(document).ready(function () {
         }
     });
 
-    $('#webadmin input[type="button"]').click(function () {
+    $('form[name="mysql"]').submit(function () {
         var $databaseInfo = $('#databaseInfo'),
             db_type = $('input[name="db_type"]').val(),
             data = '';
             //$success = $('li.success');
+
+        $('#form_'+db_type+' input:not(:disabled)').each(function (index, element) {
+            var $input = $(element);
+            if ($input.val() == "" || $input.val() == $input.attr('data-default')) {
+                return false;
+            }
+
+            $input.addClass('changed');
+        });
 
         if ($('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled)').length > 0) {
             $('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled)').addClass('errorGlow');
@@ -711,17 +794,17 @@ $(document).ready(function () {
                 $('#form_'+db_type+' input[type="text"]').removeClass('errorGlow');
                 $('#form_'+db_type+' input[type="password"]').removeClass('errorGlow');
             }, 1000);
-            return;
+            return false;
         }
 
-        $('#form_'+db_type+' input').each(function (index, element) {
+        $('#form_'+db_type+' input:not(:disabled)').each(function (index, element) {
            data += $(element).prop('name') +'='+ $(element).val() +'&';
         });
-        data += 'ajax=testDbConnection';
+        data += 'db_type='+db_type+'&';
 
         $('li.error').remove();
         $databaseInfo.html('&nbsp;').spin(spinOpts);
-        ajax('mpf_install.php', data, 'POST', function (error, result) {
+        ajax('mpf_install.php', data + 'ajax=testDbConnection', 'POST', function (error, result) {
             $databaseInfo.spin(false);
             if (error) {
                 showError($databaseInfo, error);
@@ -729,7 +812,41 @@ $(document).ready(function () {
             }
 
             $databaseInfo.addClass('success');
-        })
+            $('div', $databaseInfo.closest('li')).html(check);
+            $('#db_forms', $databaseInfo.closest('li')).slideUp(function () {
+                $('#db_types', $databaseInfo.closest('li')).slideUp(200, function () {
+                    continueDbInstallation();
+                });
+            });
+        });
+
+        function continueDbInstallation() {
+            var $createDbConfig = $('#createDbConfig'),
+                $createUserTables = $('#createUserTables');
+
+            $createDbConfig.html('&nbsp;').spin(spinOpts);
+            ajax('mpf_install.php', data + 'ajax=createDbConfig', 'POST', function (error, result) {
+                $createDbConfig.spin(false);
+                if (error) {
+                    showError($createDbConfig, error);
+                    return;
+                }
+
+                $createDbConfig.addClass('success');
+                $createUserTables.html('&nbsp;').spin(spinOpts);
+                ajax('mpf_install.php', data + 'ajax=createUserTables', 'POST', function (error, result) {
+                    $createUserTables.spin(false);
+                    if (error) {
+                        showError($createUserTables, error);
+                        return;
+                    }
+
+                    $createUserTables.addClass('success');
+                });
+            });
+        }
+
+        return false;
     });
 
     function showError($element, error) {
@@ -738,10 +855,18 @@ $(document).ready(function () {
         $('<li class="error">'+error+'</li>').insertAfter($element.closest('li'));
     }
 
-    if (getParameterByName('webadmin_walkthrough')) {
+    if (getParameterByName('webadmin_walkthrough') && <?= (defined('PATH_MPF_CORE') ? 'true' : 'false') ?>) {
+        $('#form_'+$('input[name="db_type"]').val()+' input:not(:disabled)').each(function (index, element) {
+            var $input = $(element);
+            if ($input.val() == "" || $input.val() == $input.attr('data-default')) {
+                return;
+            }
+
+            $input.addClass('changed');
+        });
+
         $('input[name="webadmin"]').trigger('click', {instant: true});
     }
-
 });
 </script>
 </body>
