@@ -36,7 +36,7 @@
 
 <!ELEMENT databases (server)*>
 <!ELEMENT server (host,port,access)>
-<!ATTLIST server engine (MySQL|MySQLi|SQLite|Oracle|MSSQL|PostgreSQL) "MySQLi" #REQUIRED>
+<!ATTLIST server engine (MySQLi|SQLite|Oracle|MSSQL|PostgreSQL) "MySQLi" #REQUIRED>
 <!ELEMENT host (#PCDATA)>
 <!ELEMENT port (#PCDATA)>
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE databases SYSTEM "http://myphpframework.com/dtd/database.dtd" >
 <databases>
-   <server engine="MySQLi">
+   <server engine="">
        <host />
        <port />
        <access type="rw">

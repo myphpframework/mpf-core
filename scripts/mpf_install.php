@@ -42,7 +42,7 @@ function downloadMPF() {
         if ($zip->open($zipFile) === TRUE) {
             if (!@$zip->extractTo(realpath('../'))) {
                 $zip->close();
-                return array('success' => false, 'error' => 'Extract <span class="path">'.$zipFile.'</span> to "<span class="path">'.realpath('../').'/</span><span class="filename">mpf-core/</span>".');
+                return array('success' => false, 'error' => 'Extract <span class="path">'.$zipFile.'</span> to <span class="path">'.realpath('../').'/</span><span class="filename">mpf-core/</span>.');
             }
             $zip->close();
         }
@@ -60,8 +60,8 @@ function downloadMPF() {
 function bootstrap() {
     $bootstrapFile = realpath('../').'/bootstrap.php';
     if (!stream_resolve_include_path($bootstrapFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/bootstrap.php '.$bootstrapFile.' && echo "succes"')) {
-            return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to "<span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>".');
+        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/bootstrap.php '.$bootstrapFile.' && echo "success"')) {
+            return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>.');
         }
     }
 
@@ -71,7 +71,7 @@ function bootstrap() {
 function htaccess() {
     $htacessFile = realpath('.').'/.htaccess';
     if (!stream_resolve_include_path($htacessFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "succes"')) {
+        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">.htaccess</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/</span><span class="filename">.htaccess</span>.');
         }
     }
@@ -137,9 +137,9 @@ function testDbConnection() {
     error_reporting(0);
     ini_set('display_errors', 'off');
 
-    if (isset($_POST['db_type']) && in_array($_POST['db_type'], array('mysql'))) {
+    if (isset($_POST['db_type']) && in_array($_POST['db_type'], array('mysqli'))) {
 
-        if ($_POST['db_type'] == 'mysql') {
+        if ($_POST['db_type'] == 'mysqli') {
             $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
             if ($mysqli->connect_error) {
                 $mysqli->close();
@@ -155,18 +155,24 @@ function testDbConnection() {
 }
 
 function createDbConfig() {
-    return array('success' => false, 'error' => 'Not Implemented');
-
     $databaseFile = realpath('.').'/config/database.xml';
     if (!stream_resolve_include_path($databaseFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/database.xml '.$databaseFile.'  && echo "succes"')) {
+        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/database.xml '.$databaseFile.'  && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/</span><span class="filename">database.xml</span>.');
         }
+        
+        $databaseXML = @simplexml_load_file($databaseFile);
+        $databaseXML->server['engine'] = $_POST['db_type'];
+        $databaseXML->server->host = $_POST['db_host'];
+        $databaseXML->server->port = $_POST['db_port'];
+        $databaseXML->server->access->database = $_POST['db_name'];
+        $databaseXML->server->access->login = $_POST['db_login'];
+        $databaseXML->server->access->password = $_POST['db_pwd'];
+        
+        @file_put_contents($databaseFile, $databaseXML->asXML(true));
     }
 
-    $databaseXML = simplexml_load_file($databaseFile);
-
-    // test
+    return array('success' => false, 'error' => 'Not Implemented');
 }
 
 function createUserTables() {
@@ -175,7 +181,7 @@ function createUserTables() {
         return array('success' => true);
     }
 
-    if ($_POST['db_type'] == 'mysql') {
+    if ($_POST['db_type'] == 'mysqli') {
         $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
         if ($mysqli->connect_error) {
             return array('success' => false, 'error' => $mysqli->connect_error);
@@ -225,7 +231,7 @@ function createUserTables() {
 function webadmin() {
     $htacessFile = realpath('.').'/mpf-admin/';
     if (!stream_resolve_include_path($htacessFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "succes"')) {
+        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">.htaccess</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/</span><span class="filename">.htaccess</span>.');
         }
     }
@@ -341,7 +347,7 @@ if (isset($_REQUEST['ajax'])) {
             display:none;
         }
 
-        #form_mysql {
+        #form_mysqli {
 
         }
 
@@ -459,13 +465,12 @@ if (isset($_REQUEST['ajax'])) {
         <div id="databaseInfo">&#183;</div>
         <label>Database Connection</label>
         <ul id="db_types">
-            <li><input type="radio" name="db_type" checked="checked" value="mysql" id="mysql" /><label for="mysql">MySQL</label></li>
+            <li><input type="radio" name="db_type" checked="checked" value="mysqli" id="mysql" /><label for="mysql">MySQL</label></li>
             <li><input type="radio" name="db_type" disabled="disabled" value="postgres" id="postgres" /><label for="postgres">Postgres</label></li>
             <li><input type="radio" name="db_type" disabled="disabled" value="sqlite" id="sqlite" /><label for="sqlite">SQLite</label></li>
         </ul>
         <ul id="db_forms">
-            <li id="form_mysql">
-                <p class="note">The <u>database name</u> must be <u>myphpframework</u>.</p>
+            <li id="form_mysqli">
                 <form name="mysql" method="get">
                     <input type="text" name="db_host" value="dp host" data-default="dp host" />
                     <input type="text" name="db_port" value="db port" data-default="db port" />

@@ -42,10 +42,16 @@ class Field {
      * @return string
      */
     public function getDatabase() {
-        // for foreign fields we have to give their table not the class one
+        // for foreign fields we have to give their database not the class one
         if (array_key_exists(PhpDoc::PROPERTY_DATABASE, $this->options)) {
             return $this->options[PhpDoc::PROPERTY_DATABASE];
         }
+        
+        // if we have no database assigned we take the main framework one
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, $this->classPhpDoc)) {
+            return;
+        }
+        
         return $this->classPhpDoc[PhpDoc::CLASS_DATABASE];
     }
 
