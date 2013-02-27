@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema targetNamespace="http://myphpframework.self/xsd"
+    xmlns="http://myphpframework.self/xsd database.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="database">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element type="xs:string" name="name" />
+                <xs:element type="xs:string" name="engine">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                            <xs:enumeration value="MySQLi" />
+                            <xs:enumeration value="PostgreSQL" />
+                            <xs:enumeration value="SQLite" />
+                            <xs:enumeration value="Oracle" />
+                            <xs:enumeration value="MSSQL" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:element>
+                <xs:element name="server" minOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element type="xs:string" name="host" />
+                            <xs:element type="xs:short" name="port" />
+                            <xs:element name="access" maxOccurs="unbounded" minOccurs="1">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element type="xs:string" name="username" />
+                                        <xs:element type="xs:string" name="password" />
+                                    </xs:sequence>
+                                    <xs:attribute type="xs:string" name="type" use="optional">
+                                        <xs:simpleType>
+                                            <xs:restriction base="xs:string">
+                                                <xs:enumeration value="r" />
+                                                <xs:enumeration value="rw" />
+                                                <xs:enumeration value="w" />
+                                            </xs:restriction>
+                                        </xs:simpleType>
+                                    </xs:attribute>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
