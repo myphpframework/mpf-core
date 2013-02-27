@@ -96,9 +96,8 @@ abstract class Layer implements Layer\Intheface {
      */
     private $connections = array();
 
-    public function __construct(Connection $connection) {
-        $connection->setId(0);
-        $this->connections[] = $connection;
+    public function __construct($connections) {
+        $this->connections = $connections;
     }
 
     /**
