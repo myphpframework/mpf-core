@@ -9,6 +9,7 @@
         <text id="dbInvalidFieldLength">The field "@fieldName@" for model "@model@" has a greater length than specified in the model.</text>
         <text id="dbFieldNotNull">The field "@fieldName@" for model "@model@" does not support null value.</text>
         <text id="dbFieldReadonly">The field "@fieldName@" for model "@model@" is defined as readonly by the model, hence you cannot modify it.</text>
+        <text id="dbInvalidDatabaseName">Invalid database name "@name@".</text>
         <text id="dbInvalidFieldName">Invalid field name "@fieldName@" for model "@model@".</text>
         <text id="dbInvalidResultResourceType">Invalid result resource type, expected "@expected@" but got "@actual@".</text>
         <text id="dbInvalidConnectionType">Invalid connection type, expected "@expected@" but got "@actual@".</text>

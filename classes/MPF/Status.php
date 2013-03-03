@@ -3,7 +3,6 @@
 namespace MPF;
 
 /**
- * @database myphpframework
  * @object MPF\Status
  */
 class Status extends \MPF\Db\Model {

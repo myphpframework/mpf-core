@@ -46,12 +46,12 @@ class Field {
         if (array_key_exists(PhpDoc::PROPERTY_DATABASE, $this->options)) {
             return $this->options[PhpDoc::PROPERTY_DATABASE];
         }
-        
+
         // if we have no database assigned we take the main framework one
         if (!array_key_exists(PhpDoc::CLASS_DATABASE, $this->classPhpDoc)) {
-            return;
+            $this->classPhpDoc[PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
         }
-        
+
         return $this->classPhpDoc[PhpDoc::CLASS_DATABASE];
     }
 

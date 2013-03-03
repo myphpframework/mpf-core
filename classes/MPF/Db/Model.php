@@ -57,12 +57,6 @@ abstract class Model extends \MPF\PhpDoc {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
-        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
-            $exception = new Exception\ModelMissingPhpDoc($className, PhpDoc::CLASS_DATABASE);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
-            throw $exception;
-        }
-
         $dbLayer = \MPF\Db::byName($field->getDatabase());
 
         // no need to call generateMD5 because it ends up calling "fromDbEntry"
@@ -221,6 +215,10 @@ abstract class Model extends \MPF\PhpDoc {
     public function getDatabase() {
         if (property_exists($this, 'database')) {
             return $this->database;
+        }
+
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
+            self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
         }
 
         return self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE];

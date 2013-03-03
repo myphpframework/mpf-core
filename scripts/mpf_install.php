@@ -155,20 +155,20 @@ function testDbConnection() {
 }
 
 function createDbConfig() {
-    $databaseFile = realpath('.').'/config/database.xml';
+    $databaseFile = realpath('.').'/config/dbs/mpf.xml';
     if (!stream_resolve_include_path($databaseFile)) {
         if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/database.xml '.$databaseFile.'  && echo "success"')) {
-            return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/</span><span class="filename">database.xml</span>.');
+            return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/dbs/</span><span class="filename">mpf.xml</span>. With the proper informations.');
         }
-        
+
         $databaseXML = @simplexml_load_file($databaseFile);
-        $databaseXML->server['engine'] = $_POST['db_type'];
+        $databaseXML->engine = $_POST['db_type'];
+        $databaseXML->name = $_POST['db_name'];
         $databaseXML->server->host = $_POST['db_host'];
         $databaseXML->server->port = $_POST['db_port'];
-        $databaseXML->server->access->database = $_POST['db_name'];
         $databaseXML->server->access->login = $_POST['db_login'];
         $databaseXML->server->access->password = $_POST['db_pwd'];
-        
+
         @file_put_contents($databaseFile, $databaseXML->asXML(true));
     }
 
@@ -472,11 +472,11 @@ if (isset($_REQUEST['ajax'])) {
         <ul id="db_forms">
             <li id="form_mysqli">
                 <form name="mysql" method="get">
-                    <input type="text" name="db_host" value="dp host" data-default="dp host" />
-                    <input type="text" name="db_port" value="db port" data-default="db port" />
-                    <input type="text" name="db_name" value="myphpframework" disabled="disabled" />
-                    <input type="text" name="db_login" value="username" data-default="username" />
-                    <input type="text" name="db_pwd" value="password" data-default="password" />
+                    <input type="text" name="db_host" value="" placeholder="dp host" />
+                    <input type="text" name="db_port" value="" placeholder="db port 3386" />
+                    <input type="text" name="db_name" value="" placeholder="db name" />
+                    <input type="text" name="db_login" value="" placeholder="username" />
+                    <input type="password" name="db_pwd" value="" placeholder="password" />
                     <input type="submit" value="Test Connection" />
                 </form>
             </li>
@@ -484,7 +484,7 @@ if (isset($_REQUEST['ajax'])) {
     </li>
     <li>
         <div id="createDbConfig">&#183;</div>
-        <label>Creating config/database.xml</label>
+        <label>Creating config/dbs/mpf.xml</label>
     </li>
     <li>
         <div id="createUserTables">&#183;</div>
@@ -747,29 +747,7 @@ $(document).ready(function () {
         }
     });
 
-    $('input[name="db_pwd"]').focus(function () {
-        var $input = $(this);
-        if ($input.prop('type') != 'password') {
-            $input.prop('type', 'password');
-            $input.val('');
-        }
-    });
-
-    $('input[name="db_pwd"]').blur(function () {
-        var $input = $(this);
-        if ($input.val() == "" || $input.val() == $input.attr('data-default')) {
-            $input.prop('type', 'text');
-        }
-    });
-
-    $('input[name="db_login"],input[name="db_pwd"],input[name="db_host"],input[name="db_port"]').focus(function () {
-        var $input = $(this);
-        if ($input.val() == $input.attr('data-default')) {
-            $input.val('');
-        }
-    });
-
-    $('input[name="db_pwd"],input[name="db_login"],input[name="db_host"],input[name="db_port"]').blur(function () {
+    $('input[name="db_pwd"],input[name="db_login"],input[name="db_host"],input[name="db_name"],input[name="db_port"]').blur(function () {
         var $input = $(this);
         if ($input.val() == "" || $input.val() == $input.attr('data-default')) {
             $input.val($input.attr('data-default'));
@@ -794,8 +772,8 @@ $(document).ready(function () {
             $input.addClass('changed');
         });
 
-        if ($('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled)').length > 0) {
-            $('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled)').addClass('errorGlow');
+        if ($('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled),[type="password"]:not(.changed):not(:disabled)').length > 0) {
+            $('#form_'+db_type+' input[type="text"]:not(.changed):not(:disabled),[type="password"]:not(.changed):not(:disabled)').addClass('errorGlow');
             setTimeout(function () {
                 $('#form_'+db_type+' input[type="text"]').removeClass('errorGlow');
                 $('#form_'+db_type+' input[type="password"]').removeClass('errorGlow');

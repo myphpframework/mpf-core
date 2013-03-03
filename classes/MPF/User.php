@@ -12,7 +12,6 @@ use \MPF\Status;
  *
  * @object \MPF\User
  * @table user
- * @database myphpframework
  */
 class User extends \MPF\Db\ModelStatus {
 

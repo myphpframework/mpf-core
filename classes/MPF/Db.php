@@ -39,6 +39,21 @@ class Db {
     }
 
     /**
+     * Returns the Default db layer, the one in mpf.xml
+     *
+     * @return string
+     */
+    public static function getDefaultName() {
+        foreach (self::$database_xmls as $xml) {
+            if ($xml->isDefault) {
+                return (string)$xml->name;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Returns the proper instance of the Db\Layer
      *
      * @throws Db\Exception\ConnectInfoNotFound
@@ -48,6 +63,12 @@ class Db {
      * @return Db\Layer
      */
     public static function byName($name) {
+        if (!$name) {
+            $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
+            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
         if (array_key_exists($name, self::$database_layers)) {
             return self::$database_layers[$name];
         }
@@ -120,7 +141,7 @@ class Db {
         self::validateConfig($xml, $filePath);
         if (!array_key_exists((string)$xml->name, self::$database_xmls)) {
             $fileInfo = pathinfo($filePath);
-            if ($fileInfo['filename'] == 'mpf') {
+            if ($fileInfo['filename'] == 'default') {
                 $xml->isDefault = true;
             }
             self::$database_xmls[ (string)$xml->name ] = $xml;
