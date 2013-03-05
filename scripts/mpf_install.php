@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 define('REQUIRED_PHP_MAJOR_VERSION', 5);
 define('REQUIRED_PHP_MINOR_VERSION', 3);
 define('REQUIRED_PHP_RELEASE_VERSION', 0);
@@ -137,16 +139,24 @@ function testDbConnection() {
     error_reporting(0);
     ini_set('display_errors', 'off');
 
-    if (isset($_POST['db_type']) && in_array($_POST['db_type'], array('mysqli'))) {
+    if ($_REQUEST === $_SESSION) {
+        try {
+            \MPF\User::SYSTEM();
+            return array('success' => true);
+        } catch (Exception $e) {}
+    }
 
-        if ($_POST['db_type'] == 'mysqli') {
-            $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
-            if ($mysqli->connect_error) {
+    if (isset($_REQUEST['db_type']) && in_array($_REQUEST['db_type'], array('mysqli'))) {
+
+        if ($_REQUEST['db_type'] == 'mysqli') {
+            $mysqli = new mysqli($_REQUEST['db_host'], $_REQUEST['db_login'], $_REQUEST['db_pwd'], $_REQUEST['db_name'], $_REQUEST['db_port']);
+            if ($mysqli->connect_errno || $mysqli->connect_error) {
                 $mysqli->close();
                 return array('success' => false, 'error' => $mysqli->connect_error);
             }
-
             $mysqli->close();
+
+            $_SESSION = $_REQUEST;
             return array('success' => true);
         }
     }
@@ -155,24 +165,24 @@ function testDbConnection() {
 }
 
 function createDbConfig() {
-    $databaseFile = realpath('.').'/config/dbs/mpf.xml';
+    $databaseFile = realpath('../config/dbs/default.xml');
     if (!stream_resolve_include_path($databaseFile)) {
         if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/database.xml '.$databaseFile.'  && echo "success"')) {
-            return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/dbs/</span><span class="filename">mpf.xml</span>. With the proper informations.');
+            return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/dbs/</span><span class="filename">default.xml</span>. With the proper informations.');
         }
 
         $databaseXML = @simplexml_load_file($databaseFile);
-        $databaseXML->engine = $_POST['db_type'];
-        $databaseXML->name = $_POST['db_name'];
-        $databaseXML->server->host = $_POST['db_host'];
-        $databaseXML->server->port = $_POST['db_port'];
-        $databaseXML->server->access->login = $_POST['db_login'];
-        $databaseXML->server->access->password = $_POST['db_pwd'];
+        $databaseXML->engine = $_SESSION['db_type'];
+        $databaseXML->name = $_SESSION['db_name'];
+        $databaseXML->server->host = $_SESSION['db_host'];
+        $databaseXML->server->port = $_SESSION['db_port'];
+        $databaseXML->server->access->login = $_SESSION['db_login'];
+        $databaseXML->server->access->password = $_SESSION['db_pwd'];
 
         @file_put_contents($databaseFile, $databaseXML->asXML(true));
     }
 
-    return array('success' => false, 'error' => 'Not Implemented');
+    return array('success' => true);
 }
 
 function createUserTables() {
@@ -181,8 +191,8 @@ function createUserTables() {
         return array('success' => true);
     }
 
-    if ($_POST['db_type'] == 'mysqli') {
-        $mysqli = new mysqli($_POST['db_host'], $_POST['db_login'], $_POST['db_pwd'], 'myphpframework', $_POST['db_port']);
+    if ($_SESSION['db_type'] == 'mysqli') {
+        $mysqli = new mysqli($_SESSION['db_host'], $_SESSION['db_login'], $_SESSION['db_pwd'], 'myphpframework', $_SESSION['db_port']);
         if ($mysqli->connect_error) {
             return array('success' => false, 'error' => $mysqli->connect_error);
         }
@@ -190,7 +200,7 @@ function createUserTables() {
         $mysqli->autocommit(FALSE);
         $mysqli->query('START TRANSACTION;');
         $errors = '';
-        $userTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_POST['db_type'].'/user.sql');
+        $userTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_SESSION['db_type'].'/user.sql');
         if ($mysqli->multi_query($userTable)) {
             do {
                 if (!$mysqli->next_result()) {
@@ -202,7 +212,7 @@ function createUserTables() {
             $errors .= $mysqli->error."\n";
         }
 
-        $statusTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_POST['db_type'].'/user_status.sql');
+        $statusTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_SESSION['db_type'].'/user_status.sql');
         if ($mysqli->multi_query($statusTable)) {
             do {
                 if (!$mysqli->next_result()) {
@@ -381,8 +391,8 @@ if (isset($_REQUEST['ajax'])) {
             width: 126px;
         }
 
-        #db_forms li input[disabled="disabled"]{
-            background-color: #EEE;
+        input[disabled]{
+            background-color: #EEE !important;
         }
 
         .errorGlow {
@@ -472,11 +482,11 @@ if (isset($_REQUEST['ajax'])) {
         <ul id="db_forms">
             <li id="form_mysqli">
                 <form name="mysql" method="get">
-                    <input type="text" name="db_host" value="" placeholder="dp host" />
-                    <input type="text" name="db_port" value="" placeholder="db port 3386" />
-                    <input type="text" name="db_name" value="" placeholder="db name" />
-                    <input type="text" name="db_login" value="" placeholder="username" />
-                    <input type="password" name="db_pwd" value="" placeholder="password" />
+                    <input type="text" name="db_host" value="<?= @$_SESSION['db_host'] ?>" placeholder="dp host" />
+                    <input type="text" name="db_port" value="<?= @$_SESSION['db_port'] ?>" placeholder="db port 3306" />
+                    <input type="text" name="db_name" value="<?= @$_SESSION['db_name'] ?>" placeholder="db name" />
+                    <input type="text" name="db_login" value="<?= @$_SESSION['db_login'] ?>" placeholder="username" />
+                    <input type="password" name="db_pwd" value="<?= @$_SESSION['db_pwd'] ?>" placeholder="password" />
                     <input type="submit" value="Test Connection" />
                 </form>
             </li>
@@ -484,7 +494,7 @@ if (isset($_REQUEST['ajax'])) {
     </li>
     <li>
         <div id="createDbConfig">&#183;</div>
-        <label>Creating config/dbs/mpf.xml</label>
+        <label>Creating config/dbs/default.xml</label>
     </li>
     <li>
         <div id="createUserTables">&#183;</div>
@@ -741,9 +751,18 @@ $(document).ready(function () {
         } else {
             $('#overview').slideUp(500, function () {
                 $('#webadmin').slideDown(500, function () {
-                    $('html, body').animate({scrollTop: $(document).height()}, 'slow');
+                    $('html, body').animate({scrollTop: $(document).height()}, 'slow', function () {
+                    });
                 });
             });
+        }
+    });
+
+    $('input[name="db_host"]').blur(function () {
+        if ($(this).val() == 'localhost' || $(this).val() == '127.0.0.1') {
+            $('input[name="db_port"]').prop('disabled', 'disabled');
+        } else {
+            $('input[name="db_port"]').removeProp('disabled');
         }
     });
 
@@ -809,7 +828,7 @@ $(document).ready(function () {
                 $createUserTables = $('#createUserTables');
 
             $createDbConfig.html('&nbsp;').spin(spinOpts);
-            ajax('mpf_install.php', data + 'ajax=createDbConfig', 'POST', function (error, result) {
+            ajax('mpf_install.php', 'ajax=createDbConfig', 'GET', function (error, result) {
                 $createDbConfig.spin(false);
                 if (error) {
                     showError($createDbConfig, error);
@@ -817,8 +836,9 @@ $(document).ready(function () {
                 }
 
                 $createDbConfig.addClass('success');
+                $('div', $createDbConfig.closest('li')).html(check);
                 $createUserTables.html('&nbsp;').spin(spinOpts);
-                ajax('mpf_install.php', data + 'ajax=createUserTables', 'POST', function (error, result) {
+                ajax('mpf_install.php', 'ajax=createUserTables', 'POST', function (error, result) {
                     $createUserTables.spin(false);
                     if (error) {
                         showError($createUserTables, error);

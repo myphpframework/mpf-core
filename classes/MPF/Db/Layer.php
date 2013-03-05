@@ -3,6 +3,7 @@
 namespace MPF\Db;
 
 use MPF\Logger;
+\MPF\ENV::bootstrap(\MPF\ENV::DATABASE);
 
 /**
  * Layer of abstraction that every db layer needs to extends

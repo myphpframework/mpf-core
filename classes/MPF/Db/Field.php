@@ -51,7 +51,6 @@ class Field {
         if (!array_key_exists(PhpDoc::CLASS_DATABASE, $this->classPhpDoc)) {
             $this->classPhpDoc[PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
         }
-
         return $this->classPhpDoc[PhpDoc::CLASS_DATABASE];
     }
 

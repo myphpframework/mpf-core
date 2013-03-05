@@ -6,6 +6,8 @@ use \MPF\PhpDoc;
 use \MPF\Config;
 use \MPF\Logger;
 
+\MPF\ENV::bootstrap(\MPF\ENV::DATABASE);
+
 /**
  *
  */
