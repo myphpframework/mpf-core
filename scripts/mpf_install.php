@@ -165,13 +165,9 @@ function testDbConnection() {
 }
 
 function createDbConfig() {
-    $databaseFile = realpath('../config/dbs/default.xml');
+    $databaseFile = realpath('../').'/config/dbs/default.xml';
     if (!stream_resolve_include_path($databaseFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/database.xml '.$databaseFile.'  && echo "success"')) {
-            return array('success' => false, 'error' => 'Copy <span class="filename">database.xml</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/config/dbs/</span><span class="filename">default.xml</span>. With the proper informations.');
-        }
-
-        $databaseXML = @simplexml_load_file($databaseFile);
+        $databaseXML = @simplexml_load_file(PATH_MPF_CORE.'scripts/database.xml');
         $databaseXML->engine = $_SESSION['db_type'];
         $databaseXML->name = $_SESSION['db_name'];
         $databaseXML->server->host = $_SESSION['db_host'];
@@ -179,7 +175,10 @@ function createDbConfig() {
         $databaseXML->server->access->login = $_SESSION['db_login'];
         $databaseXML->server->access->password = $_SESSION['db_pwd'];
 
-        @file_put_contents($databaseFile, $databaseXML->asXML(true));
+        $result = @$databaseXML->asXML($databaseFile);
+        if (!$result) {
+            return array('success' => false, 'error' => 'Please create the following file: <span class="path">'.realpath('./').'/config/dbs/</span><span class="filename">default.xml</span> with the following content:<xmp>'.$databaseXML->asXML().'</xmp>');
+        }
     }
 
     return array('success' => true);
@@ -238,12 +237,38 @@ function createUserTables() {
     return array('success' => false, 'error' => 'Unsupport database type');
 }
 
-function webadmin() {
-    $htacessFile = realpath('.').'/mpf-admin/';
-    if (!stream_resolve_include_path($htacessFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "success"')) {
-            return array('success' => false, 'error' => 'Copy <span class="filename">.htaccess</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/</span><span class="filename">.htaccess</span>.');
+function webadminDownload() {
+    $_GET['version'] = 'master';
+    $zipFile = '/tmp/mpf-admin-'.$_GET['version'].'.zip';
+    if (!stream_resolve_include_path($zipFile)) {
+        $file = fopen($zipFile, 'w');
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL,'https://github.com/myphpframework/mpf-admin/archive/'.$_GET['version'].'.zip');
+        curl_setopt($ch, CURLOPT_FAILONERROR, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FILE, $file);
+        curl_exec($ch);
+        curl_close($ch);
+        fclose($file);
+    }
+
+    $pathinfo = pathinfo(realpath('.'));
+    if (!stream_resolve_include_path(PATH_SITE.$pathinfo['basename'].'/mpf-admin')) {
+        $zip = new ZipArchive;
+        if ($zip->open($zipFile) === TRUE) {
+            if (!@$zip->extractTo(PATH_SITE.$pathinfo['basename'].'/mpf-admin')) {
+                $zip->close();
+                return array('success' => false, 'error' => 'Extract <span class="path">'.$zipFile.'</span> to <span class="path">'.realpath('.').'/</span><span class="filename">mpf-admin/</span>.');
+            }
+            $zip->close();
         }
+    }
+
+    if (stream_resolve_include_path(realpath('.').'/mpf-admin-'.$_GET['version'])) {
+        shell_exec('mv '.realpath('.').'/mpf-admin-'.$_GET['version'].' '.realpath('.').'/mpf-admin ');
+        shell_exec('find '.realpath('.').'/mpf-admin -type d -exec chmod 755 {} +');
+        shell_exec('find '.realpath('.').'/mpf-admin -type f -exec chmod 644 {} +');
     }
 
     return array('success' => true);
@@ -261,6 +286,7 @@ if (isset($_REQUEST['ajax'])) {
         case 'testDbConnection': $result = testDbConnection(); break;
         case 'createDbConfig':   $result = createDbConfig();   break;
         case 'createUserTables': $result = createUserTables(); break;
+        case 'webadminDownload': $result = webadminDownload(); break;
     }
 
     header('Content-Type: application/json');
@@ -305,7 +331,11 @@ if (isset($_REQUEST['ajax'])) {
             margin-bottom: 0px;
             font-size: 22px;
         }
-
+        xmp {
+            color: #1F2690;
+            font-size: 10px;
+            white-space: pre-wrap;
+        }
         u {
             color: darkred;
         }
@@ -501,13 +531,10 @@ if (isset($_REQUEST['ajax'])) {
         <label>Creating user and its status tables</label>
     </li>
     <li>
-        <div id="databaseInfo4">&#183;</div>
-        <label>Configuring bootstrap</label>
-    </li>
-    <li>
         <div id="webadminDownload">&#183;</div>
         <label>Downloading &amp; Extracting the Web Admin</label>
     </li>
+    <li class="success" style="display:none;" >MyPhpFramework Admin is installed successfully you can access it <a href="/mpf-admin/">here</a>.</li>
 </ul>
 <script type="text/javascript">
 // Make sure the function "hasOwnProperty" works
@@ -825,7 +852,9 @@ $(document).ready(function () {
 
         function continueDbInstallation() {
             var $createDbConfig = $('#createDbConfig'),
-                $createUserTables = $('#createUserTables');
+                $createUserTables = $('#createUserTables'),
+                $webadminDownload = $('#webadminDownload'),
+                $success = $('li.success');
 
             $createDbConfig.html('&nbsp;').spin(spinOpts);
             ajax('mpf_install.php', 'ajax=createDbConfig', 'GET', function (error, result) {
@@ -846,6 +875,19 @@ $(document).ready(function () {
                     }
 
                     $createUserTables.addClass('success');
+                    $('div', $createUserTables.closest('li')).html(check);
+                    $webadminDownload.html('&nbsp;').spin(spinOpts);
+                    ajax('mpf_install.php', 'ajax=webadminDownload', 'POST', function (error, result) {
+                        $webadminDownload.spin(false);
+                        if (error) {
+                            showError($webadminDownload, error);
+                            return;
+                        }
+
+                        $webadminDownload.addClass('success');
+                        $('div', $webadminDownload.closest('li')).html(check);
+                        $success.show();
+                    });
                 });
             });
         }
