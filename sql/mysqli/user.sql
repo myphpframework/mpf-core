@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS `user` (
   KEY `lastLogin` (`lastLogin`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ROW_FORMAT=COMPACT AUTO_INCREMENT=1 ;
 
-INSERT INTO `user` VALUES(null, NOW(), null, "system@localhost", null, "system");
+INSERT INTO `user` VALUES(null, NOW(), null, "mpf@localhost", null, "system");

@@ -2,19 +2,18 @@
 <!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
 <i18n>
     <country code="CA">
-        <text id="required">This field is mandatory.</text>
-        <text id="alphanumeric">Must only contain alphanumeric characters</text>
-        <text id="name">Name must contain alphabetical characters only.</text>
-        <text id="numeric">This field must only contain numbers.</text>
+        <text id="required">The field "@field@" is mandatory.</text>
+        <text id="alphanumeric">The field "@field@" must only contain alphanumeric characters</text>
+        <text id="name">The field "@field@" must contain alphabetical characters only.</text>
+        <text id="numeric">The field "@field@"  must only contain numbers.</text>
         <text id="passwordConfirm">Password confirmation mismatch.</text>
         <text id="password">The password must contain a minimum of 8 characters.</text>
-        <text id="email">The email entered is invalid.</text>
-        <text id="phone">The phone number entered is invalid.</text>
-        <text id="country">The selected country is invalid.</text>
-        <text id="state">The selected state does does not concord with the country.</text>
-        <text id="creditCard">Invalid credit card number.</text>
+        <text id="email">The field "@field@" must have a valid email.</text>
+        <text id="phone">The field "@field@" has an invalid phone number.</text>
+        <text id="country">The field "@field@" has an invalid country selected.</text>
+        <text id="state">The field "@field@" has a state does does not concord with the country.</text>
+        <text id="creditCard">The field "@field@" has an invalid credit card number.</text>
         <text id="unexpected">An unexpected error occurred.</text>
-
         <text id="ajaxFormError404">The action of the form does not exist!</text>
     </country>
 </i18n>

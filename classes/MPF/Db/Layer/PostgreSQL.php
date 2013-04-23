@@ -42,6 +42,9 @@ class PostgreSQL extends \MPF\Db\Layer {
         return new Entry($entry);
     }
 
+    public function getTotal($table) {
+    }
+
     /**
      * Fetches a model from the database
      *

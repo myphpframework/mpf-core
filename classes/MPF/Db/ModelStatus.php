@@ -14,6 +14,7 @@ abstract class ModelStatus extends Model {
      * @var \MPF\Status[]
      */
     protected $statuses = null;
+    protected $statusCount = 0;
     protected $allowedChanges = array();
 
     /**
@@ -34,7 +35,7 @@ abstract class ModelStatus extends Model {
         $status->database = $statusField->getDatabase();
 
         if ($this->statuses === null) {
-            $this->statuses = array();
+            $this->loadStatuses();
         }
 
         $this->statuses[] = $status;
@@ -66,15 +67,15 @@ abstract class ModelStatus extends Model {
 
         try {
             parent::save();
+            $this->loadStatuses();
+
+            // if there is no statuses we add the default one
+            if (empty($this->statuses)) {
+                $this->setStatus($this->getDefaultStatus());
+            }
 
             // if we didnt alter the statuses we dont need to do anything
-            if (is_array($this->statuses)) {
-
-                // if there is no statuses we add the default one
-                if (empty($this->statuses)) {
-                    $this->setStatus($this->getDefaultStatus());
-                }
-
+            if ($this->statusCount != count($this->statuses)) {
                 // we save all the new status that are not saved
                 foreach ($this->statuses as $status) {
                     // only save the status if its a new one
@@ -105,6 +106,8 @@ abstract class ModelStatus extends Model {
             while($status = $result->fetch()) {
                 $this->statuses[] = $status;
             }
+
+            $this->statusCount = count($this->statuses);
             $result->free();
         }
     }
@@ -120,6 +123,9 @@ abstract class ModelStatus extends Model {
                 continue;
             }
 
+            if ($property[ PhpDoc::PROPERTY_MODEL ] != 'MPF\Status') {
+                continue;
+            }
 
             if (property_exists($this, $name) && $property['declaringClass'] == $this->className) {
                 $statusFields[] = new \MPF\Db\Field(self::$phpdoc[$this->className]['class'], $name, $this->$name, $property);
@@ -127,7 +133,7 @@ abstract class ModelStatus extends Model {
         }
 
         if (empty($statusFields) || count($statusFields) > 1) {
-            $exception = new Exception\ModelMissingPhpDoc($this->className, 'status');
+            $exception = new Exception\ModelMissingStatuses();
             Logger::Log('Db/ModelStatus', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
             throw $exception;
         }
@@ -135,4 +141,15 @@ abstract class ModelStatus extends Model {
         return $statusFields[0];
     }
 
+    /**
+     * @return array
+     */
+    public function toArray() {
+        $array = parent::toArray();
+        $array['statuses'] = array();
+        foreach ($this->getStatuses() as $status) {
+            $array['statuses'][] = $status->toArray();
+        }
+        return $array;
+    }
 }

@@ -44,6 +44,19 @@ class MySQLi extends \MPF\Db\Layer {
         return new Entry($entry);
     }
 
+    /**
+     * Gets the total entries for the table
+     * @param type $table
+     * @return integer
+     */
+    public function getTotal($table) {
+        $mysqli = $this->getFirstAvailableConnection();
+        $result = $this->query('SELECT count(*) total FROM `'.$table.'`');
+        $count = $result->fetch();
+        $result->free();
+        return (int)$count['total'];
+    }
+
     public function transactionStart() {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions++;
@@ -118,7 +131,7 @@ class MySQLi extends \MPF\Db\Layer {
         }
 
         $from = ' FROM `' . $queryField->getTable() . '` ';
-        $where = 'WHERE `' . $queryField->getName() . '` ' . $queryField->getOperator() . ' ' . $this->formatQueryValue($queryField);
+        $where = 'WHERE `' . $queryField->getTable() . '`.`' . $queryField->getName() . '` ' . $queryField->getOperator() . ' ' . $this->formatQueryValue($queryField);
 
         // find the primary key
         $primaryKeys = array();
@@ -190,7 +203,7 @@ class MySQLi extends \MPF\Db\Layer {
 
         $where = "WHERE ";
         foreach ($linkTable->knownFields as $knownField) {
-            $where .= ' `'.$knownField->getLinkFieldName().'` = '.$this->formatQueryValue($knownField).' AND';
+            $where .= ' '.$linkTableName.'.`'.$knownField->getLinkFieldName().'` = '.$this->formatQueryValue($knownField).' AND';
         }
 
         $limit = '';
@@ -255,6 +268,46 @@ class MySQLi extends \MPF\Db\Layer {
         }
     }
 
+    public function deleteLinkTable(\MPF\Db\ModelLinkTable $linktable) {
+        $sql = 'DELETE FROM `'.$linktable->table.'` WHERE ';
+        foreach ($linktable->knownFields as $field) {
+            $sql .= '`'.$field->getLinkFieldName().'` = '.$this->formatQueryValue($field).' AND';
+        }
+        $sql = substr($sql, 0, -4);
+        $this->query($sql);
+    }
+
+    public function saveLinkTable(\MPF\Db\ModelLinkTable $linktable) {
+        $sql = 'REPLACE INTO `'.$linktable->table.'` VALUES(';
+        foreach ($linktable->knownFields as $field) {
+            $sql .= $this->formatQueryValue($field).',';
+        }
+        $sql = substr($sql, 0, -1).')';
+        $this->query($sql);
+    }
+
+    public function saveAllLinkTables($linktables) {
+        if (!is_array($linktables) || empty($linktables)) {
+            return;
+        }
+
+        $sql = 'REPLACE INTO `'.$linktables[0]->table.'` VALUES ';
+        $values = '';
+        foreach ($linktables as $linktable) {
+            if (!($linktable instanceof \MPF\Db\ModelLinkTable)) {
+                continue;
+            }
+
+            $values .= '(';
+            foreach ($linktable->knownFields as $field) {
+                $values .= $this->formatQueryValue($field).',';
+            }
+            $values = substr($values, 0, -1).'),';
+        }
+
+        $this->query($sql.substr($values, 0, -1));
+    }
+
     /**
      * Saves a model to the database
      *
@@ -288,7 +341,6 @@ class MySQLi extends \MPF\Db\Layer {
                     $operation = 'REPLACE';
                 }
                 $result = $this->query($operation.' INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($queryValues)) . '`) VALUES (' . implode(',', array_values($queryValues)) . ');');
-
             } catch (InvalidQuery $e) {
                 if (preg_match('/duplicate/i', $e->result->getError())) {
                     $exception = new DuplicateEntry($e->result, $model->getTable());

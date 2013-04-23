@@ -149,6 +149,10 @@ function testDbConnection() {
     if (isset($_REQUEST['db_type']) && in_array($_REQUEST['db_type'], array('mysqli'))) {
 
         if ($_REQUEST['db_type'] == 'mysqli') {
+            if (!isSet($_REQUEST['db_port'])) {
+                $_REQUEST['db_port'] = 3306;
+            }
+
             $mysqli = new mysqli($_REQUEST['db_host'], $_REQUEST['db_login'], $_REQUEST['db_pwd'], $_REQUEST['db_name'], $_REQUEST['db_port']);
             if ($mysqli->connect_errno || $mysqli->connect_error) {
                 $mysqli->close();
@@ -185,10 +189,12 @@ function createDbConfig() {
 }
 
 function createUserTables() {
-    $systemUser = \MPF\User::SYSTEM();
-    if ($systemUser) {
-        return array('success' => true);
-    }
+    try {
+        $systemUser = \MPF\User::SYSTEM();
+        if ($systemUser) {
+            return array('success' => true);
+        }
+    } catch (Exception $e) {}
 
     if ($_SESSION['db_type'] == 'mysqli') {
         $mysqli = new mysqli($_SESSION['db_host'], $_SESSION['db_login'], $_SESSION['db_pwd'], 'myphpframework', $_SESSION['db_port']);
@@ -199,28 +205,55 @@ function createUserTables() {
         $mysqli->autocommit(FALSE);
         $mysqli->query('START TRANSACTION;');
         $errors = '';
-        $userTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_SESSION['db_type'].'/user.sql');
+
+        // ##### USER
+        $userTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user.sql');
         if ($mysqli->multi_query($userTable)) {
             do {
                 if (!$mysqli->next_result()) {
-                    $errors .= $mysqli->error."\n";
+                    $errors .= $mysqli->error."1<br />\n";
                     break;
                 }
             } while ($mysqli->more_results());
         } else {
-            $errors .= $mysqli->error."\n";
+            $errors .= $mysqli->error."1<br />\n";
         }
 
-        $statusTable = @file_get_contents(PATH_MPF_CORE.'/sql/'.$_SESSION['db_type'].'/user_status.sql');
-        if ($mysqli->multi_query($statusTable)) {
+        // ##### USER STATUS
+        $statusTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_status.sql');
+        if (!$mysqli->query($statusTable)) {
+            $errors .= $mysqli->error."2<br />\n";
+        }
+
+        // ##### USER PERMISSION
+        $userPermissionTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_permission.sql');
+        if (!$mysqli->query($userPermissionTable)) {
+            $errors .= $mysqli->error."3<br />\n";
+        }
+
+        // ##### USER GROUP
+        $userGroupTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_group.sql');
+        if ($mysqli->multi_query($userGroupTable)) {
             do {
                 if (!$mysqli->next_result()) {
-                    $errors .= $mysqli->error."\n";
+                    $errors .= $mysqli->error."4<br />\n";
                     break;
                 }
             } while ($mysqli->more_results());
         } else {
-            $errors .= $mysqli->error."\n";
+            $errors .= $mysqli->error."4<br />\n";
+        }
+
+        // ##### USER GROUP LINK
+        $userGroupLinkTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_group_link.sql');
+        if (!$mysqli->query($userGroupLinkTable)) {
+            $errors .= $mysqli->error."5<br />\n";
+        }
+
+        // ##### USER GROUP PERMISSION
+        $userGroupPermissionTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_group_permission.sql');
+        if (!$mysqli->query($userGroupPermissionTable)) {
+            $errors .= $mysqli->error."6<br />\n";
         }
 
         if ($errors) {
@@ -528,7 +561,7 @@ if (isset($_REQUEST['ajax'])) {
     </li>
     <li>
         <div id="createUserTables">&#183;</div>
-        <label>Creating user and its status tables</label>
+        <label>Creating user system tables</label>
     </li>
     <li>
         <div id="webadminDownload">&#183;</div>
@@ -651,7 +684,6 @@ $(document).ready(function () {
     var check = '&#10003;',
         spinOpts = {color: "#000",lines: 10, length: 3, radius: 3, width: 1};
 
-    //https://api.github.com/repos/Bwen/NoobHTTP/git/refs/tags
     ajax('https://api.github.com/repos/myphpframework/mpf-core/git/refs/tags', 'GET', function (error, result) {
         if ($.isArray(result)) {
             var $versions = $('select[name="versions"]'), versions = [];

@@ -46,12 +46,16 @@ class Session {
      * if not it redirects to the given path.
      *
      * Preferably the login path
+     * @return \MPF\User
      */
     public static function mustBeLoggedIn($loginPath) {
-        if (!Session::getUser()) {
+        $user = Session::getUser();
+        if (!$user) {
             header('Location: '. $loginPath);
             exit;
         }
+
+        return Session::getUser();
     }
 
     /**

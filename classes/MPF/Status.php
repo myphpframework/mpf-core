@@ -11,12 +11,14 @@ class Status extends \MPF\Db\Model {
      * @primaryKey
      * @readonly
      * @type integer unsigned
+     * @private
      */
     protected $id;
 
     /**
      * @readonly
      * @type integer unsigned
+     * @private
      */
     protected $foreignId;
 

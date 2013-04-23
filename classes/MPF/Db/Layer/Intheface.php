@@ -9,7 +9,7 @@ interface Intheface {
 
   /**
    * Executes the fetch for the given result.
-   * 
+   *
    * DEV: Needs to put the connection in use if we start fetching records.
    *
    * @throws Exception_Db_InvalidConnectionType
@@ -21,7 +21,7 @@ interface Intheface {
 
   /**
    * Fetchs models by a partial model
-   * 
+   *
    * @param \MyPhpFrameowkr\Db\Model $model
    * @param string $condition
    * @return \MPF\Db\Model
@@ -45,4 +45,9 @@ interface Intheface {
    * @return \MPF\Db\Model
    */
   public function saveModel(Model $model);
+
+  /**
+   * Returns the total entries for the table
+   */
+  public function getTotal($table);
 }

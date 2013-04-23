@@ -33,6 +33,18 @@ abstract class Model extends \MPF\PhpDoc {
         return $model;
     }
 
+    /**
+     *
+     * @return integer
+     */
+    public static function getTotalEntries() {
+        $className = get_called_class();
+        self::generatePhpDoc($className);
+
+        $dbLayer = \MPF\Db::byName(self::getDb($className));
+        return $dbLayer->getTotal(self::$phpdoc[$className]['class'][PhpDoc::CLASS_TABLE]);
+    }
+
     /*
      * builds a model from a Db\Entry
      *
@@ -56,8 +68,7 @@ abstract class Model extends \MPF\PhpDoc {
      * @return \MPF\Db\ModelResult
      */
     public static function byField(Field $field, \MPF\Db\Page $page=null) {
-        $className = get_called_class();
-        self::generatePhpDoc($className);
+        self::generatePhpDoc(get_called_class());
 
         $dbLayer = \MPF\Db::byName($field->getDatabase());
 
@@ -123,6 +134,14 @@ abstract class Model extends \MPF\PhpDoc {
         return new \MPF\Db\Field(array_merge(self::$phpdoc[$className]['class'], $phpdoc), $fieldName, $value, self::$phpdoc[$className]['properties'][$fieldName]);
     }
 
+    public static function getDb($className) {
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
+            self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
+        }
+
+        return self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE];
+    }
+
     final public function __construct() {
         parent::__construct();
     }
@@ -150,23 +169,11 @@ abstract class Model extends \MPF\PhpDoc {
     }
 
     public function delete() {
-        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$this->className]['class'])) {
-            $exception = new Exception\ModelMissingPhpDoc($this->className, PhpDoc::CLASS_DATABASE);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
-            throw $exception;
-        }
-
         $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->deleteModel($this);
     }
 
     public function save() {
-        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$this->className]['class'])) {
-            $exception = new Exception\ModelMissingPhpDoc($this->className, PhpDoc::CLASS_DATABASE);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
-            throw $exception;
-        }
-
         $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->saveModel($this);
     }
@@ -219,8 +226,8 @@ abstract class Model extends \MPF\PhpDoc {
             return $this->database;
         }
 
-        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
-            self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
+        if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$this->className]['class'])) {
+            self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
         }
 
         return self::$phpdoc[$this->className]['class'][PhpDoc::CLASS_DATABASE];
@@ -466,7 +473,7 @@ abstract class Model extends \MPF\PhpDoc {
                 continue;
             }
 
-            $array[$field->getName()] = $field->getValue();
+            $array[ $field->getName() ] = $field->getValue();
         }
 
         return $array;

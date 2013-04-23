@@ -11,6 +11,9 @@ ini_set('short_open_tag',   '1');
 ini_set('register_globals', '0');
 //ini_set('memory_limit',     '128M');
 
+define('SESSION_COOKIE_DOMAIN', '.'.filter_input(\INPUT_SERVER, 'SERVER_NAME', FILTER_SANITIZE_STRING));
+define('SESSION_COOKIE_PATH', '/');
+
 define('URL_SITE',      '{URL_SITE}');
 define('MPF_ENV',       '{MPF_ENV}');
 

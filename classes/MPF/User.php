@@ -4,6 +4,7 @@ namespace MPF;
 
 use \MPF\Email;
 use \MPF\Status;
+use \MPF\User\Group;
 
 // TODO: add an IP field, helps to see if its a known user that has been blacklisted in the root .htaccess. Keep a history of IPs? foreign field?
 
@@ -64,12 +65,26 @@ class User extends \MPF\Db\ModelStatus {
     /**
      * Statuses for the user
      *
+     * @private
      * @type foreign
      * @table user_status
      * @model MPF\Status
      * @relation onetomany
+     * @var \MPF\Status
      */
     protected $statuses;
+
+    /**
+     *
+     * @private
+     * @type foreign
+     * @table user_group
+     * @model MPF\User\Group
+     * @relation onttomany
+     * @var \MPF\User\Group
+     */
+    protected $groups = null;
+    protected $groupCount = 0;
 
     const USERID_SYSTEM      =    1;
 
@@ -159,6 +174,8 @@ class User extends \MPF\Db\ModelStatus {
     }
 
     /**
+     * Returns the creation date of the user
+     *
      * @return MPF\Date
      */
     public function getCreationDate() {
@@ -166,6 +183,8 @@ class User extends \MPF\Db\ModelStatus {
     }
 
     /**
+     * Returns the last datetime the user logged in
+     *
      * @return MPF\Date
      */
     public function getLastLogin() {
@@ -173,10 +192,70 @@ class User extends \MPF\Db\ModelStatus {
     }
 
     /**
+     * Return the email for the user
+     *
      * @return MPF\Email
      */
     public function getEmail() {
         return Email::byString($this->email);
+    }
+
+    /**
+     * Returns the groups the user is part of
+     *
+     * @return MPF\User\Group[]
+     */
+    public function getGroups() {
+        // if the groups havent loaded we do so now
+        if ($this->groups === null) {
+            $this->groups = Group::byUser($this);
+            $this->groupCount = count($this->groups);
+        }
+
+        return $this->groups;
+    }
+
+    /**
+     * Add the user in the give group
+     *
+     * @param MPF\User\Group $group
+     * @return bool
+     */
+    public function addGroup(Group $group) {
+        // Restrictions to add users to the admin group
+        if ($group->getId() == Group::ADMIN_ID) {
+            $loggedUser = self::bySession();
+
+            // if we only have the system user in the database we allow the first user to be an admin,
+            if (self::getTotalEntries() != 1) {
+                // otherwise only an admin can add a user to the admin group
+                if (!$loggedUser || !$loggedUser->isInGroup(Group::ADMIN())) {
+                    return false;
+                }
+            }
+        }
+
+        // only if its not already in the group
+        if (!$this->isInGroup($group)) {
+            $this->groups[] = $group;
+        }
+
+        return true;
+    }
+
+    /**
+     * Verifies if the user is part of specific group
+     *
+     * @param MPF\User\Group $group
+     * @return bool
+     */
+    public function isInGroup(Group $group) {
+        foreach ($this->getGroups() as $grp) {
+            if ($group->getId() == $grp->getId()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -204,5 +283,51 @@ class User extends \MPF\Db\ModelStatus {
             return true;
         }
         return false;
+    }
+
+    public function save() {
+        $dbLayer = \MPF\Db::byName($this->getDatabase());
+        $dbLayer->transactionStart();
+
+        try {
+            parent::save();
+
+            /// if we have new groups we save them
+            $groups = $this->getGroups();
+            if ($this->groupCount != count($groups)) {
+                // remove all links (group) for user
+                $userIdField = $this->getField('id');
+                $userIdField->setLinkFieldName('userId');
+                $linkTable = new \MPF\Db\ModelLinkTable(array($userIdField), null, self::getDb(get_called_class()), 'user_group_link');
+                $linkTable->delete();
+
+                $linkTables = array();
+                foreach ($groups as $group) {
+                    $linkTables[] = new \MPF\Db\ModelLinkTable(array(
+                        $userIdField,
+                        $group->getField('id')
+                    ), null, self::getDb(get_called_class()), 'user_group_link');
+                }
+                \MPF\Db\ModelLinkTable::saveAll($linkTables);
+            }
+        } catch (\Exception $e) {
+            $dbLayer->transactionRollback();
+            throw $e;
+        }
+
+        $dbLayer->transactionCommit();
+    }
+
+
+    /**
+     * @return array
+     */
+    public function toArray() {
+        $array = parent::toArray();
+        $array['groups'] = array();
+        foreach ($this->getGroups() as $group) {
+            $array['groups'][] = $group->toArray();
+        }
+        return $array;
     }
 }
