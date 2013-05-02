@@ -105,7 +105,7 @@ class Text {
         if (!array_key_exists($id, $this->texts)) {
             $exception = new Exception\Text\IdNotFound($id, array_keys($this->texts));
             Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
-            throw $exception;
+            $GLOBALS['userErrors'][] = $exception;
         }
         return $this->parseTextId($id, $pluginsArgs);
     }
@@ -165,8 +165,12 @@ class Text {
      */
     private function parseTextId($id, $pluginsArgs) {
         $this->loadPlugins();
-        $parsedTexts = $this->texts[$id];
 
+        if (!array_key_exists($id, $this->texts)) {
+            return '';
+        }
+
+        $parsedTexts = $this->texts[$id];
         if (!empty(self::$plugins)) {
             foreach (self::$plugins as $plugin) {
                 // if this plugin as something to parse we execute it

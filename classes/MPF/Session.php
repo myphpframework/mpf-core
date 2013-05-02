@@ -62,6 +62,7 @@ class Session {
      * Destroy the session
      */
     public static function destroy() {
+        unset($_SESSION['userId']);
         session_write_close();
         session_unset();
         $_SESSION = array();

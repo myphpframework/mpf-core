@@ -63,7 +63,7 @@ class Template {
      * @param Exception $e
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline) {
-        $GLOBALS['userErrors'][] = $errstr;
+        $GLOBALS['userErrors'][] = new Exception($errstr, $errno);
     }
 
     /**
@@ -149,7 +149,7 @@ class Template {
 
     public function evalError($errno, $errstr, $errfile, $errline) {
         if (ENV::getType() == 'development') {
-            $GLOBALS['userErrors'][] = $errstr . ' in ' . $this->getFilename() . " on line " . $errline;
+            $GLOBALS['userErrors'][] = new \Exception($errstr . ' in ' . $this->getFilename() . " on line " . $errline, $errno);
         }
     }
 
