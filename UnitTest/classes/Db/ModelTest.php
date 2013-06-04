@@ -53,7 +53,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('MPF\Db\Exception\FieldNotNull');
         $model = new ModelExample();
-        $model->setField('email', null);
+        $model->setField('username', null);
         $this->fail("The function setField should throw an exception FieldNotNull if the fieldName is does not support null in the Model");
     }
 
@@ -93,7 +93,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $model = new ModelExample();
         $model->setField('testLength', "test");
         $json = $model->toJson();
-        $this->assertEquals('{"id":null,"integerTest":null,"creationDate":null,"mydate":null,"mydatetime":null,"lastLogin":null,"email":null,"testLength":"test","color":null}', $json, "The function toJson should of returned the proper string for the test");
+        $this->assertEquals('{"id":null,"integerTest":null,"creationDate":null,"mydate":null,"mydatetime":null,"lastAttempt":null,"username":null,"testLength":"test","color":null}', $json, "The function toJson should of returned the proper string for the test");
     }
 
     public function testFromJson()
@@ -113,8 +113,8 @@ class ModelTest extends PHPUnit_Framework_TestCase
 
     public function testComparisionValues() {
         $model = new ModelExample();
-        $model->setField('lastLogin', '2012-01-01 01:01:01');
-        $field = $model->getField('lastLogin');
+        $model->setField('lastAttempt', '2012-01-01 01:01:01');
+        $field = $model->getField('lastAttempt');
         $this->assertTrue($field->isGreaterThan('2000-01-01 01:01:01'));
         $this->assertTrue($field->isGreaterThanOrEqual('2012-01-01 01:01:01'));
         $this->assertTrue($field->isLessThan('2013-01-01 01:01:01'));
@@ -158,7 +158,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($field->isPrimaryKey());
         $this->assertFalse($field->isNullable());
 
-        $field = $model->getField('email');
+        $field = $model->getField('username');
         $this->assertEquals('LIKE', $field->getOperator());
 
         $field = $model->getField('integerTest');

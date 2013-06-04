@@ -38,9 +38,9 @@
         <text id="serviceInvalidRequestMethod">Invalid request method "@method@"</text>
         <text id="serviceInvalidRequestAction">Invalid request action "@action@"</text>
         <text id="serviceMissingRequestFields">The request is missing the following fields: "@fields@"</text>
-        <text id="serviceUserAlreadyExists">There is already an account with the email "@email@"</text>
+        <text id="serviceUserAlreadyExists">There is already an account with the username "@username@"</text>
         <text id="serviceUserNotApproved">Your account has not been approved yet</text>
         <text id="serviceInvalidCredentials">Invalid credentials</text>
-        <text id="serviceUserSuccessfulLogin">User (#@id@) @email@ successfully logged in</text>
+        <text id="serviceUserSuccessfulLogin">User (#@id@) @username@ successfully logged in</text>
     </country>
 </i18n>

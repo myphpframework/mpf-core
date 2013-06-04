@@ -17,6 +17,11 @@ function dependencies() {
        (PHP_MAJOR_VERSION >= REQUIRED_PHP_MAJOR_VERSION && PHP_MINOR_VERSION >= REQUIRED_PHP_MINOR_VERSION && PHP_RELEASE_VERSION < REQUIRED_PHP_RELEASE_VERSION)) {
         return array('success' => false, 'error' => "MPF requires PHP v".REQUIRED_PHP_MAJOR_VERSION.".".REQUIRED_PHP_MINOR_VERSION.".".REQUIRED_PHP_RELEASE_VERSION." minimum, sorry");
     }
+
+    if (!function_exists('mysqli_connect')) {
+        return array('success' => false, 'error' => "MPF requires mysqli support in order to function properly, sorry.");
+    }
+
     return array('success' => true);
 }
 
