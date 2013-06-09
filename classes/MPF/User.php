@@ -30,8 +30,8 @@ class User extends \MPF\Db\ModelStatus {
     protected $creationDate;
 
     /**
-     * @readonly
      * @type timestamp
+     * @onUpdate now
      * @default now
      */
     protected $lastAttempt;

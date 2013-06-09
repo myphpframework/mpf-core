@@ -11,6 +11,7 @@ abstract class PhpDoc {
     const PROPERTY_READONLY = 'readonly';
     const PROPERTY_TYPE = 'type';
     const PROPERTY_DEFAULT_VALUE = 'default';
+    const PROPERTY_ON_UPDATE = 'onUpdate';
     const PROPERTY_ENCRYPTION = 'encryption';
     const PROPERTY_SALT = 'salt';
     const PROPERTY_PASSWORD = 'password';
