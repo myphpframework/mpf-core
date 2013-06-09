@@ -200,6 +200,15 @@ class User extends \MPF\Db\ModelStatus {
     }
 
     /**
+     * Return the password for the user
+     *
+     * @return string
+     */
+    public function getPassword() {
+        return $this->password;
+    }
+
+    /**
      * Returns the groups the user is part of
      *
      * @return MPF\User\Group[]

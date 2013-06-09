@@ -378,7 +378,7 @@ class Field {
             return false;
         }
 
-        $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
+        $value = $this->getDefaultValue();
         if ($value === null) {
             return true;
         }
