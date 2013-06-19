@@ -91,7 +91,7 @@ class Config {
      */
     private static function getCacheId($filename) {
         $pathInfo = pathinfo(ENV::paths()->getCurrentDir());
-        return md5($pathInfo['dirname'] . $filename);
+        return md5(@$pathInfo['dirname'] . $filename);
     }
 
     protected $configs = array();

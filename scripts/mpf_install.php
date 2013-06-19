@@ -93,9 +93,7 @@ function configHtaccess() {
 
     if (!defined('PATH_MPF_CORE')) {
         $file = @file_get_contents($htacessFile);
-        if (!isset($_ENV['suPHPInstalled'])) {
-            return array('success' => false, 'error' => 'Add the following line <span class="filename">php_value auto_prepend_file "'.$bootstrapFile.'"</span> to the top of the file <span class="path">'.$htacessFile.'</span>.');
-        } else {
+        if (isSet($_ENV['suPHPInstalled']) || isSet($_SERVER["suPHPInstalled"])) {
             $file = str_replace("#suPHP_ConfigPath {path}", "suPHP_ConfigPath ".realpath('../')."/", $file);
             @file_put_contents($htacessFile, $file);
             if (!stream_resolve_include_path($phpIniFile)) {
@@ -106,6 +104,8 @@ function configHtaccess() {
                     @file_put_contents($phpIniFile, 'auto_prepend_file = "'.$bootstrapFile.'"'."\n\n".$phpIni);
                 }
             }
+        } else {
+            return array('success' => false, 'error' => 'Add the following line <span class="filename">php_value auto_prepend_file "'.$bootstrapFile.'"</span> to the top of the file <span class="path">'.$htacessFile.'</span>.');
         }
     }
 
@@ -138,6 +138,57 @@ function configBootstrap() {
     }
 
     return array('success' => true);
+}
+
+function changeFrameworkSalt() {
+    $frameworkSalt = \MPF\Config::get('settings')->framework->salt;
+
+    if (!isSet($_GET['change']) && $frameworkSalt == 'myPhPfR@M3w0rk') {
+        return array('success' => false, 'error' => 'The framework salt is still "myPhPfR@M3w0rk", it needs to be changed.');
+    }
+
+    if (isSet($_GET['change'])) {
+        if (isSet($_ENV['suPHPInstalled']) || isSet($_SERVER["suPHPInstalled"])) {
+            $newSalt = rand_string(24);
+            if ($_GET['change'] == 'framework') {
+                $frameworkSettings = file_get_contents(PATH_MPF_CORE.'config/settings.ini');
+                file_put_contents(PATH_MPF_CORE.'config/settings.ini', str_replace('framework.salt = myPhPfR@M3w0rk', 'framework.salt = '.$newSalt, $frameworkSettings));
+                return array('success' => true);
+            } else if ($_GET['change'] == 'site') {
+                @shell_exec('mkdir -p '.realpath('../').'/config');
+                @shell_exec('find '.realpath('../').'/config -type d -exec chmod 755 {} +');
+                file_put_contents(realpath('../').'/config/settings.ini', "[production]
+framework.salt = $newSalt
+
+[staging:production]
+[testing : production]
+[development : production]
+");
+                @shell_exec('find '.realpath('.').'/config -type f -exec chmod 644 {} +');
+                return array('success' => true);
+            }
+        } else {
+            if ($_GET['change'] == 'framework') {
+                return array('success' => false, 'error' => 'You will have to change the framework salt in <span class="filename">'.PATH_MPF_CORE.'config/settings.ini</span>.');
+            } else if ($_GET['change'] == 'site') {
+                return array('success' => false, 'error' => 'You will have to change the framework salt in <span class="filename">'.realpath('../').'/config/settings.ini</span>.');
+            }
+        }
+    }
+
+    return array('success' => true);
+}
+
+function rand_string( $length ) {
+	$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  $str = '';
+	$size = strlen( $chars );
+	for( $i = 0; $i < $length; $i++ ) {
+		$str .= $chars[ rand( 0, $size - 1 ) ];
+	}
+
+	return $str;
 }
 
 function testDbConnection() {
@@ -184,6 +235,9 @@ function createDbConfig() {
         $databaseXML->server->access->login = $_SESSION['db_login'];
         $databaseXML->server->access->password = $_SESSION['db_pwd'];
 
+        @shell_exec('mkdir -p '.realpath('../').'/config/dbs/');
+        @shell_exec('find '.realpath('../').'/config -type d -exec chmod 755 {} +');
+
         $result = @$databaseXML->asXML($databaseFile);
         if (!$result) {
             return array('success' => false, 'error' => 'Please create the following file: <span class="path">'.realpath('./').'/config/dbs/</span><span class="filename">default.xml</span> with the following content:<xmp>'.$databaseXML->asXML().'</xmp>');
@@ -216,24 +270,24 @@ function createUserTables() {
         if ($mysqli->multi_query($userTable)) {
             do {
                 if (!$mysqli->next_result()) {
-                    $errors .= $mysqli->error."1<br />\n";
+                    $errors .= $mysqli->error."<br />\n";
                     break;
                 }
             } while ($mysqli->more_results());
         } else {
-            $errors .= $mysqli->error."1<br />\n";
+            $errors .= $mysqli->error."<br />\n";
         }
 
         // ##### USER STATUS
         $statusTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_status.sql');
         if (!$mysqli->query($statusTable)) {
-            $errors .= $mysqli->error."2<br />\n";
+            $errors .= $mysqli->error."<br />\n";
         }
 
         // ##### USER PERMISSION
         $userPermissionTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_permission.sql');
         if (!$mysqli->query($userPermissionTable)) {
-            $errors .= $mysqli->error."3<br />\n";
+            $errors .= $mysqli->error."<br />\n";
         }
 
         // ##### USER GROUP
@@ -241,24 +295,24 @@ function createUserTables() {
         if ($mysqli->multi_query($userGroupTable)) {
             do {
                 if (!$mysqli->next_result()) {
-                    $errors .= $mysqli->error."4<br />\n";
+                    $errors .= $mysqli->error."<br />\n";
                     break;
                 }
             } while ($mysqli->more_results());
         } else {
-            $errors .= $mysqli->error."4<br />\n";
+            $errors .= $mysqli->error."<br />\n";
         }
 
         // ##### USER GROUP LINK
         $userGroupLinkTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_group_link.sql');
         if (!$mysqli->query($userGroupLinkTable)) {
-            $errors .= $mysqli->error."5<br />\n";
+            $errors .= $mysqli->error."<br />\n";
         }
 
         // ##### USER GROUP PERMISSION
         $userGroupPermissionTable = @file_get_contents(PATH_MPF_CORE.'sql/'.$_SESSION['db_type'].'/user_group_permission.sql');
         if (!$mysqli->query($userGroupPermissionTable)) {
-            $errors .= $mysqli->error."6<br />\n";
+            $errors .= $mysqli->error."<br />\n";
         }
 
         if ($errors) {
@@ -295,7 +349,7 @@ function webadminDownload() {
     if (!stream_resolve_include_path(PATH_SITE.$pathinfo['basename'].'/mpf-admin')) {
         $zip = new ZipArchive;
         if ($zip->open($zipFile) === TRUE) {
-            if (!@$zip->extractTo(PATH_SITE.$pathinfo['basename'].'/mpf-admin')) {
+            if (!@$zip->extractTo(PATH_SITE.$pathinfo['basename'].'/')) {
                 $zip->close();
                 return array('success' => false, 'error' => 'Extract <span class="path">'.$zipFile.'</span> to <span class="path">'.realpath('.').'/</span><span class="filename">mpf-admin/</span>.');
             }
@@ -321,6 +375,7 @@ if (isset($_REQUEST['ajax'])) {
         case 'htaccess':         $result = htaccess();         break;
         case 'configBootstrap':  $result = configBootstrap();  break;
         case 'configHtaccess':   $result = configHtaccess();   break;
+        case 'changeFrameworkSalt':   $result = changeFrameworkSalt();   break;
         case 'testDbConnection': $result = testDbConnection(); break;
         case 'createDbConfig':   $result = createDbConfig();   break;
         case 'createUserTables': $result = createUserTables(); break;
@@ -386,19 +441,19 @@ if (isset($_REQUEST['ajax'])) {
             margin: 0;
             padding: 0;
         }
-        body > ul > li {
+        body ul > li {
             display: block;
             border-bottom: 1px dotted gray;
             padding: 8px;
             clear:both;
         }
-        body > ul > li > div {
+        body ul > li > div {
             float: left;
             font-size: 28px;
             width: 27px;
             margin-top: -8px;
         }
-        body > ul > li > label {
+        body ul > li > label {
             font-size: 14px;
         }
         .error {
@@ -488,6 +543,9 @@ if (isset($_REQUEST['ajax'])) {
             color: #646400;
 
         }
+        #saltExplanation {
+            display: none;
+        }
     </style>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     <script type="text/javascript" src="//fgnass.github.com/spin.js/dist/spin.min.js"></script>
@@ -528,6 +586,25 @@ if (isset($_REQUEST['ajax'])) {
     <li>
         <div id="configBootstrap">&#183;</div>
         <label>Configuring bootstrap</label>
+    </li>
+    <li>
+        <div id="changeFrameworkSalt">&#183;</div>
+        <label>Changing the framework salt</label>
+    </li>
+    <li id="saltExplanation">
+        <p>There is two options available for changing the framework salt:</p>
+        <ul>
+            <li>
+                <div id="changeSaltFramework">&#183;</div>
+                <label>Change it within the core.&nbsp; <input type="button" value="Change" /></label>
+            </li>
+            <li>
+                <div id="changeSaltSite">&#183;</div>
+                <label>Overwrite it only for this web site. <input type="button" value="Change" /></label>
+            </li>
+        </ul>
+        <p>The framework salt is used in hashing various things such has the user password. The user password is not only hashed by their own unique salt but by the framework's salt as well.</p>
+        <p>If your are planning on using only 1 installation of the mpf-core for many sites it is recommended to overwrite it in every site, in the <span class="filename">config/settings.ini</span> at the root of your site.</p>
     </li>
     <li class="success" style="display:none;" >Installation of the core is completed</li>
     <li id="installWebInterface">
@@ -712,6 +789,7 @@ $(document).ready(function () {
             $bootstrap = $('#bootstrap'),
             $htaccess = $('#htaccess'),
             $configBootstrap = $('#configBootstrap'),
+            $changeFrameworkSalt = $('#changeFrameworkSalt'),
             $configHtaccess = $('#configHtaccess'),
             $success = $('li.success');
 
@@ -787,16 +865,67 @@ $(document).ready(function () {
                                 $configBootstrap.addClass('success');
                                 $('div', $configBootstrap.closest('li')).html(check);
 
-                                $success.show();
-                                $('#installWebInterface').show();
-                                $('html, body').animate({scrollTop: $(document).height()}, 'slow');
-                                var newURL = location.href.replace('webadmin_walkthrough=1', '') + (location.search ? "&" : "?") + "webadmin_walkthrough=1";
-                                history.replaceState({}, '', newURL);
+                                $("#saltExplanation").hide();
+                                $changeFrameworkSalt.html('&nbsp;').spin(spinOpts);
+                                ajax('mpf_install.php', 'ajax=changeFrameworkSalt', 'GET', function (error, result) {
+                                    $changeFrameworkSalt.spin(false);
+                                    if (error) {
+                                        $("#saltExplanation").show();
+                                        $('html, body').animate({scrollTop: $(document).height()}, 'slow');
+                                        showError($changeFrameworkSalt, error);
+                                        return;
+                                    }
+
+                                    $changeFrameworkSalt.addClass('success');
+                                    $('div', $changeFrameworkSalt.closest('li')).html(check);
+
+                                    $success.show();
+                                    $('#installWebInterface').show();
+                                    $('html, body').animate({scrollTop: $(document).height()}, 'slow');
+                                    var newURL = location.href.replace('webadmin_walkthrough=1', '') + (location.search ? "&" : "?") + "webadmin_walkthrough=1";
+                                    history.replaceState({}, '', newURL);
+                                });
                             });
                         });
                     });
                 });
             });
+        });
+    });
+
+    var $changeSaltSite = $('#changeSaltSite').closest('li');
+    $changeSaltSite.find('[type=button]').click(function () {
+        $changeSaltSite.html('&nbsp;').spin(spinOpts);
+        ajax('mpf_install.php', 'ajax=changeFrameworkSalt&change=site', 'GET', function (error, result) {
+            if (error) {
+                $('html, body').animate({scrollTop: $(document).height()}, 'slow');
+                showError($changeSaltSite, error);
+                return;
+            }
+
+            $changeSaltSite.addClass('success');
+            $('div', $changeSaltSite.closest('li')).html(check);
+
+            $("#saltExplanation").hide();
+            $('#start').click();
+        });
+    });
+
+    var $changeSaltFramework = $('#changeSaltFramework').closest('li');
+    $changeSaltFramework.find('[type=button]').click(function () {
+        $changeSaltFramework.html('&nbsp;').spin(spinOpts);
+        ajax('mpf_install.php', 'ajax=changeFrameworkSalt&change=framework', 'GET', function (error, result) {
+            if (error) {
+                $('html, body').animate({scrollTop: $(document).height()}, 'slow');
+                showError($changeSaltFramework, error);
+                return;
+            }
+
+            $changeSaltFramework.addClass('success');
+            $('div', $changeSaltFramework.closest('li')).html(check);
+
+            $("#saltExplanation").hide();
+            $('#start').click();
         });
     });
 
