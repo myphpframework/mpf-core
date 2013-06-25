@@ -23,7 +23,7 @@ class Database extends \MPF\Bootstrap implements Intheface {
         // we fetch all the potential database configs
         $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
         foreach ($paths as $path) {
-            if (stream_resolve_include_path($path . 'dbs')) {
+            if (file_exists($path . 'dbs')) {
                 if ($handle = opendir($path . 'dbs')) {
                     $files = array();
                     while (false !== ($file = readdir($handle))) {

@@ -284,7 +284,7 @@ class Template {
      */
     protected function cacheOutput($output) {
         $file = $this->getCachePath();
-        if (!stream_resolve_include_path($file)) {
+        if (!file_exists($file)) {
             @mkdir($file);
         }
         $file .= $this->getTemplateId();
@@ -349,7 +349,7 @@ class Template {
         }
 
         foreach (ENV::paths()->templates() as $path) {
-            if (stream_resolve_include_path($path . $this->getFilename())) {
+            if (file_exists($path . $this->getFilename())) {
                 $this->nearestPath = $path;
                 return $path . $this->getFilename();
             }

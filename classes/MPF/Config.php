@@ -31,7 +31,7 @@ class Config {
         }
 
         $cacheFile = CONFIG_CACHE_PATH . self::getCacheId($filename);
-        if (CONFIG_CACHE && stream_resolve_include_path($cacheFile)) {
+        if (CONFIG_CACHE && file_exists($cacheFile)) {
             $configs[$filename] = unserialize(file_get_contents($cacheFile));
             return self::getEnv($configs[$filename]);
         }
@@ -43,7 +43,7 @@ class Config {
         $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
         foreach ($paths as $path) {
             $file = $path . $filename . '.ini';
-            if (stream_resolve_include_path($file)) {
+            if (file_exists($file)) {
                 // If its the first file we instantiate the config
                 if ($config === null) {
                     $config = new Config($filename);
@@ -56,7 +56,7 @@ class Config {
         if ($config) {
             $configs[$filename] = $config;
 
-            if (CONFIG_CACHE && !stream_resolve_include_path($cacheFile)) {
+            if (CONFIG_CACHE && !file_exists($cacheFile)) {
                 @file_put_contents($cacheFile, serialize($config));
             }
 

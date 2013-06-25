@@ -31,7 +31,7 @@ function downloadMPF() {
     }
 
     $zipFile = '/tmp/mpf-core-'.$_GET['version'].'.zip';
-    if (!stream_resolve_include_path($zipFile)) {
+    if (!file_exists($zipFile)) {
         $file = fopen($zipFile, 'w');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL,'https://github.com/myphpframework/mpf-core/archive/'.$_GET['version'].'.zip');
@@ -44,7 +44,7 @@ function downloadMPF() {
         fclose($file);
     }
 
-    if (!stream_resolve_include_path(realpath('../').'/mpf-core')) {
+    if (!file_exists(realpath('../').'/mpf-core')) {
         $zip = new ZipArchive;
         if ($zip->open($zipFile) === TRUE) {
             if (!@$zip->extractTo(realpath('../'))) {
@@ -55,7 +55,7 @@ function downloadMPF() {
         }
     }
 
-    if (stream_resolve_include_path(realpath('../').'/mpf-core-'.$_GET['version'])) {
+    if (file_exists(realpath('../').'/mpf-core-'.$_GET['version'])) {
         shell_exec('mv '.realpath('../').'/mpf-core-'.$_GET['version'].' '.realpath('../').'/mpf-core ');
         shell_exec('find '.realpath('../').'/mpf-core -type d -exec chmod 755 {} +');
         shell_exec('find '.realpath('../').'/mpf-core -type f -exec chmod 644 {} +');
@@ -66,7 +66,7 @@ function downloadMPF() {
 
 function bootstrap() {
     $bootstrapFile = realpath('../').'/bootstrap.php';
-    if (!stream_resolve_include_path($bootstrapFile)) {
+    if (!file_exists($bootstrapFile)) {
         if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/bootstrap.php '.$bootstrapFile.' && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>.');
         }
@@ -77,7 +77,7 @@ function bootstrap() {
 
 function htaccess() {
     $htacessFile = realpath('.').'/.htaccess';
-    if (!stream_resolve_include_path($htacessFile)) {
+    if (!file_exists($htacessFile)) {
         if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">.htaccess</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/</span><span class="filename">.htaccess</span>.');
         }
@@ -96,7 +96,7 @@ function configHtaccess() {
         if (isSet($_ENV['suPHPInstalled']) || isSet($_SERVER["suPHPInstalled"])) {
             $file = str_replace("#suPHP_ConfigPath {path}", "suPHP_ConfigPath ".realpath('../')."/", $file);
             @file_put_contents($htacessFile, $file);
-            if (!stream_resolve_include_path($phpIniFile)) {
+            if (!file_exists($phpIniFile)) {
                 @file_put_contents($phpIniFile, 'auto_prepend_file = "'.$bootstrapFile.'"'."\n\n");
             } else {
                 $phpIni = @file_get_contents($phpIniFile);
@@ -125,11 +125,11 @@ function configBootstrap() {
         return array('success' => true);
     }
 
-    if (!defined('PATH_MPF_CORE') || PATH_MPF_CORE == '{PATH_MPF_CORE}' || !stream_resolve_include_path(PATH_MPF_CORE.'init.php')) {
+    if (!defined('PATH_MPF_CORE') || PATH_MPF_CORE == '{PATH_MPF_CORE}' || !file_exists(PATH_MPF_CORE.'init.php')) {
         return array('success' => false, 'error' => 'The constant <span class="filename">PATH_MPF_CORE</span> is not properly set in <span class="path">'.$bootstrapFile.'</span>. Make sure the <u>absolute path</u> finishes with a slash "/".');
     }
 
-    if (!defined('PATH_SITE') || PATH_SITE == '{PATH_SITE}' || !stream_resolve_include_path(PATH_SITE.'bootstrap.php')) {
+    if (!defined('PATH_SITE') || PATH_SITE == '{PATH_SITE}' || !file_exists(PATH_SITE.'bootstrap.php')) {
         return array('success' => false, 'error' => 'The constant <span class="filename">PATH_SITE</span> is not properly set in <span class="path">'.$bootstrapFile.'</span>. Make sure the <u>absolute path</u> finishes with a slash "/".');
     }
 
@@ -226,7 +226,7 @@ function testDbConnection() {
 
 function createDbConfig() {
     $databaseFile = realpath('../').'/config/dbs/default.xml';
-    if (!stream_resolve_include_path($databaseFile)) {
+    if (!file_exists($databaseFile)) {
         $databaseXML = @simplexml_load_file(PATH_MPF_CORE.'scripts/database.xml');
         $databaseXML->engine = $_SESSION['db_type'];
         $databaseXML->name = $_SESSION['db_name'];
@@ -332,7 +332,7 @@ function createUserTables() {
 function webadminDownload() {
     $_GET['version'] = 'master';
     $zipFile = '/tmp/mpf-admin-'.$_GET['version'].'.zip';
-    if (!stream_resolve_include_path($zipFile)) {
+    if (!file_exists($zipFile)) {
         $file = fopen($zipFile, 'w');
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL,'https://github.com/myphpframework/mpf-admin/archive/'.$_GET['version'].'.zip');
@@ -346,7 +346,7 @@ function webadminDownload() {
     }
 
     $pathinfo = pathinfo(realpath('.'));
-    if (!stream_resolve_include_path(PATH_SITE.$pathinfo['basename'].'/mpf-admin')) {
+    if (!file_exists(PATH_SITE.$pathinfo['basename'].'/mpf-admin')) {
         $zip = new ZipArchive;
         if ($zip->open($zipFile) === TRUE) {
             if (!@$zip->extractTo(PATH_SITE.$pathinfo['basename'].'/')) {
@@ -357,7 +357,7 @@ function webadminDownload() {
         }
     }
 
-    if (stream_resolve_include_path(realpath('.').'/mpf-admin-'.$_GET['version'])) {
+    if (file_exists(realpath('.').'/mpf-admin-'.$_GET['version'])) {
         shell_exec('mv '.realpath('.').'/mpf-admin-'.$_GET['version'].' '.realpath('.').'/mpf-admin ');
         shell_exec('find '.realpath('.').'/mpf-admin -type d -exec chmod 755 {} +');
         shell_exec('find '.realpath('.').'/mpf-admin -type f -exec chmod 644 {} +');

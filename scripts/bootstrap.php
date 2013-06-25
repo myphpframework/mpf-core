@@ -24,7 +24,7 @@ define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
 define('CONFIG_CACHE', false);
 define('CONFIG_CACHE_PATH', PATH_SITE.'cache/configs/');
 
-if (PATH_MPF_CORE != '' && stream_resolve_include_path(PATH_MPF_CORE .'init.php')) {
+if (PATH_MPF_CORE != '' && file_exists(PATH_MPF_CORE .'init.php')) {
     require(PATH_MPF_CORE .'init.php');
 }
 
