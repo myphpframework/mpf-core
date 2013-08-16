@@ -9,7 +9,7 @@ if (Phar::canWrite()) {
     $p = $p->convertToExecutable(Phar::TAR, Phar::GZ, $bucketInfo->version.'.phar.tgz');
     $p->startBuffering();
 
-    $p->buildFromDirectory(realpath('../'), '/^(.(?!.git))*$/i');
+    $p->buildFromDirectory(realpath('../'), '/^(.(?!.git|UnitTest))*$/i');
     $p->stopBuffering();
 
 } else {
