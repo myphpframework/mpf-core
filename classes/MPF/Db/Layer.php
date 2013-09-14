@@ -35,14 +35,6 @@ abstract class Layer implements Layer\Intheface {
     public abstract function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null);
 
     /**
-     * Saves a model to the database
-     *
-     * @throws \MPF\Db\Exception\DuplicateEntry
-     * @param \MPF\Db\Model $model
-     */
-    public abstract function saveModel(\MPF\Db\Model $model);
-
-    /**
      * Deletes a model from the database
      *
      * @param \MPF\Db\Model $model
