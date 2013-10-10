@@ -9,7 +9,7 @@ require_once('classes/TemplateTest.php');
 require_once('classes/TextTest.php');
 
 //require_once('classes/Db/ResultSetTest.php');
-require_once('classes/Db/Layer/MySQLiTest.php');
+//require_once('classes/Db/Layer/MySQLiTest.php');
 //require_once('classes/Db/Layer/PostgreSQLTest.php');
 //require_once('classes/Db/Layer/SQLiteTest.php');
 require_once('classes/Db/ModelTest.php');
@@ -36,7 +36,7 @@ class Framework_AllTests
         $suite->addTestSuite('Bootstrap_SessionTest');
         //$suite->addTestSuite('Bootstrap_TemplateTest');
 
-        $suite->addTestSuite('Db_Layer_MySQLiTest');
+        //$suite->addTestSuite('Db_Layer_MySQLiTest');
         //$suite->addTestSuite('Db_Layer_PostgreSQLTest');
         //$suite->addTestSuite('Db_Layer_SQLiteTest');
         $suite->addTestSuite('ModelTest');
