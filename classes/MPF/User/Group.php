@@ -81,6 +81,8 @@ class Group extends \MPF\Db\Model {
         while($userGroup = $result->fetch()) {
             $groups[] = $userGroup;
         }
+        
+        $result->free();
         return $groups;
     }
 

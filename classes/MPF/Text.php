@@ -24,7 +24,7 @@ class Text {
             $filename = $filename . '.xml';
             foreach (ENV::paths()->i18n() as $path) {
                 $file = $path . $lang . '/' . $filename;
-                if (stream_resolve_include_path($file)) {
+                if (file_exists($file)) {
                     $xmlFile = file_get_contents($file);
                     $xmlFile = preg_replace('/&/', '&amp;', $xmlFile);
                     $xml = @simplexml_load_string($xmlFile);
@@ -139,7 +139,7 @@ class Text {
             // The Text plugins reside in classes/Text/Plugin/, everything in there except the interface will be considered a potential Text plugin
             foreach (ENV::paths()->classes() as $path) {
                 $dir = $path . '/MPF/Text/Plugin';
-                if (stream_resolve_include_path($dir) && ($handle = opendir($dir))) {
+                if (file_exists($dir) && ($handle = opendir($dir))) {
                     while (false !== ($file = readdir($handle))) {
                         $file = substr($file, 0, strpos($file, '.'));
                         if ($file && !preg_match('/^\./', $file) && 'Intheface' != $file) {

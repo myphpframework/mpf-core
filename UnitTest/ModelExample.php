@@ -42,13 +42,13 @@ class ModelExample extends \MPF\Db\ModelStatus
     /**
      * @type datetime
      */
-    protected $lastLogin;
+    protected $lastAttempt;
 
     /**
      * @type varchar 150
      * @default false
      */
-    protected $email;
+    protected $username;
 
     /**
      * @type varchar 5

@@ -2,7 +2,6 @@
 
 namespace MPF;
 
-use \MPF\Email;
 use \MPF\Status;
 use \MPF\User\Group;
 
@@ -31,16 +30,16 @@ class User extends \MPF\Db\ModelStatus {
     protected $creationDate;
 
     /**
-     * @readonly
      * @type timestamp
+     * @onUpdate now
      * @default now
      */
-    protected $lastLogin;
+    protected $lastAttempt;
 
     /**
-     * @type varchar 150
+     * @type varchar 25
      */
-    protected $email;
+    protected $username;
 
     /**
      * This field cannot be altered once live
@@ -104,13 +103,13 @@ class User extends \MPF\Db\ModelStatus {
     /**
      * Creates a new user
      *
-     * @param Email $email
+     * @param string $username
      * @return \MPF\User
      */
-    public static function create(Email $email) {
+    public static function create($username) {
         $class = get_called_class();
         $newUser = new $class();
-        $newUser->setEmail($email);
+        $newUser->setUsername($username);
         return $newUser;
     }
 
@@ -149,11 +148,11 @@ class User extends \MPF\Db\ModelStatus {
 
     /**
      *
-     * @param \MPF\Email $email
+     * @param string $username
      * @return \MPF\User
      */
-    public static function byEmail(Email $email) {
-        $result = self::byField(self::generateField('email', $email->__toString()));
+    public static function byUsername($username) {
+        $result = self::byField(self::generateField('username', $username));
         if ($result->rowsTotal == 0) {
           $result->free();
           return null;
@@ -188,16 +187,25 @@ class User extends \MPF\Db\ModelStatus {
      * @return MPF\Date
      */
     public function getLastLogin() {
-        return $this->lastLogin;
+        return $this->lastAttempt;
     }
 
     /**
-     * Return the email for the user
+     * Return the username for the user
      *
-     * @return MPF\Email
+     * @return string
      */
-    public function getEmail() {
-        return Email::byString($this->email);
+    public function getUsername() {
+        return $this->username;
+    }
+
+    /**
+     * Return the password for the user
+     *
+     * @return string
+     */
+    public function getPassword() {
+        return $this->password;
     }
 
     /**
@@ -259,10 +267,10 @@ class User extends \MPF\Db\ModelStatus {
     }
 
     /**
-     * @param \MPF\Email $email
+     * @param string $username
      */
-    public function setEmail(Email $email) {
-        $this->setField('email', $email->__toString());
+    public function setUsername($username) {
+        $this->setField('username', $username);
     }
 
     /**

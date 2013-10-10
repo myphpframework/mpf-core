@@ -5,6 +5,7 @@
         <text id="required">The field "@field@" is mandatory.</text>
         <text id="alphanumeric">The field "@field@" must only contain alphanumeric characters</text>
         <text id="name">The field "@field@" must contain alphabetical characters only.</text>
+        <text id="username">The username must be no more than 25 characters and may only contain the following characters: a-zA-Z0-9' _-</text>
         <text id="numeric">The field "@field@"  must only contain numbers.</text>
         <text id="passwordConfirm">Password confirmation mismatch.</text>
         <text id="password">The password must contain a minimum of 8 characters.</text>

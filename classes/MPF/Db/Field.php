@@ -94,6 +94,32 @@ class Field {
         return null;
     }
 
+    public function getOnUpdateValue() {
+        if (array_key_exists(PhpDoc::PROPERTY_ON_UPDATE, $this->options)) {
+            $value = $this->options[PhpDoc::PROPERTY_ON_UPDATE];
+
+            // @default was specified with no value thus allow nulls
+            if (!$value || $value == 'null' || $value === null) {
+                return null;
+            }
+
+            $time = strtotime($value);
+            $time = (!$time ? time() : $time);
+
+            switch ($this->getType()) {
+                case 'timestamp':
+                case 'datetime':
+                    return date('Y-m-d H:i:s', $time);
+                    break;
+                case 'date':
+                    return date('Y-m-d', $time);
+                    break;
+            }
+            return $value;
+        }
+        return null;
+    }
+
     public function getRelationship() {
         return (array_key_exists(PhpDoc::PROPERTY_RELATION, $this->options) ? $this->options[PhpDoc::PROPERTY_RELATION] : '');
     }
@@ -378,7 +404,7 @@ class Field {
             return false;
         }
 
-        $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
+        $value = $this->getDefaultValue();
         if ($value === null) {
             return true;
         }

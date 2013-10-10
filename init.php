@@ -21,7 +21,7 @@ Logger::Log('Framework.init', 'framework initialized', Logger::LEVEL_INFO, Logge
 
 // if we have a post-inits scripts we include them all from the closest to initial path
 foreach (ENV::paths()->includes() as $path) {
-    if (stream_resolve_include_path($path.'post-init.php')) {
+    if (file_exists($path.'post-init.php')) {
         include($path.'post-init.php');
     }
 }

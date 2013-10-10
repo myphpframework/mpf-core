@@ -17,7 +17,7 @@ function __autoload($className) {
     }
 
     foreach (ENV::paths()->classes() as $path) {
-        if (stream_resolve_include_path($path . $className)) { //  && !is_dir($path . $className)
+        if (file_exists($path . $className)) { //  && !is_dir($path . $className)
             require($path . $className);
             return;
         }

@@ -177,11 +177,11 @@ namespace MPF\ENV {
         public function __construct() {
             if (empty(self::$paths)) {
                 Logger::Buffer('ENV\Paths', 'initiating environment paths...', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
-                $this->currentDir = dirname(filter_input(\INPUT_SERVER, 'SCRIPT_FILENAME', \FILTER_SANITIZE_URL)) . '/';
+                $this->currentDir = dirname(filter_var($_SERVER['SCRIPT_FILENAME'], \FILTER_SANITIZE_URL)) . '/';
 
                 // If we are in a console or purposely overwriting we use PWD
                 if (array_key_exists('PWD', $_SERVER) && false !== strpos($_SERVER['PWD'], PATH_SITE)) {
-                    $this->currentDir = filter_input(\INPUT_SERVER, 'PWD', \FILTER_SANITIZE_URL) . '/';
+                    $this->currentDir = filter_var($_SERVER['PWD'], \FILTER_SANITIZE_URL);
                 }
 
                 Logger::Buffer('ENV\Paths', 'current dir:' . $this->currentDir .' == '.PATH_SITE, Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);

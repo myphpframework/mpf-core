@@ -14,15 +14,15 @@ function array_merge_recursive_simple() {
       trigger_error(__FUNCTION__ . ' encountered a non array argument', E_USER_WARNING);
       return;
     }
-    
+
     if (!$array) {
       continue;
     }
-    
+
     foreach ($array as $key => $value) {
       if (is_string($key)) {
         if (is_array($value) && array_key_exists($key, $merged) && is_array($merged[$key])) {
-          $merged[$key] = call_user_func(__FUNCTION__, $merged[$key], $value);
+          $merged[$key] = array_merge_recursive_simple($merged[$key], $value);
         }
         else {
           $merged[$key] = $value;
@@ -54,19 +54,19 @@ function mpf_parse_ini_file ($file) {
     if ($line == '') {
       continue;
     }
-    
+
     preg_match('/\[\s{0,}([a-z]{4,}\s:\s[a-z]{4,})\s{0,}\]/i', $line, $matches);
     if (!empty($matches) && $currentSection != $matches[1]) {
       $currentSection = trim($matches[1]);
       $config[ $currentSection ] = array();
     }
-    
+
     preg_match('/\[\s{0,}([a-z]{4,})\s{0,}\]/i', $line, $matches);
     if (!empty($matches) && $currentSection != $matches[1]) {
       $currentSection = trim($matches[1]);
       $config[ $currentSection ] = array();
     }
-    
+
     preg_match('/^([a-z0-9\._]*)\s\=\s(.*)$/i', $line, $matches);
     if (!empty($matches)) {
       $value = trim($matches[2]);

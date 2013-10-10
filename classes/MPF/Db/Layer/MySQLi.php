@@ -61,8 +61,10 @@ class MySQLi extends \MPF\Db\Layer {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions++;
 
-        $result = $this->query('START TRANSACTION;');
-        $result->free();
+        if ($mysqli->transactions == 1) {
+            $result = $this->query('START TRANSACTION;');
+            $result->free();
+        }
     }
 
     public function transactionCommit() {
@@ -70,7 +72,7 @@ class MySQLi extends \MPF\Db\Layer {
         $mysqli->transactions--;
 
         // only commit if there is no transactions pending
-        if ($mysqli->transactions == 0) {
+        if ($mysqli->transactions <= 0) {
             // if we have but one request to rollback we do so for everything
             if ($mysqli->rollbacks > 0) {
                 $result = $this->query('ROLLBACK;');
@@ -256,7 +258,7 @@ class MySQLi extends \MPF\Db\Layer {
             }
 
             $result = $this->query('DELETE FROM `'. $model->getTable() .'` WHERE '. $where .';');
-
+            $result->free();
         } catch (InvalidQuery $e) {
             if (preg_match('/duplicate/i', $e->result->getError())) {
                 $exception = new DuplicateEntry($e->result, $model->getTable());
@@ -274,7 +276,8 @@ class MySQLi extends \MPF\Db\Layer {
             $sql .= '`'.$field->getLinkFieldName().'` = '.$this->formatQueryValue($field).' AND';
         }
         $sql = substr($sql, 0, -4);
-        $this->query($sql);
+        $result = $this->query($sql);
+        $result->free();
     }
 
     public function saveLinkTable(\MPF\Db\ModelLinkTable $linktable) {
@@ -283,7 +286,8 @@ class MySQLi extends \MPF\Db\Layer {
             $sql .= $this->formatQueryValue($field).',';
         }
         $sql = substr($sql, 0, -1).')';
-        $this->query($sql);
+        $result = $this->query($sql);
+        $result->free();
     }
 
     public function saveAllLinkTables($linktables) {
@@ -305,7 +309,8 @@ class MySQLi extends \MPF\Db\Layer {
             $values = substr($values, 0, -1).'),';
         }
 
-        $this->query($sql.substr($values, 0, -1));
+        $result = $this->query($sql.substr($values, 0, -1));
+        $result->free();
     }
 
     /**
@@ -369,9 +374,13 @@ class MySQLi extends \MPF\Db\Layer {
                     continue;
                 }
 
+                if ($field->getOnUpdateValue()) {
+                    $field->setValue($field->getOnUpdateValue());
+                }
+
                 if ($field->isPrimaryKey()) {
                     $where = '`'. $field->getName() .'`='. $this->formatQueryValue($field) .'';
-                } else {
+                } else if (!$field->isReadonly()) {
                     $sql .= '`' . $field->getName() . '`=' . $this->formatQueryValue($field) . ',';
                 }
             }

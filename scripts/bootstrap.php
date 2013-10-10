@@ -11,7 +11,7 @@ ini_set('short_open_tag',   '1');
 ini_set('register_globals', '0');
 //ini_set('memory_limit',     '128M');
 
-define('SESSION_COOKIE_DOMAIN', '.'.filter_input(\INPUT_SERVER, 'SERVER_NAME', FILTER_SANITIZE_STRING));
+define('SESSION_COOKIE_DOMAIN', '.'.filter_var($_SERVER['SERVER_NAME'], FILTER_SANITIZE_STRING));
 define('SESSION_COOKIE_PATH', '/');
 
 define('URL_SITE',      '{URL_SITE}');
@@ -24,7 +24,7 @@ define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
 define('CONFIG_CACHE', false);
 define('CONFIG_CACHE_PATH', PATH_SITE.'cache/configs/');
 
-if (PATH_MPF_CORE != '' && stream_resolve_include_path(PATH_MPF_CORE .'init.php')) {
+if (PATH_MPF_CORE != '' && file_exists(PATH_MPF_CORE .'init.php')) {
     require(PATH_MPF_CORE .'init.php');
 }
 
