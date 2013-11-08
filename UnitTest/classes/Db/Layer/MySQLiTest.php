@@ -5,26 +5,8 @@ use MPF\Config;
 use MPF\Db;
 
 require_once(__DIR__.'/../../../bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/UnsupportedType.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Bootstrap/Intheface.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Bootstrap/Database.php');
 
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Connection.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Layer/Intheface.php');
-
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidQuery.php');
-
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Layer/MySQLi.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Connection/MySQLi.php');
-
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Layer/PostgreSQL.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Connection/PostgreSQL.php');
-
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Layer/SQLite.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Connection/SQLite.php');
-
-ENV::bootstrap(ENV::DATABASE, array('filename'=>'dbTest'));
+ENV::bootstrap(ENV::DATABASE, 'dbTestMySQL');
 
 class Db_Layer_MySQLiTest extends PHPUnit_Framework_TestCase
 {

@@ -6,16 +6,15 @@ header('x-powered-by: MPF/0.1.0');
 
 include (PATH_MPF_CORE .'includes/utils.php');
 include (PATH_MPF_CORE .'classes/MPF/Logger.php');
-include (PATH_MPF_CORE .'classes/MPF/Config.php');
+require_once (PATH_MPF_CORE .'classes/MPF/Config.php');
 include (PATH_MPF_CORE .'classes/MPF/ENV.php');
 include (PATH_MPF_CORE .'includes/autoload.php');
 
 spl_autoload_register('__autoload');
 
-ENV::init();
+ENV::init(get_cfg_var('mpf.env'));
 
 register_shutdown_function(array('\MPF\ENV', 'shutdown'));
-
 
 Logger::Log('Framework.init', 'framework initialized', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK|Logger::CATEGORY_ENVIRONMENT);
 
@@ -25,4 +24,3 @@ foreach (ENV::paths()->includes() as $path) {
         include($path.'post-init.php');
     }
 }
-//test

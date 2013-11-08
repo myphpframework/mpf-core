@@ -26,6 +26,7 @@
         <text id="dbModelMissingPhpDoc">The model "@modelName@" requires the phpdoc "@@phpdoc@" to work properly.</text>
 
         <text id="fileNotWritable">The file "@filename@" is not writable!</text>
+        <text id="folderNotWritable">The folder "@foldername@" is not writable!</text>
 
         <text id="textFileNotFound">The text file "@filename@" could not be found in: @paths@</text>
         <text id="textIdNotFound">The text id "@id@" was not found. Available IDs are: @availableIds@</text>

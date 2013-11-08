@@ -1,33 +1,45 @@
 <?php
+
 use MPF\ENV;
-use MPF\ENV\Paths;
 use MPF\Config;
 use MPF\Bootstrap\Database;
 
-require_once(__DIR__.'/../../bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidConfig.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/UnsupportedType.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Bootstrap/Intheface.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Bootstrap/Database.php');
+require_once(__DIR__ . '/../../bootstrap.php');
 
-class Bootstrap_DatabaseTest extends PHPUnit_Framework_TestCase
-{
+class Bootstrap_DatabaseTest extends PHPUnit_Framework_TestCase {
 
-    public function testInit_InvalidConfig()
-    {
-        $this->setExpectedException('MPF\Db\Exception\InvalidConfig');
+    public function testInit_Database() {
+        ENV::setType(ENV::TYPE_DEVELOPMENT);
         $bootstrap = new Database();
-        $bootstrap->init(array('filename'=>'dbTestMissingNames'));
-        $this->fail('If the config file as anomalies in it, like missing information, the init function is supposed to throw the Exception_Db_InvalidConfig.');
+        $bootstrap->init('dbTestMySQL');
+        //$this->assertTrue(file_exists(Config::get('settings')->template->cache->dir));
     }
 
-    public function testInit_UnsupportedEngine()
-    {
-        $this->setExpectedException('MPF\Db\Exception\UnsupportedType');
+    public function testInit_withFilename() {
+        ENV::setType(ENV::TYPE_DEVELOPMENT);
         $bootstrap = new Database();
-        $bootstrap->init(array('filename'=>'dbTestUnsupportedDbType'));
-        $this->fail('If the config file as a db engine that is not supported its supposed to throw the Exception_Db_UnsupportedType.');
+        $bootstrap->init('dbTestMySQL');
     }
+
+    public function testInit_InvalidXml() {
+        $this->setExpectedException('MPF\Exception\InvalidXml');
+        ENV::setType(ENV::TYPE_DEVELOPMENT);
+        $bootstrap = new Database();
+        $bootstrap->init('dbTestInvalidXml');
+    }
+
+    public function testInit_InvalidXml2() {
+        $this->setExpectedException('MPF\Exception\InvalidXml');
+        ENV::setType(ENV::TYPE_DEVELOPMENT);
+        $bootstrap = new Database();
+        $bootstrap->init();
+    }
+
+    public function testshutdown() {
+        ENV::setType(ENV::TYPE_DEVELOPMENT);
+        $bootstrap = new Database();
+        $bootstrap->init('dbTestMySQL');
+        $bootstrap->shutdown();
+    }
+
 }

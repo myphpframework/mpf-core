@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database xmlns="http://myphpframework.com/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://myphpframework.com/xsd/ database.xsd">
+   <name>test</name>
+   <engine>PostgreSQL</engine>
+   <server>
+       <host>localhost</host>
+       <port>5432</port>
+       <access type="rw">
+           <login>test</login>
+           <password>test</password>
+       </access>
+   </server>
+</database>

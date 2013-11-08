@@ -3,12 +3,6 @@ use MPF\ENV;
 use MPF\ENV\Paths;
 
 require_once(__DIR__.'/../../bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Model.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidFieldName.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/FieldReadonly.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/FieldNotNull.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidFieldLength.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidFieldType.php');
 require_once(__DIR__.'/../../ModelExample.php');
 
 class EntryTest extends PHPUnit_Framework_TestCase

@@ -1,5 +1,5 @@
 <?php
-namespace MPF\Exception\Config;
+namespace MPF\Config\Exception;
 
 class NameNotFound extends \Exception
 {

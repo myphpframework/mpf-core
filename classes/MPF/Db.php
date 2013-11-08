@@ -73,6 +73,12 @@ class Db {
             return self::$database_layers[$name];
         }
 
+        if (!array_key_exists($name, self::$database_xmls)) {
+            $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
+            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            throw $exception;
+        }
+
         $xml = self::$database_xmls[$name];
 
         $connectionId = 0;
@@ -138,7 +144,12 @@ class Db {
      *
      */
     public static function addDatabaseXml(\SimpleXMLElement $xml, $filePath) {
-        self::validateConfig($xml, $filePath);
+        try {
+            self::validateConfig($xml, $filePath);
+        } catch (\MPF\Db\Exception\InvalidConfig $e) {
+            return;
+        }
+
         if (!array_key_exists((string)$xml->name, self::$database_xmls)) {
             $fileInfo = pathinfo($filePath);
             if ($fileInfo['filename'] == 'default') {

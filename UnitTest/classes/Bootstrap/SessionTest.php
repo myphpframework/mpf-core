@@ -6,12 +6,8 @@ use MPF\Config;
 use MPF\Bootstrap\Session;
 
 require_once(__DIR__ . '/../../bootstrap.php');
-require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap.php');
-require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap/Intheface.php');
-require_once(PATH_MPF_CORE . 'classes/MPF/Bootstrap/Session.php');
 
-//ENV::bootstrap(ENV::DATABASE, array('filename' => 'dbTest'));
-//ENV::bootstrap(ENV::SESSION);
+ENV::bootstrap(ENV::DATABASE, 'dbTestMySQL');
 
 class Bootstrap_SessionTest extends PHPUnit_Framework_TestCase {
 

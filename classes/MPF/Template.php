@@ -63,7 +63,7 @@ class Template {
      * @param Exception $e
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline) {
-        $GLOBALS['userErrors'][] = new Exception($errstr, $errno);
+        $GLOBALS['userErrors'][] = new \Exception($errstr, $errno);
     }
 
     /**
@@ -82,6 +82,13 @@ class Template {
             exit;
         }
         return $template;
+    }
+
+    public static function clearCache() {
+        if (null === shell_exec('rm -rf ' . escapeshellarg(Config::get('settings')->template->cache->dir).'  && echo "success"')) {
+            return false;
+        }
+        return true;
     }
 
     private function __construct($filename, Template $parent = null) {

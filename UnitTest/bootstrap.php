@@ -15,14 +15,13 @@ define('SESSION_COOKIE_DOMAIN', '.'.filter_input(\INPUT_SERVER, 'SERVER_NAME', F
 define('SESSION_COOKIE_PATH', '/');
 
 define('URL_SITE',      'http://unittests');
-define('MPF_ENV',       'development');
-
-define('PATH_SITE',     realpath('.').'/');
+define('PATH_SITE',     '/var/www/mpf-core/UnitTest/');
 define('PATH_MPF_CORE', '/var/www/mpf-core/');
 
-define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
-define('CONFIG_CACHE', false);
-define('CONFIG_CACHE_PATH', PATH_SITE.'cache/configs/');
+require_once(PATH_MPF_CORE.'classes/MPF/Config.php');
+\MPF\Config::$priority_folder = '/etc/mpf/';
+\MPF\Config::$cache_enabled = false;
+\MPF\Config::$cache_path = '/tmp/mpf/';
 
 if (PATH_MPF_CORE != '' && stream_resolve_include_path(PATH_MPF_CORE .'init.php')) {
     require(PATH_MPF_CORE .'init.php');

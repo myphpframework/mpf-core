@@ -1,5 +1,5 @@
 <?php
-namespace MPF\Exception\Text;
+namespace MPF\Text\Exception;
 use MPF\Text;
 
 class IdNotFound extends \Exception

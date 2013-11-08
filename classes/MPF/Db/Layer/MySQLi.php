@@ -127,9 +127,9 @@ class MySQLi extends \MPF\Db\Layer {
      * @return \MPF\Db\ModelResult
      */
     protected function getSelectByField(\MPF\Db\Field $queryField, $fields, $count=false, \MPF\Db\Page $page=null) {
-        $select = "SELECT count(*) count ";
-        if (!$count) {
-            $select = "SELECT * ";
+        $select = "SELECT * ";
+        if ($count) {
+            $select = "SELECT count(*) count ";
         }
 
         $from = ' FROM `' . $queryField->getTable() . '` ';
@@ -143,10 +143,10 @@ class MySQLi extends \MPF\Db\Layer {
             }
         }
 
+        $innerjoins = array();
         // we inner join only if we have a primary key
         if (count($primaryKeys) == 1) {
-            // only fetch foreign keys of they are onetoone relationship
-            $innerjoins = array();
+            // only fetch foreign keys if they are onetoone relationship
             foreach ($fields as $field) {
                 if ($field->isForeign() && $field->getRelationship() == 'onetoone') {
                     $innerjoins[ $field->getTable() ] = ' INNER JOIN `'.$field->getTable().'` ON `' . $primaryKeys[0]->getTable() . '`.'.$primaryKeys[0]->getName().'=`' . $field->getTable() . '`.'.$field->getLinkFieldName().' ';
@@ -231,7 +231,7 @@ class MySQLi extends \MPF\Db\Layer {
      * @return int
      */
     public function resultCountByField(\MPF\Db\Field $field, \MPF\Db\Page $page=null) {
-        $result = $this->query($this->getSelectByField($field, true, $page), true);
+        $result = $this->query($this->getSelectByField($field, array(), true, $page), true);
         $dbEntry = $result->fetch();
         $result->free();
         return (int)$dbEntry['count'];

@@ -19,15 +19,7 @@ class Template extends \MPF\Bootstrap implements Intheface {
         header('x-ua-compatible: IE=edge,chrome=1');
 
         if (Config::get('settings')->template->cache->enabled && !$this->checkDir(Config::get('settings')->template->cache->dir)) {
-            // TODO: need custom exception with multi-language message
-            $exception = new \Exception('Cache dir "' . Config::get('settings')->template->cache->dir . '" is not writable');
-            Logger::Log('Bootstrap/Template', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
-            throw $exception;
-        }
-
-        if (CONFIG_CACHE && !$this->checkDir(CONFIG_CACHE_PATH)) {
-            // TODO: need custom exception with multi-language message
-            $exception = new \Exception('Cache dir "' . Config::get('settings')->template->cache->dir . '" is not writable');
+            $exception = new \MPF\Exception\FolderNotWritable(Config::get('settings')->template->cache->dir);
             Logger::Log('Bootstrap/Template', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
             throw $exception;
         }

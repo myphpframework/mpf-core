@@ -1,6 +1,6 @@
 <?php
 
-namespace MPF\Exception\Text;
+namespace MPF\Text\Exception;
 
 use MPF\Session;
 use MPF\Text;

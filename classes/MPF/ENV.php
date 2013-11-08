@@ -22,6 +22,8 @@ use MPF\ENV\Paths;
         const TYPE_STAGING = 'staging';
         const TYPE_PRODUCTION = 'production';
 
+        private static $type = null;
+
         /**
          * Bootstrap that were initiated
          *
@@ -30,10 +32,12 @@ use MPF\ENV\Paths;
         private static $bootstraps = array();
 
         /**
-         *
+         * @param string $type
          * @return \MPF\ENV\Paths
          */
-        public static function init() {
+        public static function init($type) {
+            self::$type = $type;
+
             // This is just to initiate the paths and main settings/configs
             $paths = self::Paths();
             Config::get('settings');
@@ -41,8 +45,21 @@ use MPF\ENV\Paths;
             return $paths;
         }
 
+        /**
+         * This function should not be used unless for testing purposes...
+         * @param string $type;
+         */
+        public static function setType($type) {
+            self::$type = $type;
+        }
+
         public static function getType() {
-            return MPF_ENV;
+            if (self::$type !== null) {
+                return self::$type;
+            }
+
+            // TODO: Multi-lang exception required
+            throw new \Exception('The value mpf.env must be defined/set in the php.ini for MyPhpFramework to work properly');
         }
 
         /**
@@ -55,28 +72,29 @@ use MPF\ENV\Paths;
         public static function clearAllCache() {
             static $cacheTypes = array('Template', 'Config');
 
+            if (empty($cacheTypes)) {
+                $cacheTypes = array('Template', 'Config');
+                return null;
+            }
+
             foreach ($cacheTypes as $key => $type) {
-                $outcome = array(
-                    'title' => Text::byXml('environment')->get('cache' . $type),
-                    'outcome' => Text::byXml('environment')->get('cacheFailed'),
-                );
                 switch ($type) {
                     case 'Template':
-                        system('rm -rf ' . escapeshellarg(Config::get('settings')->template->cache->dir), $return);
-                        if (0 == $return) {
-                            $outcome['outcome'] = Text::byXml('environment')->get('cacheSuccess');
-                        }
                         unset($cacheTypes[$key]);
+                        if (\MPF\Template::clearCache()) {
+                            return true;
+                        }
                         break;
                     case 'Config':
-                        system('rm -rf ' . escapeshellarg(CONFIG_CACHE_PATH), $return);
-                        if (0 == $return) {
-                            $outcome['outcome'] = Text::byXml('environment')->get('cacheSuccess');
-                        }
                         unset($cacheTypes[$key]);
+                        if (\MPF\Config::clearCache()) {
+                            return true;
+                        }
                         break;
                 }
-                return $outcome;
+
+                unset($cacheTypes[$key]);
+                return $type;
             }
 
             return null;
@@ -89,14 +107,14 @@ use MPF\ENV\Paths;
          * ENV::DATABASE
          * ENV::SESSION
          *
-         * @throws Exception\Bootstrap\UnsupportedType
+         * @throws Bootstrap\Exception\UnsupportedType
          * @param string $type
-         * @param array $args
+         * @param string $filename
          * @return Bootstrap_Interface
          */
-        public static function bootstrap($type, $args=array()) {
+        public static function bootstrap($type, $filename='') {
             if (!in_array($type, array(ENV::TEMPLATE, ENV::DATABASE, ENV::SESSION))) {
-                throw new Exception\Bootstrap\UnsupportedType($type);
+                throw new Bootstrap\Exception\UnsupportedType($type);
             }
 
             if (!array_key_exists($type, self::$bootstraps)) {
@@ -106,7 +124,7 @@ use MPF\ENV\Paths;
                 $bootstrap = new $class();
                 if (!$bootstrap->isInitialized()) {
                     Logger::Log('ENV', 'Initiating bootstrap "' . $type . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
-                    $bootstrap->init($args);
+                    $bootstrap->init($filename);
                 }
 
                 self::$bootstraps[$type] = $bootstrap;

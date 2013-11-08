@@ -3,12 +3,6 @@ use MPF\ENV;
 use MPF\ENV\Paths;
 
 require_once(__DIR__.'/../../bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Model.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidFieldName.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/FieldReadonly.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/FieldNotNull.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidFieldLength.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Db/Exception/InvalidFieldType.php');
 require_once(__DIR__.'/../../ModelExample.php');
 
 class ModelTest extends PHPUnit_Framework_TestCase
@@ -93,7 +87,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $model = new ModelExample();
         $model->setField('testLength', "test");
         $json = $model->toJson();
-        $this->assertEquals('{"id":null,"integerTest":null,"creationDate":null,"mydate":null,"mydatetime":null,"lastAttempt":null,"username":null,"testLength":"test","color":null}', $json, "The function toJson should of returned the proper string for the test");
+        $this->assertEquals('{"id":null,"integerTest":null,"creationDate":null,"mydate":"2000-01-01","mydatetime":"2000-01-01 00:00:00","lastAttempt":null,"username":"false","testLength":"test","color":"test","statuses":[]}', $json, "The function toJson should of returned the proper string for the test");
     }
 
     public function testFromJson()

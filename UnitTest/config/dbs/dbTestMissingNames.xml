@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database xmlns="http://myphpframework.com/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://myphpframework.com/xsd/ database.xsd">
+   <name>newbiverse</name>
+   <engine>MYSQLi</engine>
+   <server>
+       <name>newbiverse</name>
+       <port>3306</port>
+   </server>
+   <server>
+       <name>newbiverse</name>
+       <login>root</login>
+   </server>
+</database>

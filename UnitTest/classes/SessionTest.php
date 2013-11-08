@@ -7,7 +7,7 @@ use MPF\Session;
 
 require_once(__DIR__ . '/../bootstrap.php');
 
-ENV::bootstrap(ENV::DATABASE, array('filename' => 'dbTest'));
+ENV::bootstrap(ENV::DATABASE, 'dbTestMySQL');
 ENV::bootstrap(ENV::SESSION);
 
 class SessionTest extends PHPUnit_Framework_TestCase {

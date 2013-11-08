@@ -10,7 +10,8 @@ class Text {
      * Fetches the i18n file and returns the instantiated Text
      *
      * @static
-     * @throws Exception\InvalidXml|Exception\Text\FileNotFound
+     * @throws Exception\InvalidXml
+     * @throws Text\Exception\FileNotFound
      * @param  $filename
      * @return This
      */
@@ -53,7 +54,7 @@ class Text {
 
             // if we still haven't found the file we throw an exception
             if (!array_key_exists($filename, $files)) {
-                $exception = new Exception\Text\FileNotFound($filename, ENV::paths()->i18n());
+                $exception = new Text\Exception\FileNotFound($filename, ENV::paths()->i18n());
                 Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
                 throw $exception;
             }
@@ -97,13 +98,13 @@ class Text {
     /**
      * Returns the text for the provided ID
      *
-     * @throws Exception\Text\IdNotFound
+     * @throws Text\Exception\IdNotFound
      * @param string $id
      * @return string
      */
     public function get($id, $pluginsArgs=array()) {
         if (!array_key_exists($id, $this->texts)) {
-            $exception = new Exception\Text\IdNotFound($id, array_keys($this->texts));
+            $exception = new Text\Exception\IdNotFound($id, array_keys($this->texts));
             Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
             $GLOBALS['userErrors'][] = $exception;
         }

@@ -5,21 +5,41 @@ namespace MPF;
 use MPF\ENV;
 
 class Config {
+    public static $priority_folder = '';
+    public static $cache_enabled = false;
+    public static $cache_path = '/tmp/';
+
+    public static function checkCacheDir() {
+        if ($dir && (!is_dir($dir) || !is_writable($dir))) {
+            if (!@mkdir($dir, 0775, true)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static function clearCache() {
+        if (null === shell_exec('rm -rf ' . escapeshellarg(self::$cache_path).'  && echo "success"')) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      *
-     * @throws Exception\Config\FileNotFound
+     * @throws Config\Exception\FileNotFound
      * @staticvar array $configs
      * @param string $filename
+     * @param bool $useCache
      * @return StdObj
      */
     public static function get($filename, $useCache=true) {
         static $configs = array();
 
-        if (MPF_ENV === '') {
+        if (ENV::getType() === '') {
             die('<xmp>
         #################################################################
-        # The constant "MPF_ENV" must be set according to your          #
+        # The php.ini value "mpf.env" must be set according to your     #
         # /config/*.ini sections in order for myphpframework            #
         # to work correctly. See documentation.                         #
         #################################################################
@@ -30,8 +50,14 @@ class Config {
             return self::getEnv($configs[$filename]);
         }
 
-        $cacheFile = CONFIG_CACHE_PATH . self::getCacheId($filename);
-        if (CONFIG_CACHE && file_exists($cacheFile)) {
+        if (self::$cache_enabled && !self::checkCacheDir(self::$cache_path)) {
+            $exception = new \MPF\Exception\FolderNotWritable(self::$cache_path);
+            Logger::Log('Bootstrap/Template', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
+            throw $exception;
+        }
+
+        $cacheFile = self::$cache_path . self::getCacheId($filename);
+        if (self::$cache_enabled && file_exists($cacheFile)) {
             $configs[$filename] = unserialize(file_get_contents($cacheFile));
             return self::getEnv($configs[$filename]);
         }
@@ -40,7 +66,7 @@ class Config {
         $config = null;
 
         // We fetch the first file that we find in the paths
-        $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
+        $paths = array_merge(array(self::$priority_folder), ENV::paths()->configs());
         foreach ($paths as $path) {
             $file = $path . $filename . '.ini';
             if (file_exists($file)) {
@@ -56,13 +82,13 @@ class Config {
         if ($config) {
             $configs[$filename] = $config;
 
-            if (CONFIG_CACHE && !file_exists($cacheFile)) {
+            if (self::$cache_enabled && !file_exists($cacheFile)) {
                 @file_put_contents($cacheFile, serialize($config));
             }
 
             return self::getEnv($configs[$filename]);
         }
-        throw new Exception\Config\FileNotFound($filename, $paths);
+        throw new Config\Exception\FileNotFound($filename, $paths);
     }
 
     /**
@@ -71,13 +97,13 @@ class Config {
      * @return stdClass
      */
     private static function getEnv(Config $config) {
-        if (!array_key_exists(MPF_ENV, $config->configs)) {
-            throw new Exception\Config\EnvironmentNotFound('Enviroment "' . MPF_ENV . '" does not exist in the config file!');
+        if (!array_key_exists(ENV::getType(), $config->configs)) {
+            throw new Config\Exception\EnvironmentNotFound('Enviroment "' . ENV::getType() . '" does not exist in the config file!');
         }
 
-        $return = $config->configs[MPF_ENV];
-        if (array_key_exists(MPF_ENV, $config->extends)) {
-            $extendName = $config->extends[MPF_ENV];
+        $return = $config->configs[ENV::getType()];
+        if (array_key_exists(ENV::getType(), $config->extends)) {
+            $extendName = $config->extends[ENV::getType()];
             $return = array_merge_recursive_simple($config->configs[$extendName], $return);
         }
 
@@ -106,7 +132,7 @@ class Config {
 
     /**
      *
-     * @throws Exception\Config\Overlapping
+     * @throws Config\Exception\Overlapping
      * @param type $iniSections
      */
     protected function addIni($iniSections) {
@@ -146,7 +172,7 @@ class Config {
                     }
 
                     if (!is_array($config)) {
-                        throw new Exception\Config\Overlapping(implode('.', $parts));
+                        throw new Config\Exception\Overlapping(implode('.', $parts));
                     }
 
                     if (!array_key_exists($parts[$i], $config)) {

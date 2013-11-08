@@ -1,5 +1,5 @@
 <?php
-namespace MPF\Exception\Bootstrap;
+namespace MPF\Bootstrap\Exception;
 use MPF\Text;
 
 class UnsupportedType extends \Exception

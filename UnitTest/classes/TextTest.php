@@ -5,20 +5,12 @@ use MPF\Config;
 use MPF\Text;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin/Intheface.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin/Replace.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Text/Plugin/BBCode.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Text.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Exception/Text/FileNotFound.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Exception/Text/IdNotFound.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Exception/InvalidXml.php');
 
 class TextTest extends PHPUnit_Framework_TestCase
 {
     public function testByXml_FileNotFound()
     {
-        $this->setExpectedException('MPF\Exception\Text\FileNotFound');
+        $this->setExpectedException('MPF\Text\Exception\FileNotFound');
         $text = Text::byXml('unknownfile');
         $this->fail('The exception "Exception_Text_FileNotFound" should be thrown if we cant find the file.');
     }
@@ -40,13 +32,6 @@ class TextTest extends PHPUnit_Framework_TestCase
     {
         $text = Text::byXml('test')->get('testReplace', array('Replace'=>array('name' => 'bob')));
         $this->assertEquals('test the bob plz!', $text, 'The marker @name@ should of been replaced by "bob" and wasnt.');
-    }
-
-    public function testGetId_invalidId()
-    {
-        $this->setExpectedException('MPF\Exception\Text\IdNotFound');
-        Text::byXml('test')->get('invalidTextId');
-        $this->fail('If the text id is not found it should throw the exception "Exception_Text_IdNotFound".');
     }
 
     public function testGetId_validId()

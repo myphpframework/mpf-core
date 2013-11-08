@@ -1,5 +1,8 @@
 <?php
 
+error_reporting(E_ALL);
+ini_set('display_errors', 'on');
+
 if (preg_match('/downloads/', $_SERVER['REQUEST_URI'])) {
     $filename = 'mpf_install.php';
     header("Pragma: public");
@@ -98,6 +101,7 @@ function htaccess() {
         if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/.htaccess '.$htacessFile.'  && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">.htaccess</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('./').'/</span><span class="filename">.htaccess</span>.');
         }
+        shell_exec('chmod 644 '.realpath('.').'/.htaccess');
     }
 
     return array('success' => true);
@@ -114,7 +118,7 @@ function configHtaccess() {
             $file = str_replace("#suPHP_ConfigPath {path}", "suPHP_ConfigPath ".realpath('../')."/", $file);
             @file_put_contents($htacessFile, $file);
             if (!file_exists($phpIniFile)) {
-                @file_put_contents($phpIniFile, 'auto_prepend_file = "'.$bootstrapFile.'"'."\n\n");
+                @file_put_contents($phpIniFile, 'mpf.env = "development"'."\n".'auto_prepend_file = "'.$bootstrapFile.'"'."\n\n");
             } else {
                 $phpIni = @file_get_contents($phpIniFile);
                 if (!preg_match('/auto_prepend_file/i', $phpIni)) {
@@ -137,7 +141,6 @@ function configBootstrap() {
         $file = str_replace('{PATH_MPF_CORE}', realpath('../').'/mpf-core/', $file);
         $file = str_replace('{PATH_SITE}', realpath('../').'/', $file);
         $file = str_replace('{URL_SITE}', 'http://'.$_SERVER['HTTP_HOST'].'/', $file);
-        $file = str_replace('{MPF_ENV}', 'development', $file);
         @file_put_contents($bootstrapFile, $file);
         return array('success' => true);
     }
@@ -150,8 +153,8 @@ function configBootstrap() {
         return array('success' => false, 'error' => 'The constant <span class="filename">PATH_SITE</span> is not properly set in <span class="path">'.$bootstrapFile.'</span>. Make sure the <u>absolute path</u> finishes with a slash "/".');
     }
 
-    if (!defined('MPF_ENV') || MPF_ENV == '{MPF_ENV}') {
-        return array('success' => false, 'error' => 'The constant <span class="filename">MPF_ENV</span> is not properly set in <span class="path">'.$bootstrapFile.'</span>. This constant reflects the current environment the server is in, usual choices are: development,testing,staging,production');
+    if (!get_cfg_var('mpf.env')) {
+        return array('success' => false, 'error' => 'The value <span class="filename">mpf.env</span> is not properly set in your php.ini. This value reflects the current environment the server is in, usual choices are: development,testing,staging,production');
     }
 
     return array('success' => true);
@@ -172,8 +175,8 @@ function changeFrameworkSalt() {
                 file_put_contents(PATH_MPF_CORE.'config/settings.ini', str_replace('framework.salt = myPhPfR@M3w0rk', 'framework.salt = '.$newSalt, $frameworkSettings));
                 return array('success' => true);
             } else if ($_GET['change'] == 'site') {
-                @shell_exec('mkdir -p '.realpath('../').'/config');
-                @shell_exec('find '.realpath('../').'/config -type d -exec chmod 755 {} +');
+                shell_exec('mkdir -p '.realpath('../').'/config');
+                shell_exec('find '.realpath('../').'/config -type d -exec chmod 755 {} +');
                 file_put_contents(realpath('../').'/config/settings.ini', "[production]
 framework.salt = $newSalt
 
@@ -181,7 +184,7 @@ framework.salt = $newSalt
 [testing : production]
 [development : production]
 ");
-                @shell_exec('find '.realpath('.').'/config -type f -exec chmod 644 {} +');
+                shell_exec('find '.realpath('.').'/config -type f -exec chmod 644 {} +');
                 return array('success' => true);
             }
         } else {
@@ -252,8 +255,8 @@ function createDbConfig() {
         $databaseXML->server->access->login = $_SESSION['db_login'];
         $databaseXML->server->access->password = $_SESSION['db_pwd'];
 
-        @shell_exec('mkdir -p '.realpath('../').'/config/dbs/');
-        @shell_exec('find '.realpath('../').'/config -type d -exec chmod 755 {} +');
+        shell_exec('mkdir -p '.realpath('../').'/config/dbs/');
+        shell_exec('find '.realpath('../').'/config -type d -exec chmod 755 {} +');
 
         $result = @$databaseXML->asXML($databaseFile);
         if (!$result) {

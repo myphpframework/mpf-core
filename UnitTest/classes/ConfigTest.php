@@ -2,42 +2,39 @@
 use MPF\Config;
 
 require_once(__DIR__.'/../bootstrap.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Exception/Config/FileNotFound.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Exception/Config/NameNotFound.php');
-require_once(PATH_MPF_CORE.'classes/MPF/Exception/InvalidXml.php');
 
 class ConfigTest extends PHPUnit_Framework_TestCase
 {
     public function testGet_FileNotFound() {
-        $this->setExpectedException('MPF\Exception\Config\FileNotFound');
+        $this->setExpectedException('MPF\Config\Exception\FileNotFound');
         Config::get('randomFileName');
         $this->fail('The exception "Exception_Config_FileNotFound" should be thrown if we cant find the file.');
     }
 
     public function testGet_UnknownEnvironment() {
-        define('MPF_ENV', 'unknownEnvironment');
-        $this->setExpectedException('MPF\Exception\Config\EnvironmentNotFound');
+        \MPF\ENV::setType('unknownEnvironment');
+        $this->setExpectedException('MPF\Config\Exception\EnvironmentNotFound');
         Config::get('configTest');
-        $this->fail('If the MPF_ENV does not match any section of the config file an exception should be thrown');
+        $this->fail('If the mpf.env does not match any section of the EnvironmentNotFound exception should be thrown');
     }
 
     public function testGet_Overlapping() {
-        define('MPF_ENV', 'testing');
-        $this->setExpectedException('MPF\Exception\Config\Overlapping');
+        \MPF\ENV::setType('testing');
+        $this->setExpectedException('MPF\Config\Exception\Overlapping');
         Config::get('configOverlapTest');
         $this->fail('If a config overlaps another an exception should be thrown');
     }
 
     public function testGet_ExtensibilityAndMultipleLevels() {
-        define('MPF_ENV', 'production');
+        \MPF\ENV::setType('production');
         $test1 = Config::get('configTest')->test1;
         $this->assertTrue(('prod' == $test1), 'The value should of been "prod" and not "'.print_r($test1, true).'"');
 
-        define('MPF_ENV', 'development');
+        \MPF\ENV::setType('development');
         $test1 = Config::get('configTest')->test1;
         $this->assertTrue(('dev' == $test1), 'The value should of been "dev" and not "'.print_r($test1, true).'"');
 
-        define('MPF_ENV', 'development');
+        \MPF\ENV::setType('development');
         $test2 = Config::get('configTest')->test2;
         $this->assertTrue(('prod' == $test2), 'The value should of been "prod" and not "'.print_r($test2, true).'"');
 

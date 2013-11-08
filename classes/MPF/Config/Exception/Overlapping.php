@@ -1,5 +1,5 @@
 <?php
-namespace MPF\Exception\Config;
+namespace MPF\Config\Exception;
 use MPF\Text;
 
 class Overlapping extends \Exception

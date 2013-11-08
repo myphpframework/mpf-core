@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE config SYSTEM "http://myphpframework.com/dtd/database.dtd" >
-<databases>
-   <server engine="BOBISNOTANENGINE">
+<database xmlns="http://myphpframework.com/xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://myphpframework.com/xsd/ database.xsd">
+   <name>test1</name>
+   <engine>BOBISNOTANENGINE</engine>
+   <server>
        <host>localhost</host>
        <port>3306</port>
-       <access type="rw" for="1">
-           <database>newbiverse</database>
+       <access type="rw">
            <login>root</login>
            <password>124357</password>
        </access>
    </server>
-   <server engine="BOBISNOTANENGINE">
+   <server>
        <host>localhost</host>
        <port>3306</port>
-       <access type="r" for="2">
-           <database>newbiverse</database>
+       <access type="r">
            <login>root</login>
            <password>124357</password>
        </access>
-       <access type="w" for="1">
-           <database>newbiverse</database>
+       <access type="w">
            <login>root</login>
            <password>124357</password>
        </access>
    </server>
-</databases>
+</database>

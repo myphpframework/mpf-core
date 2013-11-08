@@ -29,7 +29,7 @@ class Bootstrap {
      */
     protected function checkDir($dir) {
         if ($dir && (!is_dir($dir) || !is_writable($dir))) {
-            if (!mkdir($dir, 0775, true)) {
+            if (!@mkdir($dir, 0775, true)) {
                 return false;
             }
         }
