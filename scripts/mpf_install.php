@@ -571,7 +571,7 @@ if (isset($_REQUEST['ajax'])) {
     <script type="text/javascript" src="//fgnass.github.com/spin.js/dist/spin.min.js"></script>
 </head>
 <body>
-<h2><img src="http://myphpframework.self/images/logo_small_blue.png" alt="myPhpFramework Logo" width="87" height="43"/>Web Installation Walkthrough</h2>
+<h2><img src="http://myphpframework.com/images/logo_small_blue.png" alt="myPhpFramework Logo" width="87" height="43"/>Web Installation Walkthrough</h2>
 <ul id="overview">
     <li>
         <p>The walkthrough will try to <u>download the framework and configure it on its own</u> and if it cannot it will guide you through the rest of the mpf-core installation.</p>

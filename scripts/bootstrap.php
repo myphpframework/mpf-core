@@ -19,12 +19,12 @@ define('URL_SITE',      '{URL_SITE}');
 define('PATH_SITE',     '{PATH_SITE}');
 define('PATH_MPF_CORE', '{PATH_MPF_CORE}');
 
-require_once(PATH_MPF_CORE.'classes/MPF/Config.php');
-\MPF\Config::$priority_folder = '/etc/mpf/';
-\MPF\Config::$cache_enabled = false;
-\MPF\Config::$cache_path = PATH_SITE.'cache/configs/';
-
 if (PATH_MPF_CORE != '' && file_exists(PATH_MPF_CORE .'init.php')) {
+    require_once(PATH_MPF_CORE.'classes/MPF/Config.php');
+    \MPF\Config::$priority_folder = '/etc/mpf/';
+    \MPF\Config::$cache_enabled = false;
+    \MPF\Config::$cache_path = PATH_SITE.'cache/configs/';
+
     require(PATH_MPF_CORE .'init.php');
 }
 
