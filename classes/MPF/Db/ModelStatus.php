@@ -80,6 +80,7 @@ abstract class ModelStatus extends Model {
                 foreach ($this->statuses as $status) {
                     // only save the status if its a new one
                     if ($status->isNew()) {
+                        Logger::Log('Db/ModelStatus', 'Adding new status('.$status->getValue().') for '.get_class($this).'('.$this->getId().')', Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
                         $status->save();
                     }
                 }

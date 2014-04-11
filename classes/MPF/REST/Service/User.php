@@ -39,9 +39,10 @@ class User extends \MPF\REST\Service {
 
             // if its the first user we add it to the Admin group
             if (Usr::getTotalEntries() == 1) {
+                Logger::Log('Service', 'First user creation in system, adding to ADMIN group & Active status.', Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
                 $user->addGroup(Group::ADMIN());
+                $user->setStatus(\MPF\Status::create($user, \MPF\User::STATUS_ACTIVE, \MPF\User::SYSTEM()->getId()));
             }
-
             $user->save();
 
             $this->setResponseCode(self::HTTPCODE_CREATED);

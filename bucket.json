@@ -1,8 +1,8 @@
 {
-    "author": "Philippe Guilbault <philippe.guilbault@gmail.com>",
+    "author": "Philippe Guilbault <pguilbault@myphpframework.com>",
     "name": "MyPhpFramework",
     "description": "Core classes for MyPhpFramework",
-    "keywords": ["php","framework","orm","status","user","login","auth","phpframework","myphpframework","package","mysql"],
+    "keywords": ["php","framework","orm","status","user","login","auth","phpframework","myphpframework","package","mysql","REST"],
     "version": "0.1.0",
     "homepage": "http://myphpframework.com/",
     "licenses": [{"type": "LGPL-3.0"}],

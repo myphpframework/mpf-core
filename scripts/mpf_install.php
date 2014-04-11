@@ -46,39 +46,63 @@ function dependencies() {
 }
 
 function downloadMPF() {
-    if (defined('PATH_MPF_CORE')) {
+    if (defined('PATH_MPF_CORE')  && file_exists(PATH_MPF_CORE)) {
         return array('success' => true);
     }
 
-    $zipFile = '/tmp/mpf-core-'.$_GET['version'].'.zip';
-    if (!file_exists($zipFile)) {
-        $file = fopen($zipFile, 'w');
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL,'https://github.com/myphpframework/mpf-core/archive/'.$_GET['version'].'.zip');
-        curl_setopt($ch, CURLOPT_FAILONERROR, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FILE, $file);
-        curl_exec($ch);
-        curl_close($ch);
-        fclose($file);
-    }
-
-    if (!file_exists(realpath('../').'/mpf-core')) {
-        $zip = new ZipArchive;
-        if ($zip->open($zipFile) === TRUE) {
-            if (!@$zip->extractTo(realpath('../'))) {
-                $zip->close();
-                return array('success' => false, 'error' => 'Extract <span class="path">'.$zipFile.'</span> to <span class="path">'.realpath('../').'/</span><span class="filename">mpf-core/</span>.');
-            }
-            $zip->close();
+    $_SESSION['version'] = $_GET['version'];
+    if (isSet($_REQUEST['compress']) && $_REQUEST['compress'] == 1 && $_GET['version'] != 'master') {
+        $_SESSION['compress'] = $_REQUEST['compress'];
+        $pharFile = '/tmp/mpf-core.'.$_GET['version'].'.phar.tgz';
+        if (!file_exists($pharFile)) {
+            $file = fopen($pharFile, 'w');
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL,'http://myphpframework.com/downloads/mpf-core.'.$_GET['version'].'.phar.tgz');
+            curl_setopt($ch, CURLOPT_FAILONERROR, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FILE, $file);
+            curl_exec($ch);
+            curl_close($ch);
+            fclose($file);
         }
-    }
 
-    if (file_exists(realpath('../').'/mpf-core-'.$_GET['version'])) {
-        shell_exec('mv '.realpath('../').'/mpf-core-'.$_GET['version'].' '.realpath('../').'/mpf-core ');
-        shell_exec('find '.realpath('../').'/mpf-core -type d -exec chmod 755 {} +');
-        shell_exec('find '.realpath('../').'/mpf-core -type f -exec chmod 644 {} +');
+        if (!file_exists(realpath('../').'/mpf-core.'.$_GET['version'].'.phar.tgz')) {
+            shell_exec('mv '.$pharFile.' '.realpath('../'));
+            shell_exec('find '.realpath('../').'/mpf-core.'.$_GET['version'].'.phar.tgz -type d -exec chmod 755 {} +');
+            shell_exec('find '.realpath('../').'/mpf-core.'.$_GET['version'].'.phar.tgz -type f -exec chmod 644 {} +');
+        }
+    } else {
+        $zipFile = '/tmp/mpf-core-'.$_GET['version'].'.zip';
+        if (!file_exists($zipFile)) {
+            $file = fopen($zipFile, 'w');
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL,'https://github.com/myphpframework/mpf-core/archive/'.$_GET['version'].'.zip');
+            curl_setopt($ch, CURLOPT_FAILONERROR, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FILE, $file);
+            curl_exec($ch);
+            curl_close($ch);
+            fclose($file);
+        }
+
+        if (!file_exists(realpath('../').'/mpf-core')) {
+            $zip = new ZipArchive;
+            if ($zip->open($zipFile) === TRUE) {
+                if (!@$zip->extractTo(realpath('../'))) {
+                    $zip->close();
+                    return array('success' => false, 'error' => 'Extract <span class="path">'.$zipFile.'</span> to <span class="path">'.realpath('../').'/</span><span class="filename">mpf-core/</span>.');
+                }
+                $zip->close();
+            }
+        }
+
+        if (file_exists(realpath('../').'/mpf-core-'.$_GET['version'])) {
+            shell_exec('mv '.realpath('../').'/mpf-core-'.$_GET['version'].' '.realpath('../').'/mpf-core ');
+            shell_exec('find '.realpath('../').'/mpf-core -type d -exec chmod 755 {} +');
+            shell_exec('find '.realpath('../').'/mpf-core -type f -exec chmod 644 {} +');
+        }
     }
 
     return array('success' => true);
@@ -87,7 +111,9 @@ function downloadMPF() {
 function bootstrap() {
     $bootstrapFile = realpath('../').'/bootstrap.php';
     if (!file_exists($bootstrapFile)) {
-        if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/bootstrap.php '.$bootstrapFile.' && echo "success"')) {
+        if (isSet($_SESSION['compress']) && $_SESSION['compress'] == 1 && !copy(realpath('./').'mpf-core.'.$_SESSION['version'].'.phar.tgz')) {
+            return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>.');
+        } else if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/bootstrap.php '.$bootstrapFile.' && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>.');
         }
     }
@@ -276,7 +302,7 @@ function createUserTables() {
     } catch (Exception $e) {}
 
     if ($_SESSION['db_type'] == 'mysqli') {
-        $mysqli = new mysqli($_SESSION['db_host'], $_SESSION['db_login'], $_SESSION['db_pwd'], 'myphpframework', $_SESSION['db_port']);
+        $mysqli = new mysqli($_SESSION['db_host'], $_SESSION['db_login'], $_SESSION['db_pwd'], $_SESSION['db_name'], $_SESSION['db_port']);
         if ($mysqli->connect_error) {
             return array('success' => false, 'error' => $mysqli->connect_error);
         }
@@ -466,6 +492,7 @@ if (isset($_REQUEST['ajax'])) {
             border-bottom: 1px dotted gray;
             padding: 8px;
             clear:both;
+            position: relative;
         }
         body ul > li > div {
             float: left;
@@ -566,9 +593,12 @@ if (isset($_REQUEST['ajax'])) {
         #saltExplanation {
             display: none;
         }
+        .spinner {
+            left: 12px !important;
+        }
     </style>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
-    <script type="text/javascript" src="//fgnass.github.com/spin.js/dist/spin.min.js"></script>
+    <script type="text/javascript" src="//fgnass.github.io/spin.js/spin.min.js"></script>
 </head>
 <body>
 <h2><img src="http://myphpframework.com/images/logo_small_blue.png" alt="myPhpFramework Logo" width="87" height="43"/>Web Installation Walkthrough</h2>
@@ -578,6 +608,7 @@ if (isset($_REQUEST['ajax'])) {
         <p>The version of the framework of your choosing will be downloaded as a zip to <span class="filename">/tmp/mpf-core.zip</span> and extracted to <span class="filename"><?= realpath('../').'/mpf-core/'; ?></span> if permissions (SuPHP, phpSuExec) let us do so.</p>
     </li>
     <li>
+        <input type="checkbox" name="compress" value="1" id="compress" checked="checkled" /><label for="compress">Download the compressed version of mpf-core .phar.tgz</label><br /><br />
         <select name="versions">
             <option value="master">Latest (Unstable)</option>
         </select>
@@ -835,7 +866,7 @@ $(document).ready(function () {
             $dependencies.addClass('success');
             $('div', $dependencies.closest('li')).html(check);
             $downloadMPF.html('&nbsp;').spin(spinOpts);
-            ajax('mpf_install.php', 'ajax=downloadMPF&version='+$('[name="versions"]').val(), 'GET', function (error, result) {
+            ajax('mpf_install.php', 'ajax=downloadMPF&version='+$('[name="versions"]').val()+'&compress='+$('[name="compress"]').val(), 'GET', function (error, result) {
                 $downloadMPF.spin(false);
                 if (error) {
                     showError($downloadMPF, error);
