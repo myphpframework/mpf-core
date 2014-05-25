@@ -3,6 +3,10 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 
+//error_reporting(0);
+//ini_set('display_errors', 'off');
+
+
 if (preg_match('/downloads/', $_SERVER['REQUEST_URI'])) {
     $filename = 'mpf_install.php';
     header("Pragma: public");
@@ -111,7 +115,7 @@ function downloadMPF() {
 function bootstrap() {
     $bootstrapFile = realpath('../').'/bootstrap.php';
     if (!file_exists($bootstrapFile)) {
-        if (isSet($_SESSION['compress']) && $_SESSION['compress'] == 1 && !copy(realpath('./').'mpf-core.'.$_SESSION['version'].'.phar.tgz')) {
+        if (isSet($_SESSION['compress']) && $_SESSION['compress'] == 1 && !@copy('/tmp/mpf-core.'.$_SESSION['version'].'.phar.tgz', realpath('./').'mpf-core.'.$_SESSION['version'].'.phar.tgz')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>.');
         } else if (null === shell_exec('cp '.realpath('../').'/mpf-core/scripts/bootstrap.php '.$bootstrapFile.' && echo "success"')) {
             return array('success' => false, 'error' => 'Copy <span class="filename">bootstrap.php</span> from <span class="path">mpf-core/scripts/</span> to <span class="path">'.realpath('../').'/</span><span class="filename">bootstrap.php</span>.');
@@ -193,9 +197,9 @@ function changeFrameworkSalt() {
         return array('success' => false, 'error' => 'The framework salt is still "myPhPfR@M3w0rk", it needs to be changed.');
     }
 
+    $newSalt = rand_string(24);
     if (isSet($_GET['change'])) {
         if (isSet($_ENV['suPHPInstalled']) || isSet($_SERVER["suPHPInstalled"])) {
-            $newSalt = rand_string(24);
             if ($_GET['change'] == 'framework') {
                 $frameworkSettings = file_get_contents(PATH_MPF_CORE.'config/settings.ini');
                 file_put_contents(PATH_MPF_CORE.'config/settings.ini', str_replace('framework.salt = myPhPfR@M3w0rk', 'framework.salt = '.$newSalt, $frameworkSettings));
@@ -215,9 +219,19 @@ framework.salt = $newSalt
             }
         } else {
             if ($_GET['change'] == 'framework') {
-                return array('success' => false, 'error' => 'You will have to change the framework salt in <span class="filename">'.PATH_MPF_CORE.'config/settings.ini</span>.');
+                return array('success' => false, 'error' => 'You will have to change the framework salt in <span class="filename">'.PATH_MPF_CORE.'config/settings.ini</span>.<br />[production]<br />
+framework.salt = '.$newSalt.'<br />
+<br />
+[staging:production]<br />
+[testing : production]<br />
+[development : production]<br />');
             } else if ($_GET['change'] == 'site') {
-                return array('success' => false, 'error' => 'You will have to change the framework salt in <span class="filename">'.realpath('../').'/config/settings.ini</span>.');
+                return array('success' => false, 'error' => 'You will have to change the framework salt in <span class="filename">'.realpath('../').'/config/settings.ini</span>.<br />[production]<br />
+framework.salt = '.$newSalt.'<br />
+<br />
+[staging:production]<br />
+[testing : production]<br />
+[development : production]<br />');
             }
         }
     }

@@ -152,6 +152,7 @@ class Template {
     public function stopContent() {
         $this->setContent(ob_get_contents());
         ob_end_clean();
+        return $this;
     }
 
     public function evalError($errno, $errstr, $errfile, $errline) {

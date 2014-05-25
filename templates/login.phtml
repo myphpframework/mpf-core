@@ -1,68 +1,99 @@
-<? $text = MPF\Text::byXml('login'); ?>
-<form name="login" method="POST" action="/">
-    <ul>
-        <li><input type="radio" name="type" value="login" id="typeLogin" checked="checked" /><label for="typeLogin"><?= $text->get('labelTypeLogin') ?></label></li>
-        <li><input type="radio" name="type" value="new" id="typeNew" /><label for="typeNew"><?= $text->get('labelTypeNew') ?></label></li>
-    </ul>
-    <div><label for="email"><?= $text->get('labelEmail') ?>:</label><input type="text" id="email" name="email" value="<?= @$_POST['email']; ?>" /></div>
-    <div><label for="password"><?= $text->get('labelPassword') ?>:</label><input type="password" id="password" name="password" value="" autocomplete="off" /></div>
-    <div><label for="passwordConfirm"><?= $text->get('labelConfirm') ?>:</label><input type="password" id="passwordConfirm" name="passwordConfirm" value="" autocomplete="off" /></div>
-    <div><input type="submit" value="<?= $text->get('labelSubmit') ?>" /></div>
-</form>
-<script type="text/javascript">
-$(document).ready(function() {
-    function changeType() {
-        switch ($('[name="type"]:checked').val()) {
-            case 'login':
-                $('[name="passwordConfirm"]').closest('div').fadeOut(250);
-                $('[name="passwordConfirm"]', $form).unvalidate();
-                break;
-            case 'new':
-                $('[name="passwordConfirm"]').closest('div').fadeIn(250);
-                $('[name="passwordConfirm"]', $form).validate('passwordConfirm required');
-                break;
-        }
+<?
+    if (\MPF\User::bySession()) {
+        header('Location: /');
+        exit;
     }
 
-    $('[name="type"]').change(function () {
-        changeType();
+    $GLOBALS['cssFiles'] = array('/media/css/login.css');
+    $loginText = \MPF\Text::byXml('mpf_login');
+    $totalUsers = \MPF\User::getTotalEntries();
+
+?>
+<form name="login" action="/rest/login.html" method="PUT">
+    <fieldset>
+        <legend><?= $loginText->get('title') ?></legend>
+        <? if ($totalUsers == 1): ?><p class="information"><?= $loginText->get('firstUser') ?></p><? endif; ?>
+        <div><label for="username"><?= $loginText->get('username') ?></label><input type="text" name="username" id="username" tabindex="1" /></div>
+        <div>
+            <label for="password"><?= $loginText->get('password') ?></label>
+            <input type="password" name="password" id="password" tabindex="2" />
+        </div>
+        <div class="newUser">
+            <label><?= $loginText->get('passwordStrength') ?></label>
+            <div data-mpf-password-strength="password"><div data-mpf-password-strength-meter="password" class="mpfStrengthLow">&nbsp;</div></div>
+            <div data-mpf-tooltip="passwordStrength">
+                <label><img src="media/images/icons/16x16/information.png" width="16" height="16" alt="i" /></label>
+                <section>
+                    <h5><?= $loginText->get('passwordStrengthTitle') ?></h5>
+                    <hr />
+                    <?= $loginText->get('passwordStrengthDescription') ?>
+                </section>
+            </div>
+        </div>
+        <div class="newUser"><label for="passwordConfirm"><?= $loginText->get('passwordConfirm') ?></label><input type="password" name="passwordConfirm" id="passwordConfirm" tabindex="3" /></div>
+        <? if ($totalUsers != 1): ?><p class="existingUser"><?= $loginText->get('passwordLost') ?></p><? endif; ?>
+        <div><label for="new"><?= $loginText->get('newUser') ?></label><input type="checkbox" name="new" id="new" <? if ($totalUsers == 1): ?>checked="checked" disabled="disabled" <? endif; ?> /></div>
+        <input type="submit" value="<?= $loginText->get('submit') ?>" class="gradientGreen" tabindex="4" />
+    </fieldset>
+</form>
+<script type="text/javascript">
+$(document).ready(function () {
+    "use strict";
+    var $loginForm = $('form[name="login"]');
+
+    $('#new').click(function () {
+        $('.newUser').slideUp();
+
+        if (this.checked) {
+            $('.existingUser').slideUp(function () {
+                $('.newUser').slideDown();
+            });
+            $('#passwordConfirm').validate('required passwordConfirm');
+            $('#password').validate('required passwordStrength password', 'keyup');
+        } else {
+            $('.newUser').slideUp(function () {
+                $('.existingUser').slideDown();
+            });
+            $('#passwordConfirm').unvalidate();
+            $('#password').unvalidate();
+            $('#password').validate('required password');
+        }
     });
 
-    changeType();
+    $('#new:checked').each(function (index, element) {
+       $('.newUser').slideDown();
+       $('#passwordConfirm').validate('required passwordConfirm');
+       $('#password').validate('required passwordStrength password', 'keyup');
+    });
 
-    var $form = $('form[name="login"]');
-    $('[name="password"]', $form).validate('password required');
-    $('[name="email"]', $form).validate('email required');
-    $form.submit(function () {
-    //$('[type="button"]').click(function () {
-        $form.validate(function (isValid, invalidFields) {
+    $('#username').focus();
+    $('#username').validate('required username');
+    $('#password').validate('required password');
+    $loginForm.submit(function () {
+        $('[data-form-error-img]').remove();
+
+        $loginForm.prop('action', mpf.restUrl+'user/'+$('#username').val()+'/login');
+        if ($('#new:checked').length === 1) {
+            $loginForm.prop('action', mpf.restUrl+'user/');
+            $loginForm.prop('method', 'post');
+        }
+
+        $loginForm.validate(function (isValid, invalidFields) {
             if (!isValid) {
-                $form.addFormErrors(invalidFields);
-                return false;
+                $loginForm.addErrors(invalidFields);
+                return;
             }
 
-            // rectify the action & method for the login service
-            if ($('[name="type"]:checked').val() == 'login') {
-                $form.prop('action', 'mpf_user/'+ $('[name="email"]', $form).val() +'/login');
-                $form.prop('method', 'PUT');
-            } else {
-                $form.prop('action', 'mpf_user/');
-                $form.prop('method', 'POST');
-            }
-
-            mpf.ajaxForm($form, function (error, response) {
-                if (error) {
-                    $form.addFormErrors([{
-                        element: $('ul', $form),
-                        errorMsg: error
-                    }]);
+            $loginForm.ajaxSubmit(function (errors, response) {
+                if (errors) {
+                    $loginForm.addErrors(errors);
                     return;
                 }
 
-                document.location.href = '/';
+                document.location.href = "/mpf-admin/";
             });
-            return false;
         });
+
         return false;
     });
 });
