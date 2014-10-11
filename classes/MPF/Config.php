@@ -5,7 +5,6 @@ namespace MPF;
 use MPF\ENV;
 
 class Config {
-    public static $priority_folder = '';
     public static $cache_enabled = false;
     public static $cache_path = '/tmp/';
 
@@ -66,7 +65,7 @@ class Config {
         $config = null;
 
         // We fetch the first file that we find in the paths
-        $paths = array_merge(array(self::$priority_folder), ENV::paths()->configs());
+        $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
         foreach ($paths as $path) {
             $file = $path . $filename . '.ini';
             if (file_exists($file)) {

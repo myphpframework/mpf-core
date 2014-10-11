@@ -36,6 +36,11 @@ use MPF\ENV\Paths;
          * @return \MPF\ENV\Paths
          */
         public static function init($type) {
+            if (!$type) {
+                // TODO: Multi-lang exception required
+                throw new \Exception('The value mpf.env must be defined/set in the php.ini for MyPhpFramework to work properly');
+            }
+
             self::$type = $type;
 
             // This is just to initiate the paths and main settings/configs
@@ -54,12 +59,7 @@ use MPF\ENV\Paths;
         }
 
         public static function getType() {
-            if (self::$type !== null) {
-                return self::$type;
-            }
-
-            // TODO: Multi-lang exception required
-            throw new \Exception('The value mpf.env must be defined/set in the php.ini for MyPhpFramework to work properly');
+            return self::$type;
         }
 
         /**

@@ -20,7 +20,7 @@ class Database extends \MPF\Bootstrap implements Intheface {
      */
     public function init($filename='') {
         // we fetch all the potential database configs
-        $paths = array_merge(array(\MPF\Config::$priority_folder), ENV::paths()->configs());
+        $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
         foreach ($paths as $path) {
             if (file_exists($path . 'dbs')) {
                 if ($filename) {
