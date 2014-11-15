@@ -18,10 +18,9 @@ define('URL_SITE',      'http://unittests');
 define('PATH_SITE',     '/var/www/mpf-core/UnitTest/');
 define('PATH_MPF_CORE', '/var/www/mpf-core/');
 
-require_once(PATH_MPF_CORE.'classes/MPF/Config.php');
-\MPF\Config::$priority_folder = '/etc/mpf/';
-\MPF\Config::$cache_enabled = false;
-\MPF\Config::$cache_path = '/tmp/mpf/';
+define('CONFIG_PRIORITY_FOLDER', '/etc/mpf/');
+define('CONFIG_CACHE', false);
+define('CONFIG_CACHE_PATH', PATH_SITE.'cache/configs/');
 
 if (PATH_MPF_CORE != '' && stream_resolve_include_path(PATH_MPF_CORE .'init.php')) {
     require(PATH_MPF_CORE .'init.php');

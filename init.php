@@ -1,6 +1,7 @@
 <?php
 use MPF\Logger;
 use MPF\ENV;
+use MPF\Autoloader;
 
 header('x-powered-by: MPF/0.1.0');
 
@@ -8,9 +9,13 @@ include (PATH_MPF_CORE .'includes/utils.php');
 include (PATH_MPF_CORE .'classes/MPF/Logger.php');
 require_once (PATH_MPF_CORE .'classes/MPF/Config.php');
 include (PATH_MPF_CORE .'classes/MPF/ENV.php');
-include (PATH_MPF_CORE .'includes/autoload.php');
+include (PATH_MPF_CORE .'classes/MPF/Autoloader.php');
 
-spl_autoload_register('__autoload');
+$autoloader = new Autoloader();
+foreach (ENV::paths()->classes() as $path) {
+    $autoloader->addPath($path);
+}
+$autoloader->register();
 
 ENV::init(get_cfg_var('mpf.env'));
 

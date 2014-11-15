@@ -2,11 +2,15 @@
 
 use MPF\ENV;
 use MPF\Logger;
+use MPF\Autoloader;
+
+$autoloader = new Autoloader();
+foreach (ENV::paths()->classes() as $path) {
+    $autoloader->addPath($path);
+}
+$autoloader->register();
 
 /*
- * Loads a class
- */
-
 function __autoload($className) {
     // if we didnt find it in the libs folder and it does have a \ in it, its probably an addition to the a lib
     if (false !== strpos($className, '\\')) {
@@ -24,3 +28,4 @@ function __autoload($className) {
     }
     Logger::Buffer('__autoload', 'could NOT find class "' . $className . '"', Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
 }
+*/
