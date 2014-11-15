@@ -7,9 +7,11 @@ use MPF\Config;
 
 require_once(__DIR__ . '/../Template.php');
 
-class Template extends \MPF\Bootstrap implements Intheface {
+class Template extends \MPF\Bootstrap implements Intheface
+{
 
-    public function init($args = array()) {
+    public function init($args = array())
+    {
         $this->initialized = true;
 
         header('x-content-type-options: nosniff');
@@ -30,7 +32,8 @@ class Template extends \MPF\Bootstrap implements Intheface {
         set_error_handler(array('MPF\Template', 'errorHandler'), E_USER_ERROR | E_USER_NOTICE | E_USER_WARNING);
     }
 
-    public function shutdown() {
+    public function shutdown()
+    {
         Logger::Log('ENV/Boostrap/Template', 'shutting down template', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
     }
 

@@ -6,7 +6,9 @@ use MPF\REST\Service;
 use MPF\Rest\Parser;
 use MPF\ENV;
 
-class REST {
+class REST
+{
+
     protected static $basePath = '';
 
     /**
@@ -15,21 +17,24 @@ class REST {
      */
     protected static $loggedInUser;
 
-    public static function basicAuth($login, $password, $realm='MPF-REST') {
+    public static function basicAuth($login, $password, $realm = 'MPF-REST')
+    {
         if (!$login || !$password || !self::authenticate($login, $password)) {
             header('Access-Control-Allow-Origin: *');
-            header('WWW-Authenticate: Basic realm="'.$realm.'"');
+            header('WWW-Authenticate: Basic realm="' . $realm . '"');
             header('HTTP/1.0 401 Unauthorized');
             return false;
         }
         return true;
     }
 
-    public static function verifySignature() {
-
+    public static function verifySignature()
+    {
+        
     }
 
-    protected static function authenticate($login, $password) {
+    protected static function authenticate($login, $password)
+    {
         $user = \MPF\User::byUsername($login);
         if (!$user) {
             return false;
@@ -43,8 +48,9 @@ class REST {
         return true;
     }
 
-    public static function execute($basePath='') {
-        self::$basePath = '/'.preg_replace('/^\/|\/$/i', '', $basePath).'/';
+    public static function execute($basePath = '')
+    {
+        self::$basePath = '/' . preg_replace('/^\/|\/$/i', '', $basePath) . '/';
 
         if (ENV::getType() !== ENV::TYPE_DEVELOPMENT) {
             error_reporting(0);
@@ -57,12 +63,12 @@ class REST {
             $data = self::getData();
             list($serviceClass, $id, $action, $parser) = self::getParts();
 
-            Logger::Log('\MPF\REST', 'Generated class: '. $serviceClass ."\n\tREQUEST_URI: ". $_SERVER['REQUEST_URI'] ."\n", Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            Logger::Log('\MPF\REST', 'Generated class: ' . $serviceClass . "\n\tREQUEST_URI: " . $_SERVER['REQUEST_URI'] . "\n", Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
 
             if (!class_exists($serviceClass)) {
                 Service::setResponseCode(Service::HTTPCODE_NOT_FOUND);
                 echo $parser->toOutput(array("errors" => array(
-                    array("code" => Service::HTTPCODE_NOT_FOUND, "msg" => "Service (".$serviceClass.") not found"))
+                        array("code" => Service::HTTPCODE_NOT_FOUND, "msg" => "Service (" . $serviceClass . ") not found"))
                 ));
                 exit;
             }
@@ -91,28 +97,28 @@ class REST {
             }
         } catch (Exception\InvalidRequestAction $e) {
             $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
+                    array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: '.print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
             $service->output($response);
         } catch (Service\Exception\MissingRequestFields $e) {
             $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
+                    array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: '.print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
             $service->output($response);
         } catch (Service\Exception\InvalidRequestMethod $e) {
             $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
+                    array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: '.print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
             $service->output($response);
         } catch (\MPF\REST\Service\Exception $e) {
             $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
             $response = array('errors' => array(
-                array("code" => $errorCode, "msg" => $e->getMessage())
+                    array("code" => $errorCode, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: '.print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
             $service->output($response);
         } catch (\Exception $e) {
             $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
@@ -121,14 +127,15 @@ class REST {
                 $msg = $e->getMessage();
             }
             $response = array('errors' => array(
-                array("code" => $errorCode, "msg" => $msg)
+                    array("code" => $errorCode, "msg" => $msg)
             ));
-            Logger::Log('\MPF\REST', 'Response: '.print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
             $service->output($response);
         }
     }
 
-    private static function getData() {
+    private static function getData()
+    {
         $a_data = array();
         $input = file_get_contents('php://input');
 
@@ -155,7 +162,7 @@ class REST {
                         continue;
                     }
 
-                    if (strpos($block, 'application/octet-stream') !== FALSE) {
+                    if (strpos($block, 'application/octet-stream') !== false) {
                         preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
                         $a_data['files'][$matches[1]] = $matches[2];
                     } else {
@@ -166,7 +173,8 @@ class REST {
             }
         }
 
-        function sanitize(&$data) {
+        function sanitize(&$data)
+        {
             foreach ($data as $key => $value) {
                 if (is_array($value)) {
                     $data[$key] = sanitize($value);
@@ -183,7 +191,8 @@ class REST {
         return sanitize($a_data);
     }
 
-    private static function getParts() {
+    private static function getParts()
+    {
         $requestUri = filter_var($_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL);
         $requestUri = str_replace(self::$basePath, '', $requestUri);
         $servicePath = str_replace(array('?', $_SERVER['QUERY_STRING']), '', $requestUri);
@@ -228,5 +237,9 @@ class REST {
         return array($serviceClass, $id, $action, $parser);
     }
 
-    private function __construct() {}
+    private function __construct()
+    {
+        
+    }
+
 }

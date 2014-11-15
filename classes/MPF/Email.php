@@ -1,8 +1,10 @@
 <?php
+
 namespace MPF;
 
 class Email
 {
+
     /**
      * @static
      * @param $string
@@ -47,4 +49,5 @@ class Email
     {
         return $this->email;
     }
+
 }

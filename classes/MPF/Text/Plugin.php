@@ -1,9 +1,12 @@
 <?php
+
 namespace MPF\Text;
 
 abstract class Plugin implements Plugin\Intheface
 {
+
     protected $name = '';
+
     public function __construct($name)
     {
         $this->name = $name;
@@ -19,4 +22,5 @@ abstract class Plugin implements Plugin\Intheface
     {
         return $this->name;
     }
+
 }

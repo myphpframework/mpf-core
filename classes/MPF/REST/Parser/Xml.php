@@ -2,9 +2,11 @@
 
 namespace MPF\REST\Parser;
 
-class Xml extends \MPF\REST\Parser {
+class Xml extends \MPF\REST\Parser
+{
 
-    public function toOutput($input) {
+    public function toOutput($input)
+    {
         if (!is_array($input)) {
             $input = array();
         }
@@ -21,7 +23,7 @@ class Xml extends \MPF\REST\Parser {
                 }
 
                 if ($isListOfItems) {
-                    $input = array($this->serviceName.'s' => $input);
+                    $input = array($this->serviceName . 's' => $input);
                 } else {
                     $input = array($this->serviceName => $input);
                 }
@@ -30,7 +32,7 @@ class Xml extends \MPF\REST\Parser {
         $response = $this->arrayToXml($input);
 
         header('Content-Type: text/xml');
-        header('Content-Length: '.strlen($response));
+        header('Content-Length: ' . strlen($response));
 
         return $response;
     }
@@ -41,7 +43,8 @@ class Xml extends \MPF\REST\Parser {
      * @param SimpleXMLElement? if specified content will be appended, used for recursion
      * @return string XML version of $array
      */
-    private function arrayToXml($array, $rootElement = null, $xml = null) {
+    private function arrayToXml($array, $rootElement = null, $xml = null)
+    {
         $_xml = $xml;
 
         if ($_xml === null) {
@@ -64,8 +67,9 @@ class Xml extends \MPF\REST\Parser {
         return $_xml->asXML();
     }
 
-    public function toArray($output) {
-
+    public function toArray($output)
+    {
+        
     }
 
 }

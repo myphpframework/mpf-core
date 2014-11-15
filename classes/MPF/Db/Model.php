@@ -11,10 +11,13 @@ use \MPF\Logger;
 /**
  *
  */
-abstract class Model extends \MPF\PhpDoc {
+abstract class Model extends \MPF\PhpDoc
+{
+
     private $md5 = null;
 
-    public static function fromJson($json) {
+    public static function fromJson($json)
+    {
         $properties = @json_decode($json);
         if (null === $properties) {
             // TODO: Custom exception fromJson error
@@ -37,7 +40,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return integer
      */
-    public static function getTotalEntries() {
+    public static function getTotalEntries()
+    {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
@@ -51,7 +55,8 @@ abstract class Model extends \MPF\PhpDoc {
      * return Model
      */
 
-    public static function fromDbEntry(Entry $entry) {
+    public static function fromDbEntry(Entry $entry)
+    {
         $class = get_called_class();
         $model = new $class();
         foreach ($entry as $name => $value) {
@@ -67,7 +72,8 @@ abstract class Model extends \MPF\PhpDoc {
      * @param Field $field
      * @return \MPF\Db\ModelResult
      */
-    public static function byField(Field $field, \MPF\Db\Page $page=null) {
+    public static function byField(Field $field, \MPF\Db\Page $page = null)
+    {
         self::generatePhpDoc(get_called_class());
 
         $dbLayer = \MPF\Db::byName($field->getDatabase());
@@ -81,7 +87,8 @@ abstract class Model extends \MPF\PhpDoc {
      * @param \MPF\Db\ModelLinkTable $linkTable
      * @return \MPF\Db\ModelResult
      */
-    public static function byLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null) {
+    public static function byLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page = null)
+    {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
@@ -101,7 +108,8 @@ abstract class Model extends \MPF\PhpDoc {
      * @param type $fieldName
      * @return \MPF\Db\Field
      */
-    public static function generateFields($phpdoc=array()) {
+    public static function generateFields($phpdoc = array())
+    {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
@@ -121,7 +129,8 @@ abstract class Model extends \MPF\PhpDoc {
      * @param type $fieldName
      * @return \MPF\Db\Field
      */
-    public static function generateField($fieldName, $value=null, $phpdoc=array()) {
+    public static function generateField($fieldName, $value = null, $phpdoc = array())
+    {
         $className = get_called_class();
         self::generatePhpDoc($className);
 
@@ -134,7 +143,8 @@ abstract class Model extends \MPF\PhpDoc {
         return new \MPF\Db\Field(array_merge(self::$phpdoc[$className]['class'], $phpdoc), $fieldName, $value, self::$phpdoc[$className]['properties'][$fieldName]);
     }
 
-    public static function getDb($className) {
+    public static function getDb($className)
+    {
         if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
             self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE] = \MPF\Db::getDefaultName();
         }
@@ -142,11 +152,13 @@ abstract class Model extends \MPF\PhpDoc {
         return self::$phpdoc[$className]['class'][PhpDoc::CLASS_DATABASE];
     }
 
-    final public function __construct() {
+    final public function __construct()
+    {
         parent::__construct();
     }
 
-    final public function updatefromDbEntry(Entry $entry) {
+    final public function updatefromDbEntry(Entry $entry)
+    {
         foreach ($entry as $name => $value) {
             $this->$name = $value;
         }
@@ -157,7 +169,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return integer
      */
-    final public function getId() {
+    final public function getId()
+    {
         $primaryFields = $this->getPrimaryFields();
         if (count($primaryFields) > 1) {
             $exception = new MPF\Db\Exception\TooManyPrimaryKeys();
@@ -168,12 +181,14 @@ abstract class Model extends \MPF\PhpDoc {
         return $primaryFields[0]->getValue();
     }
 
-    public function delete() {
+    public function delete()
+    {
         $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->deleteModel($this);
     }
 
-    public function save() {
+    public function save()
+    {
         $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->saveModel($this);
     }
@@ -182,7 +197,9 @@ abstract class Model extends \MPF\PhpDoc {
      * @param string $fieldName
      * @return \MPF\Db\Field
      */
-    public function getField($fieldName) {
+
+    public function getField($fieldName)
+    {
         if (!array_key_exists($fieldName, self::$phpdoc[$this->className]['properties'])) {
             $exception = new Exception\InvalidFieldName($fieldName, $this->className);
             Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
@@ -202,7 +219,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return \MPF\Db\Field
      */
-    public function getFields() {
+    public function getFields()
+    {
         $fields = array();
         foreach (self::$phpdoc[$this->className]['properties'] as $name => $property) {
             if (empty($property) || !array_key_exists(PhpDoc::PROPERTY_TYPE, $property)) {
@@ -221,7 +239,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return string
      */
-    public function getDatabase() {
+    public function getDatabase()
+    {
         if (property_exists($this, 'database')) {
             return $this->database;
         }
@@ -238,7 +257,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return string
      */
-    public function getTable() {
+    public function getTable()
+    {
         if (property_exists($this, 'table')) {
             return $this->table;
         }
@@ -251,7 +271,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return \MPF\Db\Field[]
      */
-    public function getPrimaryFields() {
+    public function getPrimaryFields()
+    {
         $primaryKeys = array();
         foreach (self::$phpdoc[$this->className]['properties'] as $name => $property) {
             if (array_key_exists(PhpDoc::PROPERTY_PRIMARY_KEY, $property) && $property[PhpDoc::PROPERTY_PRIMARY_KEY]) {
@@ -266,7 +287,8 @@ abstract class Model extends \MPF\PhpDoc {
      * @param string $fieldName
      * @param mixed $fieldValue
      */
-    public function setField($fieldName, $fieldValue=null, $returnValue=false) {
+    public function setField($fieldName, $fieldValue = null, $returnValue = false)
+    {
 
         $field = $this->getField($fieldName);
         if ($field->isReadonly()) {
@@ -366,7 +388,7 @@ abstract class Model extends \MPF\PhpDoc {
         }
 
         if ($field->hasEncryption()) {
-
+            
         }
 
         if ($returnValue) {
@@ -384,11 +406,13 @@ abstract class Model extends \MPF\PhpDoc {
      * @param mixed $fieldValue
      * @return mixed
      */
-    public function verifyField($fieldName, $fieldValue=null, $returnValue=false) {
+    public function verifyField($fieldName, $fieldValue = null, $returnValue = false)
+    {
         return $this->setField($fieldName, $fieldValue, true);
     }
 
-    private function generateSalt($length, $hashType='sha512') {
+    private function generateSalt($length, $hashType = 'sha512')
+    {
         $salt = '';
         for ($i = 0; $i < $length; $i++) {
             $salt .= hash($hashType, Config::get('settings')->framework->salt . time() . uniqid(true));
@@ -403,7 +427,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return boolean
      */
-    public function isNew() {
+    public function isNew()
+    {
         $isNew = true;
         foreach ($this->getPrimaryFields() as $field) {
             if ($field->getValue()) {
@@ -418,7 +443,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return \MPF\Db\Entry
      */
-    public function getDbEntry() {
+    public function getDbEntry()
+    {
         $fieldValues = array();
         foreach ($this->getFields() as $field) {
             if ($field->isForeign()) {
@@ -432,7 +458,8 @@ abstract class Model extends \MPF\PhpDoc {
         return new \MPF\Db\Entry($fieldValues, $this->getMD5());
     }
 
-    private function generateMD5() {
+    private function generateMD5()
+    {
         if ($this->md5 === null) {
             $fieldValues = array();
             foreach ($this->getFields() as $field) {
@@ -448,7 +475,8 @@ abstract class Model extends \MPF\PhpDoc {
         }
     }
 
-    public function getMD5() {
+    public function getMD5()
+    {
         return $this->md5;
     }
 
@@ -457,7 +485,8 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return string
      */
-    public function toJson() {
+    public function toJson()
+    {
         return json_encode($this->toArray());
     }
 
@@ -466,14 +495,15 @@ abstract class Model extends \MPF\PhpDoc {
      *
      * @return array
      */
-    public function toArray() {
+    public function toArray()
+    {
         $array = array();
         foreach ($this->getFields() as $field) {
             if ($field->isPrivate()) {
                 continue;
             }
 
-            $array[ $field->getName() ] = $field->getValue();
+            $array[$field->getName()] = $field->getValue();
         }
 
         return $array;

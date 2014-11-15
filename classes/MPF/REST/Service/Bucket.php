@@ -8,28 +8,34 @@ use MPF\Text;
 use MPF\Logger;
 use MPF\User as Usr;
 
-class Bucket extends \MPF\REST\Service {
+class Bucket extends \MPF\REST\Service
+{
 
-    protected function options($id, $action) {
+    protected function options($id, $action)
+    {
         $this->setResponseCode(self::HTTPCODE_OK);
 
         $options = '';
-        header('Allow: '.$options);
+        header('Allow: ' . $options);
     }
 
-    protected function update($id, $data) {
+    protected function update($id, $data)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function delete($id) {
+    protected function delete($id)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function retrieve($id, $data) {
+    protected function retrieve($id, $data)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function create($id, $data) {
+    protected function create($id, $data)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
         return;
 
@@ -51,10 +57,11 @@ class Bucket extends \MPF\REST\Service {
         } catch (\MPF\Db\Exception\DuplicateEntry $e) {
             $this->setResponseCode(self::HTTPCODE_CONFLICT);
             return array('errors' => array(
-                array('code' => self::HTTPCODE_CONFLICT, 'msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
+                    array('code' => self::HTTPCODE_CONFLICT, 'msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
             ));
         }
 
         $_SESSION['userId'] = $user->getId();
     }
+
 }

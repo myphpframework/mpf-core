@@ -10,7 +10,8 @@ use MPF\Db\Result;
 use MPF\Db\Entry;
 use MPF\Logger;
 
-class MySQLi extends \MPF\Db\Layer {
+class MySQLi extends \MPF\Db\Layer
+{
 
     /**
      * Executes the fetch for the given result
@@ -20,7 +21,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @param Result $result
      * @return Result
      */
-    public function fetch(Result $result) {
+    public function fetch(Result $result)
+    {
         $connection = $result->getConnection();
         $connection->setInUse(true);
         if (!($connection instanceof \MPF\Db\Connection\MySQLi)) {
@@ -49,15 +51,17 @@ class MySQLi extends \MPF\Db\Layer {
      * @param type $table
      * @return integer
      */
-    public function getTotal($table) {
+    public function getTotal($table)
+    {
         $mysqli = $this->getFirstAvailableConnection();
-        $result = $this->query('SELECT count(*) total FROM `'.$table.'`');
+        $result = $this->query('SELECT count(*) total FROM `' . $table . '`');
         $count = $result->fetch();
         $result->free();
-        return (int)$count['total'];
+        return (int) $count['total'];
     }
 
-    public function transactionStart() {
+    public function transactionStart()
+    {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions++;
 
@@ -67,7 +71,8 @@ class MySQLi extends \MPF\Db\Layer {
         }
     }
 
-    public function transactionCommit() {
+    public function transactionCommit()
+    {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions--;
 
@@ -84,7 +89,8 @@ class MySQLi extends \MPF\Db\Layer {
         }
     }
 
-    public function transactionRollback() {
+    public function transactionRollback()
+    {
         $mysqli = $this->getFirstAvailableConnection();
         $mysqli->transactions--;
 
@@ -104,7 +110,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page=null) {
+    public function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page = null)
+    {
         $entriesFound = $this->searchCacheByModelField($field, $page);
         if (!empty($entriesFound)) {
             return new \MPF\Db\ModelCacheResult($entriesFound, $field->getClass());
@@ -126,7 +133,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    protected function getSelectByField(\MPF\Db\Field $queryField, $fields, $count=false, \MPF\Db\Page $page=null) {
+    protected function getSelectByField(\MPF\Db\Field $queryField, $fields, $count = false, \MPF\Db\Page $page = null)
+    {
         $select = "SELECT * ";
         if ($count) {
             $select = "SELECT count(*) count ";
@@ -149,24 +157,24 @@ class MySQLi extends \MPF\Db\Layer {
             // only fetch foreign keys if they are onetoone relationship
             foreach ($fields as $field) {
                 if ($field->isForeign() && $field->getRelationship() == 'onetoone') {
-                    $innerjoins[ $field->getTable() ] = ' INNER JOIN `'.$field->getTable().'` ON `' . $primaryKeys[0]->getTable() . '`.'.$primaryKeys[0]->getName().'=`' . $field->getTable() . '`.'.$field->getLinkFieldName().' ';
+                    $innerjoins[$field->getTable()] = ' INNER JOIN `' . $field->getTable() . '` ON `' . $primaryKeys[0]->getTable() . '`.' . $primaryKeys[0]->getName() . '=`' . $field->getTable() . '`.' . $field->getLinkFieldName() . ' ';
                 }
             }
         }
 
         $limit = '';
         if ($page) {
-            $offset = ($page->number == 1 ? 0 : ($page->number-1) * $page->amount);
-            $limit = ' LIMIT '.$offset.', '.$page->amount;
+            $offset = ($page->number == 1 ? 0 : ($page->number - 1) * $page->amount);
+            $limit = ' LIMIT ' . $offset . ', ' . $page->amount;
 
             // we must get the total amount of results for the page object
-            $result = $this->query('SELECT count(*) count '. $from . substr($where, 0, -3), true);
+            $result = $this->query('SELECT count(*) count ' . $from . substr($where, 0, -3), true);
             $entry = $result->fetch();
             $page->total = $entry['count'];
             $result->free();
         }
 
-        return $select . $from . implode(' ',  $innerjoins) . $where . $limit;
+        return $select . $from . implode(' ', $innerjoins) . $where . $limit;
     }
 
     /**
@@ -176,7 +184,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null) {
+    public function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page = null)
+    {
         #$entriesFound = $this->searchCacheByLinkTable($linkTable);
         #if (!empty($entriesFound)) {
         #    return new \MPF\Db\ModelCacheResult($entriesFound, $field->getClass());
@@ -189,32 +198,33 @@ class MySQLi extends \MPF\Db\Layer {
         return $modelResult;
     }
 
-    protected function getSelectByModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, $count=false, \MPF\Db\Page $page=null) {
-        $linkTableName = '`'.$linkTable->table.'`';
+    protected function getSelectByModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, $count = false, \MPF\Db\Page $page = null)
+    {
+        $linkTableName = '`' . $linkTable->table . '`';
 
         $innerjoin = '';
         $from = " FROM $linkTableName ";
         $select = "SELECT count(*) count ";
         if (!$count) {
-            $targetTableName = '`'.$linkTable->targetField->getTable().'`';
-            $targetFieldForeignName = '`'.$linkTable->targetField->getLinkFieldName().'`';
-            $targetFieldName = '`'.$linkTable->targetField->getName().'`';
+            $targetTableName = '`' . $linkTable->targetField->getTable() . '`';
+            $targetFieldForeignName = '`' . $linkTable->targetField->getLinkFieldName() . '`';
+            $targetFieldName = '`' . $linkTable->targetField->getName() . '`';
             $select = "SELECT * ";
             $innerjoin = "INNER JOIN $targetTableName ON $linkTableName.$targetFieldForeignName=$targetTableName.$targetFieldName ";
         }
 
         $where = "WHERE ";
         foreach ($linkTable->knownFields as $knownField) {
-            $where .= ' '.$linkTableName.'.`'.$knownField->getLinkFieldName().'` = '.$this->formatQueryValue($knownField).' AND';
+            $where .= ' ' . $linkTableName . '.`' . $knownField->getLinkFieldName() . '` = ' . $this->formatQueryValue($knownField) . ' AND';
         }
 
         $limit = '';
         if ($page) {
-            $offset = ($page->number == 1 ? 0 : ($page->number-1) * $page->amount);
-            $limit = ' LIMIT '.$offset.', '.$page->amount;
+            $offset = ($page->number == 1 ? 0 : ($page->number - 1) * $page->amount);
+            $limit = ' LIMIT ' . $offset . ', ' . $page->amount;
 
             // we must get the total amount of results for the page object
-            $result = $this->query('SELECT count(*) count '. $from . $innerjoin . substr($where, 0, -3), true);
+            $result = $this->query('SELECT count(*) count ' . $from . $innerjoin . substr($where, 0, -3), true);
             $entry = $result->fetch();
             $page->total = $entry['count'];
             $result->free();
@@ -230,11 +240,12 @@ class MySQLi extends \MPF\Db\Layer {
      * @param \MPF\Db\Page $page
      * @return int
      */
-    public function resultCountByField(\MPF\Db\Field $field, \MPF\Db\Page $page=null) {
+    public function resultCountByField(\MPF\Db\Field $field, \MPF\Db\Page $page = null)
+    {
         $result = $this->query($this->getSelectByField($field, array(), true, $page), true);
         $dbEntry = $result->fetch();
         $result->free();
-        return (int)$dbEntry['count'];
+        return (int) $dbEntry['count'];
     }
 
     /**
@@ -242,22 +253,23 @@ class MySQLi extends \MPF\Db\Layer {
      *
      * @param \MPF\Db\Model $model
      */
-    public function deleteModel(\MPF\Db\Model $model) {
+    public function deleteModel(\MPF\Db\Model $model)
+    {
         try {
             $where = '';
             $fallback_where = array();
             foreach ($model->getFields() as $field) {
                 if ($field->isPrimaryKey()) {
-                    $where = ' `'. $field->getName() .'`='. $this->formatQueryValue($field) .' ';
+                    $where = ' `' . $field->getName() . '`=' . $this->formatQueryValue($field) . ' ';
                 }
-                $fallback_where[] = ' `'. $field->getName() .'`='. $this->formatQueryValue($field) .' ';
+                $fallback_where[] = ' `' . $field->getName() . '`=' . $this->formatQueryValue($field) . ' ';
             }
 
             if (!$where) {
                 $where = implode(' AND ', $fallback_where);
             }
 
-            $result = $this->query('DELETE FROM `'. $model->getTable() .'` WHERE '. $where .';');
+            $result = $this->query('DELETE FROM `' . $model->getTable() . '` WHERE ' . $where . ';');
             $result->free();
         } catch (InvalidQuery $e) {
             if (preg_match('/duplicate/i', $e->result->getError())) {
@@ -270,32 +282,35 @@ class MySQLi extends \MPF\Db\Layer {
         }
     }
 
-    public function deleteLinkTable(\MPF\Db\ModelLinkTable $linktable) {
-        $sql = 'DELETE FROM `'.$linktable->table.'` WHERE ';
+    public function deleteLinkTable(\MPF\Db\ModelLinkTable $linktable)
+    {
+        $sql = 'DELETE FROM `' . $linktable->table . '` WHERE ';
         foreach ($linktable->knownFields as $field) {
-            $sql .= '`'.$field->getLinkFieldName().'` = '.$this->formatQueryValue($field).' AND';
+            $sql .= '`' . $field->getLinkFieldName() . '` = ' . $this->formatQueryValue($field) . ' AND';
         }
         $sql = substr($sql, 0, -4);
         $result = $this->query($sql);
         $result->free();
     }
 
-    public function saveLinkTable(\MPF\Db\ModelLinkTable $linktable) {
-        $sql = 'REPLACE INTO `'.$linktable->table.'` VALUES(';
+    public function saveLinkTable(\MPF\Db\ModelLinkTable $linktable)
+    {
+        $sql = 'REPLACE INTO `' . $linktable->table . '` VALUES(';
         foreach ($linktable->knownFields as $field) {
-            $sql .= $this->formatQueryValue($field).',';
+            $sql .= $this->formatQueryValue($field) . ',';
         }
-        $sql = substr($sql, 0, -1).')';
+        $sql = substr($sql, 0, -1) . ')';
         $result = $this->query($sql);
         $result->free();
     }
 
-    public function saveAllLinkTables($linktables) {
+    public function saveAllLinkTables($linktables)
+    {
         if (!is_array($linktables) || empty($linktables)) {
             return;
         }
 
-        $sql = 'REPLACE INTO `'.$linktables[0]->table.'` VALUES ';
+        $sql = 'REPLACE INTO `' . $linktables[0]->table . '` VALUES ';
         $values = '';
         foreach ($linktables as $linktable) {
             if (!($linktable instanceof \MPF\Db\ModelLinkTable)) {
@@ -304,12 +319,12 @@ class MySQLi extends \MPF\Db\Layer {
 
             $values .= '(';
             foreach ($linktable->knownFields as $field) {
-                $values .= $this->formatQueryValue($field).',';
+                $values .= $this->formatQueryValue($field) . ',';
             }
-            $values = substr($values, 0, -1).'),';
+            $values = substr($values, 0, -1) . '),';
         }
 
-        $result = $this->query($sql.substr($values, 0, -1));
+        $result = $this->query($sql . substr($values, 0, -1));
         $result->free();
     }
 
@@ -319,7 +334,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @throws \MPF\Db\Exception\DuplicateEntry
      * @param \MPF\Db\Model $model
      */
-    public function saveModel(\MPF\Db\Model $model) {
+    public function saveModel(\MPF\Db\Model $model)
+    {
         $fields = $model->getFields();
 
         if ($model->isNew()) {
@@ -345,7 +361,7 @@ class MySQLi extends \MPF\Db\Layer {
                 if (!$hasPrimaryKeys) {
                     $operation = 'REPLACE';
                 }
-                $result = $this->query($operation.' INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($queryValues)) . '`) VALUES (' . implode(',', array_values($queryValues)) . ');');
+                $result = $this->query($operation . ' INTO `' . $model->getTable() . '` (`' . implode('`,`', array_keys($queryValues)) . '`) VALUES (' . implode(',', array_values($queryValues)) . ');');
             } catch (InvalidQuery $e) {
                 if (preg_match('/duplicate/i', $e->result->getError())) {
                     $exception = new DuplicateEntry($e->result, $model->getTable());
@@ -379,14 +395,14 @@ class MySQLi extends \MPF\Db\Layer {
                 }
 
                 if ($field->isPrimaryKey()) {
-                    $where = '`'. $field->getName() .'`='. $this->formatQueryValue($field) .'';
+                    $where = '`' . $field->getName() . '`=' . $this->formatQueryValue($field) . '';
                 } else if (!$field->isReadonly()) {
                     $sql .= '`' . $field->getName() . '`=' . $this->formatQueryValue($field) . ',';
                 }
             }
 
             $sql = substr($sql, 0, -1);
-            $sql .= ' WHERE '. $where.' ';
+            $sql .= ' WHERE ' . $where . ' ';
 
             $result = $this->query($sql);
             $result->free();
@@ -395,7 +411,8 @@ class MySQLi extends \MPF\Db\Layer {
         }
     }
 
-    private function formatQueryValue(\MPF\Db\Field $field) {
+    private function formatQueryValue(\MPF\Db\Field $field)
+    {
         $mysqli = $this->getConnectionResource();
         if ($field->getValue() === null) {
             $value = 'NULL';
@@ -406,7 +423,7 @@ class MySQLi extends \MPF\Db\Layer {
                 case 'datetime':
                 case 'date':
                 case 'varchar':
-                    $value = '"'.$mysqli->real_escape_string($field->getValue()).'"';
+                    $value = '"' . $mysqli->real_escape_string($field->getValue()) . '"';
                     break;
                 case 'float':
                 case 'int':
@@ -423,7 +440,8 @@ class MySQLi extends \MPF\Db\Layer {
      *
      * @param Result $result
      */
-    public function freeResult(Result $result) {
+    public function freeResult(Result $result)
+    {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\MySQLi)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
@@ -437,7 +455,7 @@ class MySQLi extends \MPF\Db\Layer {
         }
 
         $connection->setInUse(false);
-        Logger::Log('Db/Layer', 'Connection #'.$result->getConnection()->getId().' has been freed', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+        Logger::Log('Db/Layer', 'Connection #' . $result->getConnection()->getId() . ' has been freed', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
     }
 
     /**
@@ -447,7 +465,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @param string $query
      * @return string
      */
-    protected function sanitizeQuery($query) {
+    protected function sanitizeQuery($query)
+    {
         return $query;
     }
 
@@ -461,7 +480,8 @@ class MySQLi extends \MPF\Db\Layer {
      * @param Result $result
      * @return Result
      */
-    protected function executeQuery(Result $result) {
+    protected function executeQuery(Result $result)
+    {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\MySQLi)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
@@ -492,7 +512,8 @@ class MySQLi extends \MPF\Db\Layer {
      *
      * @return integer
      */
-    protected function getRowsTotal(Result $result) {
+    protected function getRowsTotal(Result $result)
+    {
         return (int) $result->getResource()->num_rows;
     }
 
@@ -501,7 +522,8 @@ class MySQLi extends \MPF\Db\Layer {
      *
      * @return integer
      */
-    protected function getRowsAffected(Result $result) {
+    protected function getRowsAffected(Result $result)
+    {
         return (int) $result->getConnection()->resource->affected_rows;
     }
 

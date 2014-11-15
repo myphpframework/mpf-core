@@ -8,7 +8,9 @@ use MPF\User\Group;
  * @object MPF\User\Group
  * @table user_group
  */
-class Group extends \MPF\Db\Model {
+class Group extends \MPF\Db\Model
+{
+
     const ADMIN_ID = 1;
 
     /**
@@ -42,12 +44,13 @@ class Group extends \MPF\Db\Model {
      *
      * @return MPF\User\Group
      */
-    public static function ADMIN() {
+    public static function ADMIN()
+    {
         $result = self::byField(self::generateField('id', self::ADMIN_ID));
 
         if ($result->rowsTotal == 0) {
-          $result->free();
-          return null;
+            $result->free();
+            return null;
         }
 
         $userGroup = $result->fetch();
@@ -61,7 +64,8 @@ class Group extends \MPF\Db\Model {
      * @param User $user
      * @return MPF\User\Group[]
      */
-    public static function byUser(\MPF\User $user) {
+    public static function byUser(\MPF\User $user)
+    {
         $userId = $user->getField('id');
         $userId->setLinkFieldName('userId');
         $knownFields = array($userId);
@@ -73,15 +77,15 @@ class Group extends \MPF\Db\Model {
         $result = self::byLinkTable($linkTable);
 
         if ($result->rowsTotal == 0) {
-          $result->free();
-          return array();
+            $result->free();
+            return array();
         }
 
         $groups = array();
-        while($userGroup = $result->fetch()) {
+        while ($userGroup = $result->fetch()) {
             $groups[] = $userGroup;
         }
-        
+
         $result->free();
         return $groups;
     }
@@ -92,7 +96,8 @@ class Group extends \MPF\Db\Model {
      * @param User $user
      * @return MPF\User\Group[]
      */
-    public static function byOwner(\MPF\User $user) {
+    public static function byOwner(\MPF\User $user)
+    {
         //self::byField();
         return array();
     }

@@ -7,7 +7,8 @@ use \MPF\PhpDoc;
 /**
  * Object for all the result of database queries
  */
-class Field {
+class Field
+{
 
     private $name;
     private $value;
@@ -16,7 +17,8 @@ class Field {
     private $operator = null;
     private $linkFieldName = '';
 
-    public function __construct($classPhpDoc, $name, $value, $options) {
+    public function __construct($classPhpDoc, $name, $value, $options)
+    {
         $this->classPhpDoc = $classPhpDoc;
         $this->name = $name;
         $this->value = $value;
@@ -28,7 +30,8 @@ class Field {
      *
      * @return string
      */
-    public function getTable() {
+    public function getTable()
+    {
         // for foreign fields we have to give their table not the class one
         if (array_key_exists(PhpDoc::PROPERTY_TABLE, $this->options)) {
             return $this->options[PhpDoc::PROPERTY_TABLE];
@@ -41,7 +44,8 @@ class Field {
      *
      * @return string
      */
-    public function getDatabase() {
+    public function getDatabase()
+    {
         // for foreign fields we have to give their database not the class one
         if (array_key_exists(PhpDoc::PROPERTY_DATABASE, $this->options)) {
             return $this->options[PhpDoc::PROPERTY_DATABASE];
@@ -59,7 +63,8 @@ class Field {
      *
      * @return string
      */
-    public function getClass() {
+    public function getClass()
+    {
         return $this->classPhpDoc[PhpDoc::CLASS_NAME];
     }
 
@@ -68,7 +73,8 @@ class Field {
      *
      * @return mixed
      */
-    public function getDefaultValue() {
+    public function getDefaultValue()
+    {
         if (array_key_exists(PhpDoc::PROPERTY_DEFAULT_VALUE, $this->options)) {
             $value = $this->options[PhpDoc::PROPERTY_DEFAULT_VALUE];
 
@@ -94,7 +100,8 @@ class Field {
         return null;
     }
 
-    public function getOnUpdateValue() {
+    public function getOnUpdateValue()
+    {
         if (array_key_exists(PhpDoc::PROPERTY_ON_UPDATE, $this->options)) {
             $value = $this->options[PhpDoc::PROPERTY_ON_UPDATE];
 
@@ -120,7 +127,8 @@ class Field {
         return null;
     }
 
-    public function getRelationship() {
+    public function getRelationship()
+    {
         return (array_key_exists(PhpDoc::PROPERTY_RELATION, $this->options) ? $this->options[PhpDoc::PROPERTY_RELATION] : '');
     }
 
@@ -129,7 +137,8 @@ class Field {
      *
      * @return mixed
      */
-    public function getValue() {
+    public function getValue()
+    {
         return (!$this->value ? $this->getDefaultValue() : $this->value);
     }
 
@@ -138,7 +147,8 @@ class Field {
      *
      * @return string
      */
-    public function getLinkFieldName() {
+    public function getLinkFieldName()
+    {
         if (!$this->linkFieldName) {
             return (array_key_exists(PhpDoc::PROPERTY_LINKNAME, $this->options) ? $this->options[PhpDoc::PROPERTY_LINKNAME] : '');
         }
@@ -150,16 +160,17 @@ class Field {
      *
      * @param string $name
      */
-    public function setLinkFieldName($name) {
+    public function setLinkFieldName($name)
+    {
         $this->linkFieldName = $name;
     }
 
     /**
      * Sets the value of the field
      */
-    public function setValue($value) {
-        if (array_key_exists(PhpDoc::PROPERTY_RELATION, $this->options)
-         && in_array(strtolower($this->options[PhpDoc::PROPERTY_RELATION]), array('manytomany', 'onetomany', 'onetoone'))) {
+    public function setValue($value)
+    {
+        if (array_key_exists(PhpDoc::PROPERTY_RELATION, $this->options) && in_array(strtolower($this->options[PhpDoc::PROPERTY_RELATION]), array('manytomany', 'onetomany', 'onetoone'))) {
             if (!is_array($this->value)) {
                 $this->value = array();
             }
@@ -175,7 +186,8 @@ class Field {
      *
      * @return type string
      */
-    public function getName() {
+    public function getName()
+    {
         return $this->name;
     }
 
@@ -184,7 +196,8 @@ class Field {
      *
      * @return string
      */
-    public function getType() {
+    public function getType()
+    {
         if (array_key_exists(PhpDoc::PROPERTY_TYPE, $this->options)) {
             $type = $this->options[PhpDoc::PROPERTY_TYPE];
             if (is_array($type)) {
@@ -200,7 +213,8 @@ class Field {
      *
      * @return integer
      */
-    public function getTypeLength() {
+    public function getTypeLength()
+    {
         if (array_key_exists(PhpDoc::PROPERTY_TYPE, $this->options) && is_array($this->options[PhpDoc::PROPERTY_TYPE])) {
             return (int) $this->options[PhpDoc::PROPERTY_TYPE][1];
         }
@@ -212,7 +226,8 @@ class Field {
      *
      * @return string
      */
-    public function getOperator() {
+    public function getOperator()
+    {
         if ($this->operator !== null) {
             return $this->operator;
         }
@@ -231,15 +246,21 @@ class Field {
      * @param mixed $value
      * @return boolean
      */
-    public function matches($value) {
+    public function matches($value)
+    {
         switch (strtoupper($this->getOperator())) {
             default:
             case 'LIKE':
-            case '=': return $this->isEqual($value); break;
-            case '<=':return $this->isLessThanOrEqual($value); break;
-            case '<': return $this->isLessThan($value); break;
-            case '>=':return $this->isGreaterThanOrEqual($value); break;
-            case '>': return $this->isGreaterThan($value); break;
+            case '=': return $this->isEqual($value);
+                break;
+            case '<=':return $this->isLessThanOrEqual($value);
+                break;
+            case '<': return $this->isLessThan($value);
+                break;
+            case '>=':return $this->isGreaterThanOrEqual($value);
+                break;
+            case '>': return $this->isGreaterThan($value);
+                break;
         }
         return false;
     }
@@ -250,7 +271,8 @@ class Field {
      *
      * @param string $operator
      */
-    public function setOperator($operator) {
+    public function setOperator($operator)
+    {
         if (!in_array($operator, array('=', 'LIKE', '<=', '<', '>=', '>'))) {
             // TODO: need custom mutli lang exception
             throw new Exception('Invalid field operator');
@@ -264,7 +286,8 @@ class Field {
      *
      * @return mixed
      */
-    private function getComparisonValues($dbValue) {
+    private function getComparisonValues($dbValue)
+    {
         $fieldValue = $this->getvalue();
         switch ($this->getType()) {
             case 'timestamp':
@@ -276,27 +299,32 @@ class Field {
         return array($fieldValue, $dbValue);
     }
 
-    public function isGreaterThan($value) {
+    public function isGreaterThan($value)
+    {
         list($dbValue, $fieldValue) = $this->getComparisonValues($value);
         return ($dbValue > $fieldValue);
     }
 
-    public function isGreaterThanOrEqual($value) {
+    public function isGreaterThanOrEqual($value)
+    {
         list($dbValue, $fieldValue) = $this->getComparisonValues($value);
         return ($dbValue >= $fieldValue);
     }
 
-    public function isLessThan($value) {
+    public function isLessThan($value)
+    {
         list($dbValue, $fieldValue) = $this->getComparisonValues($value);
         return ($dbValue < $fieldValue);
     }
 
-    public function isLessThanOrEqual($value) {
+    public function isLessThanOrEqual($value)
+    {
         list($dbValue, $fieldValue) = $this->getComparisonValues($value);
         return ($dbValue <= $fieldValue);
     }
 
-    public function isEqual($value) {
+    public function isEqual($value)
+    {
         list($dbValue, $fieldValue) = $this->getComparisonValues($value);
         return ($dbValue == $fieldValue);
     }
@@ -306,7 +334,8 @@ class Field {
      *
      * @return type
      */
-    public function hasOperator() {
+    public function hasOperator()
+    {
         return ($this->operator !== null);
     }
 
@@ -315,7 +344,8 @@ class Field {
      *
      * @return bool
      */
-    public function hasEncryption() {
+    public function hasEncryption()
+    {
         return array_key_exists(PhpDoc::PROPERTY_ENCRYPTION, $this->options);
     }
 
@@ -324,7 +354,8 @@ class Field {
      *
      * @return bool
      */
-    public function isPassword() {
+    public function isPassword()
+    {
         return array_key_exists(PhpDoc::PROPERTY_PASSWORD, $this->options);
     }
 
@@ -333,22 +364,26 @@ class Field {
      *
      * @return bool
      */
-    public function isPrivate() {
+    public function isPrivate()
+    {
         return array_key_exists(PhpDoc::PROPERTY_PRIVATE, $this->options);
     }
 
-    public function isPrimaryKey() {
-        return (array_key_exists(PhpDoc::PROPERTY_PRIMARY_KEY, $this->options) && $this->options[ PhpDoc::PROPERTY_PRIMARY_KEY ]);
+    public function isPrimaryKey()
+    {
+        return (array_key_exists(PhpDoc::PROPERTY_PRIMARY_KEY, $this->options) && $this->options[PhpDoc::PROPERTY_PRIMARY_KEY]);
     }
 
     /**
      * Returns if the field is froma foreign table
      */
-    public function isForeign() {
-        if (array_key_exists(PhpDoc::PROPERTY_TYPE, $this->options) && $this->options[ PhpDoc::PROPERTY_TYPE ] == 'foreign') {
+    public function isForeign()
+    {
+        if (array_key_exists(PhpDoc::PROPERTY_TYPE, $this->options) && $this->options[PhpDoc::PROPERTY_TYPE] == 'foreign') {
             return true;
         }
-        return false;;
+        return false;
+        ;
     }
 
     /**
@@ -356,7 +391,8 @@ class Field {
      *
      * @return string
      */
-    public function getPasswordType() {
+    public function getPasswordType()
+    {
         $type = '';
         if (array_key_exists(PhpDoc::PROPERTY_PASSWORD, $this->options)) {
             return $this->options[PhpDoc::PROPERTY_PASSWORD];
@@ -369,7 +405,8 @@ class Field {
      *
      * @return bool
      */
-    public function isSalt() {
+    public function isSalt()
+    {
         return array_key_exists(PhpDoc::PROPERTY_SALT, $this->options);
     }
 
@@ -378,7 +415,8 @@ class Field {
      *
      * @return string
      */
-    public function getSaltType() {
+    public function getSaltType()
+    {
         $type = '';
         if (array_key_exists(PhpDoc::PROPERTY_SALT, $this->options)) {
             return $this->options[PhpDoc::PROPERTY_SALT];
@@ -389,7 +427,8 @@ class Field {
     /**
      * @return bool
      */
-    public function isReadonly() {
+    public function isReadonly()
+    {
         if (array_key_exists(PhpDoc::PROPERTY_READONLY, $this->options) && $this->options[PhpDoc::PROPERTY_READONLY]) {
             return true;
         }
@@ -399,7 +438,8 @@ class Field {
     /**
      * @return bool
      */
-    public function isNullable() {
+    public function isNullable()
+    {
         if (!array_key_exists(PhpDoc::PROPERTY_DEFAULT_VALUE, $this->options)) {
             return false;
         }

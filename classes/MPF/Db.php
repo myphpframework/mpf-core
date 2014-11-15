@@ -2,13 +2,14 @@
 
 namespace MPF;
 
-class Db {
+class Db
+{
+
     const TYPE_MYSQLI = 'MySQLi';
     const TYPE_SQLITE = 'SQLite';
     const TYPE_ORACLE = 'Oracle';
     const TYPE_MSSQL = 'MSSQL';
     const TYPE_POSTGRESQL = 'PostgreSQL';
-
     const ACCESS_TYPE_READ = 'r';
     const ACCESS_TYPE_WRITE = 'w';
     const ACCESS_TYPE_READWRITE = 'rw';
@@ -28,10 +29,11 @@ class Db {
      *
      * @return Db\Layer
      */
-    public static function getDefault() {
+    public static function getDefault()
+    {
         foreach (self::$database_xmls as $xml) {
             if ($xml->isDefault) {
-                return self::byName((string)$xml->name);
+                return self::byName((string) $xml->name);
             }
         }
 
@@ -43,10 +45,11 @@ class Db {
      *
      * @return string
      */
-    public static function getDefaultName() {
+    public static function getDefaultName()
+    {
         foreach (self::$database_xmls as $xml) {
             if ($xml->isDefault) {
-                return (string)$xml->name;
+                return (string) $xml->name;
             }
         }
 
@@ -62,7 +65,8 @@ class Db {
      * @param string $name
      * @return Db\Layer
      */
-    public static function byName($name) {
+    public static function byName($name)
+    {
         if (!$name) {
             $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
             Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
@@ -83,17 +87,17 @@ class Db {
 
         $connectionId = 0;
         $dbConnections = array();
-        $className = self::getClassNameByType((string)$xml->engine, 'Connection');
+        $className = self::getClassNameByType((string) $xml->engine, 'Connection');
         foreach ($xml->server as $server) {
             foreach ($server->access as $access) {
                 $dbConnection = new $className();
                 $dbConnection->setId($connectionId++);
-                $dbConnection->setInfo((string)$xml->engine, (string)$server->host, (int)$server->port, $name, (string)$access->login, (string)$access->password, (string)$access['type']);
+                $dbConnection->setInfo((string) $xml->engine, (string) $server->host, (int) $server->port, $name, (string) $access->login, (string) $access->password, (string) $access['type']);
                 $dbConnections[] = $dbConnection;
             }
         }
 
-        $className = self::getClassNameByType((string)$xml->engine);
+        $className = self::getClassNameByType((string) $xml->engine);
         self::$database_layers[$name] = new $className($dbConnections);
 
         return self::$database_layers[$name];
@@ -107,15 +111,16 @@ class Db {
      * @param string $prefix
      * @return string
      */
-    public static function getClassNameByType($dbType, $prefix='Layer') {
+    public static function getClassNameByType($dbType, $prefix = 'Layer')
+    {
         $className = 'MPF\Db\\' . $prefix . '\\';
         // Find the right string case for the class name
         foreach (array(
-            self::TYPE_MYSQLI,
-            self::TYPE_POSTGRESQL,
-            self::TYPE_SQLITE,
-            self::TYPE_MSSQL,
-            self::TYPE_ORACLE,) as $type) {
+    self::TYPE_MYSQLI,
+    self::TYPE_POSTGRESQL,
+    self::TYPE_SQLITE,
+    self::TYPE_MSSQL,
+    self::TYPE_ORACLE,) as $type) {
             if (strtolower($type) == strtolower($dbType)) {
                 $className .= $type;
                 break;
@@ -123,9 +128,7 @@ class Db {
         }
 
         // Verify if the database is supported (If we have a Db\Layer class for it)
-        if (!class_exists($className)
-          || !in_array('MPF\Db\\' . $prefix . '\Intheface', class_implements($className))
-          || !in_array('MPF\Db\\' . $prefix, class_parents($className))) {
+        if (!class_exists($className) || !in_array('MPF\Db\\' . $prefix . '\Intheface', class_implements($className)) || !in_array('MPF\Db\\' . $prefix, class_parents($className))) {
             $exception = new Db\Exception\UnsupportedType($dbType);
             Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
             throw $exception;
@@ -143,19 +146,20 @@ class Db {
      * @param $filePath
      *
      */
-    public static function addDatabaseXml(\SimpleXMLElement $xml, $filePath) {
+    public static function addDatabaseXml(\SimpleXMLElement $xml, $filePath)
+    {
         try {
             self::validateConfig($xml, $filePath);
         } catch (\MPF\Db\Exception\InvalidConfig $e) {
             return;
         }
 
-        if (!array_key_exists((string)$xml->name, self::$database_xmls)) {
+        if (!array_key_exists((string) $xml->name, self::$database_xmls)) {
             $fileInfo = pathinfo($filePath);
             if ($fileInfo['filename'] == 'default') {
                 $xml->isDefault = true;
             }
-            self::$database_xmls[ (string)$xml->name ] = $xml;
+            self::$database_xmls[(string) $xml->name] = $xml;
         }
     }
 
@@ -167,7 +171,8 @@ class Db {
      * @param \SimpleXMLElement $conf
      * @param string $filename
      */
-    private static function validateConfig(\SimpleXMLElement $conf, $filename) {
+    private static function validateConfig(\SimpleXMLElement $conf, $filename)
+    {
         if (!$conf->server || !$conf->name || !$conf->engine) {
             $exception = new Db\Exception\InvalidConfig($filename);
             Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
@@ -192,7 +197,9 @@ class Db {
         }
     }
 
-    private function __construct() {
+    private function __construct()
+    {
+        
     }
 
 }

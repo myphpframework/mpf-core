@@ -7,7 +7,9 @@ use MPF\Config;
 use MPF\Logger;
 use MPF\Status;
 
-class Page {
+class Page
+{
+
     /**
      *
      * @var integer
@@ -26,8 +28,10 @@ class Page {
      */
     public $total;
 
-    public function __construct($number, $amount) {
+    public function __construct($number, $amount)
+    {
         $this->number = $number;
         $this->amount = $amount;
     }
+
 }

@@ -8,7 +8,8 @@ use MPF\Db\Exception\InvalidQuery;
 use MPF\Db\Result;
 use MPF\Db\Entry;
 
-class PostgreSQL extends \MPF\Db\Layer {
+class PostgreSQL extends \MPF\Db\Layer
+{
 
     /**
      * Executes the fetch for the given result
@@ -18,7 +19,8 @@ class PostgreSQL extends \MPF\Db\Layer {
      * @param Result $result
      * @return Result
      */
-    public function fetch(Result $result) {
+    public function fetch(Result $result)
+    {
         $connection = $result->getConnection();
         $connection->setInUse(true);
         if (!($connection instanceof \MPF\Db\Connection\PostgreSQL)) {
@@ -34,7 +36,7 @@ class PostgreSQL extends \MPF\Db\Layer {
             throw $exception;
         }
 
-        $entry = pg_fetch_array($resource, NULL, PGSQL_ASSOC);
+        $entry = pg_fetch_array($resource, null, PGSQL_ASSOC);
         if (!$entry) {
             return false;
         }
@@ -42,7 +44,9 @@ class PostgreSQL extends \MPF\Db\Layer {
         return new Entry($entry);
     }
 
-    public function getTotal($table) {
+    public function getTotal($table)
+    {
+        
     }
 
     /**
@@ -51,15 +55,19 @@ class PostgreSQL extends \MPF\Db\Layer {
      * @param \MPF\Db\Field $field
      * @return \MPF\Db\Result
      */
-    public function queryModelField(\MPF\Db\Field $field) {
+    public function queryModelField(\MPF\Db\Field $field)
+    {
+        
     }
 
-    public function fetchModels(\MPF\Db\Model $model, $condition='AND') {
-
+    public function fetchModels(\MPF\Db\Model $model, $condition = 'AND')
+    {
+        
     }
 
-    public function saveModel(\MPF\Db\Model $model) {
-
+    public function saveModel(\MPF\Db\Model $model)
+    {
+        
     }
 
     /**
@@ -67,7 +75,8 @@ class PostgreSQL extends \MPF\Db\Layer {
      *
      * @param Result $result
      */
-    public function freeResult(Result $result) {
+    public function freeResult(Result $result)
+    {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\PostgreSQL)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
@@ -90,7 +99,8 @@ class PostgreSQL extends \MPF\Db\Layer {
      * @param string $query
      * @return string
      */
-    protected function sanitizeQuery($query) {
+    protected function sanitizeQuery($query)
+    {
         // String assignation are in single quotes in PostgreSQL
         $assignationRegexp = '/=[\s]{0,}"(.*?)"/is';
         if (preg_match_all($assignationRegexp, $query, $matchs)) {
@@ -109,7 +119,8 @@ class PostgreSQL extends \MPF\Db\Layer {
      * @param Result $result
      * @return Result
      */
-    protected function executeQuery(Result $result) {
+    protected function executeQuery(Result $result)
+    {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\PostgreSQL)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\PostgreSQL');
@@ -132,7 +143,7 @@ class PostgreSQL extends \MPF\Db\Layer {
             }
             // Other kind of error???
             else {
-
+                
             }
         } elseif (is_resource($postgreResult)) {
             $result->setResource($postgreResult);
@@ -148,7 +159,8 @@ class PostgreSQL extends \MPF\Db\Layer {
      *
      * @return integer
      */
-    protected function getRowsTotal(Result $result) {
+    protected function getRowsTotal(Result $result)
+    {
         $count = pg_num_rows($result->getResource());
         if ($count == -1) {
             $count = 0;
@@ -161,7 +173,8 @@ class PostgreSQL extends \MPF\Db\Layer {
      *
      * @return integer
      */
-    protected function getRowsAffected(Result $result) {
+    protected function getRowsAffected(Result $result)
+    {
         return (int) pg_affected_rows($result->getResource());
     }
 

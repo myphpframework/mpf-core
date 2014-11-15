@@ -8,7 +8,8 @@ use MPF\Logger;
 
 require(__DIR__ . '/../Db.php');
 
-class Database extends \MPF\Bootstrap implements Intheface {
+class Database extends \MPF\Bootstrap implements Intheface
+{
 
     /**
      * Initialize the Db object with the proper configs
@@ -18,20 +19,21 @@ class Database extends \MPF\Bootstrap implements Intheface {
      * @param string $filename
      * @return
      */
-    public function init($filename='') {
+    public function init($filename = '')
+    {
         // we fetch all the potential database configs
         $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
         foreach ($paths as $path) {
             if (file_exists($path . 'dbs')) {
                 if ($filename) {
-                    $file = $path . 'dbs/'.$filename.'.xml';
+                    $file = $path . 'dbs/' . $filename . '.xml';
                     $xml = @simplexml_load_file($file);
                     if (!$xml) {
                         throw new \MPF\Exception\InvalidXml($file);
                     }
 
                     Db::addDatabaseXml($xml, $file);
-                } else  if ($handle = opendir($path . 'dbs')) {
+                } else if ($handle = opendir($path . 'dbs')) {
                     $files = array();
                     while (false !== ($file = readdir($handle))) {
                         if ($file != "." && $file != "..") {
@@ -41,9 +43,9 @@ class Database extends \MPF\Bootstrap implements Intheface {
                     closedir($handle);
 
                     foreach ($files as $file) {
-                        $xml = @simplexml_load_file($path . 'dbs/'.$file);
+                        $xml = @simplexml_load_file($path . 'dbs/' . $file);
                         if (!$xml) {
-                            throw new \MPF\Exception\InvalidXml($path . 'dbs/'.$file);
+                            throw new \MPF\Exception\InvalidXml($path . 'dbs/' . $file);
                         }
 
                         Db::addDatabaseXml($xml, $file);
@@ -53,7 +55,8 @@ class Database extends \MPF\Bootstrap implements Intheface {
         }
     }
 
-    public function shutdown() {
+    public function shutdown()
+    {
         Logger::Log('ENV/Boostrap/Database', 'shutting down databases', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
     }
 

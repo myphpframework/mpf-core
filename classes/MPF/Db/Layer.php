@@ -3,16 +3,21 @@
 namespace MPF\Db;
 
 use MPF\Logger;
+
 \MPF\ENV::bootstrap(\MPF\ENV::DATABASE);
 
 /**
  * Layer of abstraction that every db layer needs to extends
  */
-abstract class Layer implements Layer\Intheface {
+abstract class Layer implements Layer\Intheface
+{
+
     protected static $modelCache = array();
 
     public abstract function transactionStart();
+
     public abstract function transactionCommit();
+
     public abstract function transactionRollback();
 
     /**
@@ -23,7 +28,7 @@ abstract class Layer implements Layer\Intheface {
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\Result
      */
-    public abstract function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page=null);
+    public abstract function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page = null);
 
     /**
      * Fetches models from the database via a link table
@@ -32,7 +37,7 @@ abstract class Layer implements Layer\Intheface {
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public abstract function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page=null);
+    public abstract function queryModelLinkTable(\MPF\Db\ModelLinkTable $linkTable, \MPF\Db\Page $page = null);
 
     /**
      * Deletes a model from the database
@@ -89,7 +94,8 @@ abstract class Layer implements Layer\Intheface {
      */
     private $connections = array();
 
-    public function __construct($connections) {
+    public function __construct($connections)
+    {
         $this->connections = $connections;
     }
 
@@ -101,7 +107,8 @@ abstract class Layer implements Layer\Intheface {
      * @param string $query
      * @return Result
      */
-    public function query($query, $isReadOnly=false) {
+    public function query($query, $isReadOnly = false)
+    {
         $query = $this->sanitizeQuery($query);
         $result = new Result($query, $this->getFirstAvailableConnection($isReadOnly), $this);
         Logger::Log('Db/Layer', $query, Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
@@ -114,21 +121,22 @@ abstract class Layer implements Layer\Intheface {
      * @param \MPF\Db\Entry $dbEntry
      * @param string $tableName
      */
-    public function cacheDbEntry(\MPF\Db\Entry $dbEntry, $tableName) {
+    public function cacheDbEntry(\MPF\Db\Entry $dbEntry, $tableName)
+    {
         if (!array_key_exists($tableName, self::$modelCache)) {
-            self::$modelCache[ $tableName ] = array();
+            self::$modelCache[$tableName] = array();
         }
 
         // if we reached the "limit" of items in the cache we clean the old entries up
-        if (count(self::$modelCache[ $tableName ]) > 10000) {
-            array_splice(self::$modelCache[ $tableName ], 0, 5000);
+        if (count(self::$modelCache[$tableName]) > 10000) {
+            array_splice(self::$modelCache[$tableName], 0, 5000);
         }
 
         // if we have an oldMd5 we need to remove it from the cache
         if ($dbEntry->oldMd5) {
-            unset(self::$modelCache[ $tableName ][ $dbEntry->oldMd5 ]);
+            unset(self::$modelCache[$tableName][$dbEntry->oldMd5]);
         }
-        self::$modelCache[ $tableName ][ $dbEntry->getMD5() ] = $dbEntry;
+        self::$modelCache[$tableName][$dbEntry->getMD5()] = $dbEntry;
     }
 
     /**
@@ -137,7 +145,8 @@ abstract class Layer implements Layer\Intheface {
      * @param \MPF\Db\Field $field
      * @return \MPF\Db\Entry
      */
-    protected function searchCacheByModelField(\MPF\Db\Field $field, \MPF\Db\Page $page=null) {
+    protected function searchCacheByModelField(\MPF\Db\Field $field, \MPF\Db\Page $page = null)
+    {
         if (!array_key_exists($field->getTable(), self::$modelCache)) {
             return array();
         }
@@ -149,9 +158,9 @@ abstract class Layer implements Layer\Intheface {
         }
 
         $entriesFound = array();
-        foreach (self::$modelCache[ $field->getTable() ] as $dbEntry) {
-             // TODO: Since introduction of the page system in the ORM there is a problem with the cache where we dont filter de cached entries by it and they are not "ordered by"
-             if ($field->matches($dbEntry[ $field->getName() ])) {
+        foreach (self::$modelCache[$field->getTable()] as $dbEntry) {
+            // TODO: Since introduction of the page system in the ORM there is a problem with the cache where we dont filter de cached entries by it and they are not "ordered by"
+            if ($field->matches($dbEntry[$field->getName()])) {
                 $entriesFound[] = $dbEntry;
             }
         }
@@ -161,7 +170,7 @@ abstract class Layer implements Layer\Intheface {
             // if we dont have the same count as the database we return nothing
             $count = $this->resultCountByField($field, $page);
             $countCache = count($entriesFound);
-            Logger::Log('Db/Layer', 'Searching \MPF\Db\Entry cache, result: cache('.$countCache.')  db('.$count.')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            Logger::Log('Db/Layer', 'Searching \MPF\Db\Entry cache, result: cache(' . $countCache . ')  db(' . $count . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
             if ($count != $countCache) {
                 return array();
             }
@@ -175,10 +184,10 @@ abstract class Layer implements Layer\Intheface {
      *
      * @return resource
      */
-    protected function getConnectionResource() {
+    protected function getConnectionResource()
+    {
         foreach ($this->connections as $id => $connection) {
-            if (($connection->isInfoValid() && $connection->isConnected())
-            || (!$connection->isConnected() && $connection->connect())) {
+            if (($connection->isInfoValid() && $connection->isConnected()) || (!$connection->isConnected() && $connection->connect())) {
                 return $connection->resource;
             }
         }
@@ -192,7 +201,8 @@ abstract class Layer implements Layer\Intheface {
      * @param boolean $isReadOnly
      * @return Connection
      */
-    protected function getFirstAvailableConnection($isReadOnly=false) {
+    protected function getFirstAvailableConnection($isReadOnly = false)
+    {
         $potentialClones = array();
 
         // Find the first connection that is not connected and returns it
@@ -200,12 +210,12 @@ abstract class Layer implements Layer\Intheface {
             if ($connection->isInfoValid()) {
                 // if the connection is being use by a fetch
                 if ($connection->isConnected() && !$connection->isInUse()) {
-                    Logger::Log('Db/Layer', 'Connection #'.$connection->getId().' is available, using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                    Logger::Log('Db/Layer', 'Connection #' . $connection->getId() . ' is available, using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
                     return $connection;
                 }
                 // Only connect if we arent already connected
                 elseif (!$connection->isConnected() && $connection->connect()) {
-                    Logger::Log('Db/Layer', 'Connection #'.$connection->getId().' just connected and is available, using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                    Logger::Log('Db/Layer', 'Connection #' . $connection->getId() . ' just connected and is available, using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
                     return $connection;
                 } elseif ($connection->isConnected()) {
                     $potentialClones[] = $connection;
@@ -221,7 +231,7 @@ abstract class Layer implements Layer\Intheface {
                     $this->connections[] = $newConnection;
                     $id = end(array_keys($this->connections));
                     $newConnection->setId($id);
-                    Logger::Log('Db/Layer', 'Cloning connection #'. $potential->getId() .' to #'. $id .' and using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                    Logger::Log('Db/Layer', 'Cloning connection #' . $potential->getId() . ' to #' . $id . ' and using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
                     return $this->connections[$id];
                 }
             }

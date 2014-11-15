@@ -7,7 +7,8 @@ use \MPF\Logger;
 /**
  * Object for all the result of model cache search
  */
-class ModelCacheResult extends \MPF\Db\ModelResult {
+class ModelCacheResult extends \MPF\Db\ModelResult
+{
 
     /**
      *
@@ -21,7 +22,8 @@ class ModelCacheResult extends \MPF\Db\ModelResult {
      * @param \MPF\Db\Entry[] $dbEntries
      * @param string $className
      */
-    public function __construct($dbEntries, $className) {
+    public function __construct($dbEntries, $className)
+    {
         $this->entries = $dbEntries;
         $this->rowsTotal = count($dbEntries);
         $this->rowsAffected = 0;
@@ -29,7 +31,8 @@ class ModelCacheResult extends \MPF\Db\ModelResult {
         $this->cursor = 0;
     }
 
-    public function free() {
+    public function free()
+    {
         $this->entries = null;
         $this->cursor = 0;
     }
@@ -39,7 +42,8 @@ class ModelCacheResult extends \MPF\Db\ModelResult {
      *
      * @return \MPF\Db\Model
      */
-    public function fetch() {
+    public function fetch()
+    {
         if (isSet($this->entries[$this->cursor])) {
             $className = $this->className;
             $entry = $className::fromDbEntry($this->entries[$this->cursor]);

@@ -7,7 +7,8 @@ use \MPF\Logger;
 /**
  * Object for all the result of database queries
  */
-class ModelResult extends \MPF\EventEmitter {
+class ModelResult extends \MPF\EventEmitter
+{
 
     public $timestamp = 0;
     public $query = '';
@@ -16,7 +17,8 @@ class ModelResult extends \MPF\EventEmitter {
     protected $className = '';
     protected $result = null;
 
-    public function __construct(Result $result, $className) {
+    public function __construct(Result $result, $className)
+    {
         $this->result = $result;
         $this->query = $result->query;
         $this->rowsTotal = $result->rowsTotal;
@@ -24,7 +26,8 @@ class ModelResult extends \MPF\EventEmitter {
         $this->className = $className;
     }
 
-    public function free() {
+    public function free()
+    {
         $this->result->free();
     }
 
@@ -33,7 +36,8 @@ class ModelResult extends \MPF\EventEmitter {
      *
      * @return \MPF\Db\Model
      */
-    public function fetch() {
+    public function fetch()
+    {
         $dbEntry = $this->result->fetch();
         if ($dbEntry) {
             $className = $this->className;

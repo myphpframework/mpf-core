@@ -1,8 +1,10 @@
 <?php
+
 namespace MPF\Db\Connection;
 
 interface Intheface
 {
+
     /**
      * Determines if we have everything we need to be able to connect to the
      * database
@@ -10,7 +12,7 @@ interface Intheface
      * @return bool
      */
     public function isInfoValid();
-    
+
     /**
      * Tries to connect to the database and sets the resource if successfull
      * 

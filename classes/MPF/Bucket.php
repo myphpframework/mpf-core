@@ -10,7 +10,8 @@ use \MPF\Status;
  * @object \MPF\User
  * @table user
  */
-class Bucket extends \MPF\Db\ModelStatus {
+class Bucket extends \MPF\Db\ModelStatus
+{
 
     /**
      * Unique ID of the bucket
@@ -85,13 +86,12 @@ class Bucket extends \MPF\Db\ModelStatus {
      * @var \MPF\Status
      */
     protected $statuses;
-
     protected $categories = 0;
 
-    const STATUS_NOTAPPROVED =   50;
-    const STATUS_ACTIVE      =  100;
-    const STATUS_SUSPENDED   = 1000;
-    const STATUS_DELETED     = 2000;
+    const STATUS_NOTAPPROVED = 50;
+    const STATUS_ACTIVE = 100;
+    const STATUS_SUSPENDED = 1000;
+    const STATUS_DELETED = 2000;
 
     /**
      * Creates a new user
@@ -99,7 +99,8 @@ class Bucket extends \MPF\Db\ModelStatus {
      * @param string $username
      * @return \MPF\User
      */
-    public static function create($username) {
+    public static function create($username)
+    {
         $class = get_called_class();
         $newUser = new $class();
         $newUser->setUsername($username);
@@ -111,12 +112,13 @@ class Bucket extends \MPF\Db\ModelStatus {
      * @param $id
      * @return \MPF\User
      */
-    public static function byId($id) {
+    public static function byId($id)
+    {
         $result = self::byField(self::generateField('id', $id));
 
         if ($result->rowsTotal == 0) {
-          $result->free();
-          return null;
+            $result->free();
+            return null;
         }
 
         $user = $result->fetch();
@@ -129,7 +131,8 @@ class Bucket extends \MPF\Db\ModelStatus {
      *
      * @return \MPF\Status
      */
-    protected function getDefaultStatus() {
+    protected function getDefaultStatus()
+    {
         return Status::create($this, self::STATUS_NOTAPPROVED, User::USERID_SYSTEM);
     }
 
@@ -138,11 +141,13 @@ class Bucket extends \MPF\Db\ModelStatus {
      *
      * @return MPF\Date
      */
-    public function getCreationDate() {
+    public function getCreationDate()
+    {
         return $this->creationDate;
     }
 
-    public function save() {
+    public function save()
+    {
         $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->transactionStart();
 
@@ -159,7 +164,9 @@ class Bucket extends \MPF\Db\ModelStatus {
     /**
      * @return array
      */
-    public function toArray() {
+    public function toArray()
+    {
         return parent::toArray();
     }
+
 }

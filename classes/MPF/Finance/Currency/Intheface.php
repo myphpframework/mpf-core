@@ -2,7 +2,9 @@
 
 namespace \MPF\Finance\Currency;
 
-class Intheface {
+class Intheface
+{
+
     /**
      * @throws \MPF\Finance\Exception\MissingAPIKey
      */

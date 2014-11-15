@@ -5,7 +5,8 @@ namespace MPF;
 /**
  * @object MPF\Status
  */
-class Status extends \MPF\Db\Model {
+class Status extends \MPF\Db\Model
+{
 
     /**
      * @primaryKey
@@ -57,12 +58,13 @@ class Status extends \MPF\Db\Model {
      * @param $id
      * @return \MPF\User\Status
      */
-    public static function queryById($id) {
+    public static function queryById($id)
+    {
         $result = self::byField(self::generateField('id', $id));
 
         if ($result->rowsTotal == 0) {
-          $result->free();
-          return null;
+            $result->free();
+            return null;
         }
 
         $status = $result->fetch();
@@ -77,7 +79,8 @@ class Status extends \MPF\Db\Model {
      * @param integer $byWhoId
      * @return \MPF\Status
      */
-    public static function create(\MPF\Db\ModelStatus $model, $status, $byWhoId) {
+    public static function create(\MPF\Db\ModelStatus $model, $status, $byWhoId)
+    {
         $newStatus = new Status();
         $newStatus->date = date('Y-m-d H:i:s');
         $newStatus->status = $status;
@@ -90,21 +93,24 @@ class Status extends \MPF\Db\Model {
     /**
      * @return MPF\Date
      */
-    public function getDate() {
+    public function getDate()
+    {
         return $this->date;
     }
 
     /**
      * @return integer
      */
-    public function getForeignId() {
+    public function getForeignId()
+    {
         return $this->foreignId;
     }
 
     /**
      * @return \MPF\User
      */
-    public function getByWho() {
+    public function getByWho()
+    {
         return $this->byWhoId;
     }
 
@@ -112,11 +118,13 @@ class Status extends \MPF\Db\Model {
      *
      * @return integer
      */
-    public function getValue() {
+    public function getValue()
+    {
         return $this->status;
     }
 
-    public function save() {
+    public function save()
+    {
         if (!$this->isNew()) {
             return;
         }

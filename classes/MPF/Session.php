@@ -4,14 +4,16 @@ namespace MPF;
 
 use MPF\Locale;
 
-class Session {
+class Session
+{
 
     /**
      * Returns the locale of the session
      *
      * @return Locale
      */
-    public static function getLocale() {
+    public static function getLocale()
+    {
         if (!array_key_exists('mpf_locale', $_COOKIE)) {
             return new Locale('en_CA');
         }
@@ -24,7 +26,8 @@ class Session {
      *
      * @return \MPF\User
      */
-    public static function getUser() {
+    public static function getUser()
+    {
         return \MPF\User::bySession();
     }
 
@@ -34,11 +37,12 @@ class Session {
      * @param type $varName
      * @return mixed
      */
-    public static function get($varName) {
-        if (!array_key_exists($varName, (array)$_SESSION)) {
+    public static function get($varName)
+    {
+        if (!array_key_exists($varName, (array) $_SESSION)) {
             return null;
         }
-        return $_SESSION[ $varName ];
+        return $_SESSION[$varName];
     }
 
     /**
@@ -48,10 +52,11 @@ class Session {
      * Preferably the login path
      * @return \MPF\User
      */
-    public static function mustBeLoggedIn($loginPath) {
+    public static function mustBeLoggedIn($loginPath)
+    {
         $user = Session::getUser();
         if (!$user) {
-            header('Location: '. $loginPath);
+            header('Location: ' . $loginPath);
             exit;
         }
 
@@ -61,10 +66,12 @@ class Session {
     /**
      * Destroy the session
      */
-    public static function destroy() {
+    public static function destroy()
+    {
         unset($_SESSION['userId']);
         session_write_close();
         session_unset();
         $_SESSION = array();
     }
+
 }

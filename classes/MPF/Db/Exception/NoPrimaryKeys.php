@@ -4,7 +4,8 @@ namespace MPF\Db\Exception;
 
 use MPF\Text;
 
-class NoManyPrimaryKeys extends \Exception {
+class NoManyPrimaryKeys extends \Exception
+{
 
     /**
      *
@@ -12,7 +13,8 @@ class NoManyPrimaryKeys extends \Exception {
      */
     public $result;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->result = $result;
         parent::__construct(Text::byXml('mpf_exception')->get('dbModelNoManyPrimaryKeys'));
     }

@@ -9,28 +9,34 @@ use MPF\Logger;
 use MPF\User as Usr;
 use MPF\User\Group;
 
-class User extends \MPF\REST\Service {
+class User extends \MPF\REST\Service
+{
 
-    protected function options($id, $action) {
+    protected function options($id, $action)
+    {
         $this->setResponseCode(self::HTTPCODE_OK);
 
         $options = '';
-        header('Allow: '.$options);
+        header('Allow: ' . $options);
     }
 
-    protected function update($id, $data) {
+    protected function update($id, $data)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function delete($id) {
+    protected function delete($id)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function retrieve($id, $data) {
+    protected function retrieve($id, $data)
+    {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function create($id, $data) {
+    protected function create($id, $data)
+    {
         $this->validate(array('POST'), array('username', 'password'));
 
         try {
@@ -50,7 +56,7 @@ class User extends \MPF\REST\Service {
         } catch (\MPF\Db\Exception\DuplicateEntry $e) {
             $this->setResponseCode(self::HTTPCODE_CONFLICT);
             return array('errors' => array(
-                array('code' => self::HTTPCODE_CONFLICT, 'msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
+                    array('code' => self::HTTPCODE_CONFLICT, 'msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
             ));
         }
 
@@ -63,11 +69,12 @@ class User extends \MPF\REST\Service {
      * @param string $id
      * @param array $data
      */
-    protected function logout($id, $data) {
+    protected function logout($id, $data)
+    {
         Session::destroy();
 
         if (array_key_exists('redirect', $data)) {
-            header('Location: '.urldecode($data['redirect']));
+            header('Location: ' . urldecode($data['redirect']));
             exit;
         }
 
@@ -75,7 +82,7 @@ class User extends \MPF\REST\Service {
         exit;
     }
 
-   /**
+    /**
      *
      * @throws \MPF\REST\Service\Exception\InvalidRequestMethod
      * @throws \MPF\REST\Service\Exception\MissingRequestFields
@@ -83,7 +90,8 @@ class User extends \MPF\REST\Service {
      * @param string $id
      * @param array $data
      */
-    protected function resetPassword($id, $data) {
+    protected function resetPassword($id, $data)
+    {
         $this->validate(array('PUT'), array('reset_username'));
         $id = filter_var($id, FILTER_SANITIZE_STRING);
 
@@ -91,14 +99,14 @@ class User extends \MPF\REST\Service {
         if (!$user) {
             $this->setResponseCode(self::HTTPCODE_NOT_FOUND);
             return array('errors' => array(
-                array('code' => self::HTTPCODE_NOT_FOUND, 'msg' => Text::byXml('mpf_user')->get('usernameNotFound', array('Replace' => array('username' => $id))))
+                    array('code' => self::HTTPCODE_NOT_FOUND, 'msg' => Text::byXml('mpf_user')->get('usernameNotFound', array('Replace' => array('username' => $id))))
             ));
         }
 
         if ($user->getPassword() !== null || $user->getId() == 1) {
             $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
             return array('errors' => array(
-                array('code' => self::HTTPCODE_BAD_REQUEST, 'msg' => Text::byXml('mpf_user')->get('cannotResetPassword', array('Replace' => array('username' => $id))))
+                    array('code' => self::HTTPCODE_BAD_REQUEST, 'msg' => Text::byXml('mpf_user')->get('cannotResetPassword', array('Replace' => array('username' => $id))))
             ));
         }
 
@@ -122,7 +130,8 @@ class User extends \MPF\REST\Service {
      * @param string $id
      * @param array $data
      */
-    protected function login($id, $data) {
+    protected function login($id, $data)
+    {
         $this->validate(array('PUT'), array('username', 'password'));
         $id = filter_var($id, FILTER_SANITIZE_STRING);
 
@@ -145,4 +154,5 @@ class User extends \MPF\REST\Service {
         Logger::Log('Service\User', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
         throw $exception;
     }
+
 }

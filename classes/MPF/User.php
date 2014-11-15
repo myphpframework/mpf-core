@@ -13,7 +13,8 @@ use \MPF\User\Group;
  * @object \MPF\User
  * @table user
  */
-class User extends \MPF\Db\ModelStatus {
+class User extends \MPF\Db\ModelStatus
+{
 
     /**
      * @primaryKey
@@ -85,18 +86,18 @@ class User extends \MPF\Db\ModelStatus {
     protected $groups = null;
     protected $groupCount = 0;
 
-    const USERID_SYSTEM      =    1;
-
-    const STATUS_NOTAPPROVED =   50;
-    const STATUS_ACTIVE      =  100;
-    const STATUS_SUSPENDED   = 1000;
-    const STATUS_DELETED     = 2000;
+    const USERID_SYSTEM = 1;
+    const STATUS_NOTAPPROVED = 50;
+    const STATUS_ACTIVE = 100;
+    const STATUS_SUSPENDED = 1000;
+    const STATUS_DELETED = 2000;
 
     /**
      *
      * @return \MPF\User
      */
-    public static function SYSTEM() {
+    public static function SYSTEM()
+    {
         return self::byId(self::USERID_SYSTEM);
     }
 
@@ -106,7 +107,8 @@ class User extends \MPF\Db\ModelStatus {
      * @param string $username
      * @return \MPF\User
      */
-    public static function create($username) {
+    public static function create($username)
+    {
         $class = get_called_class();
         $newUser = new $class();
         $newUser->setUsername($username);
@@ -118,14 +120,15 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return \MPF\User
      */
-    public static function bySession() {
+    public static function bySession()
+    {
         \MPF\ENV::bootstrap(\MPF\ENV::SESSION);
 
         if (!\MPF\Session::get('userId')) {
             return null;
         }
 
-        return self::byId((int)\MPF\Session::get('userId'));
+        return self::byId((int) \MPF\Session::get('userId'));
     }
 
     /**
@@ -133,12 +136,13 @@ class User extends \MPF\Db\ModelStatus {
      * @param $id
      * @return \MPF\User
      */
-    public static function byId($id) {
+    public static function byId($id)
+    {
         $result = self::byField(self::generateField('id', $id));
 
         if ($result->rowsTotal == 0) {
-          $result->free();
-          return null;
+            $result->free();
+            return null;
         }
 
         $user = $result->fetch();
@@ -151,11 +155,12 @@ class User extends \MPF\Db\ModelStatus {
      * @param string $username
      * @return \MPF\User
      */
-    public static function byUsername($username) {
+    public static function byUsername($username)
+    {
         $result = self::byField(self::generateField('username', $username));
         if ($result->rowsTotal == 0) {
-          $result->free();
-          return null;
+            $result->free();
+            return null;
         }
 
         $user = $result->fetch();
@@ -168,7 +173,8 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return \MPF\Status
      */
-    protected function getDefaultStatus() {
+    protected function getDefaultStatus()
+    {
         return Status::create($this, self::STATUS_NOTAPPROVED, User::USERID_SYSTEM);
     }
 
@@ -177,7 +183,8 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return MPF\Date
      */
-    public function getCreationDate() {
+    public function getCreationDate()
+    {
         return $this->creationDate;
     }
 
@@ -186,7 +193,8 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return MPF\Date
      */
-    public function getLastLogin() {
+    public function getLastLogin()
+    {
         return $this->lastAttempt;
     }
 
@@ -195,7 +203,8 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return string
      */
-    public function getUsername() {
+    public function getUsername()
+    {
         return $this->username;
     }
 
@@ -204,7 +213,8 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return string
      */
-    public function getPassword() {
+    public function getPassword()
+    {
         return $this->password;
     }
 
@@ -213,7 +223,8 @@ class User extends \MPF\Db\ModelStatus {
      *
      * @return MPF\User\Group[]
      */
-    public function getGroups() {
+    public function getGroups()
+    {
         // if the groups havent loaded we do so now
         if ($this->groups === null) {
             $this->groups = Group::byUser($this);
@@ -229,7 +240,8 @@ class User extends \MPF\Db\ModelStatus {
      * @param MPF\User\Group $group
      * @return bool
      */
-    public function addGroup(Group $group) {
+    public function addGroup(Group $group)
+    {
         // Restrictions to add users to the admin group
         if ($group->getId() == Group::ADMIN_ID) {
             $loggedUser = self::bySession();
@@ -257,7 +269,8 @@ class User extends \MPF\Db\ModelStatus {
      * @param MPF\User\Group $group
      * @return bool
      */
-    public function isInGroup(Group $group) {
+    public function isInGroup(Group $group)
+    {
         foreach ($this->getGroups() as $grp) {
             if ($group->getId() == $grp->getId()) {
                 return true;
@@ -269,14 +282,16 @@ class User extends \MPF\Db\ModelStatus {
     /**
      * @param string $username
      */
-    public function setUsername($username) {
+    public function setUsername($username)
+    {
         $this->setField('username', $username);
     }
 
     /**
      * @param string $password
      */
-    public function setPassword($password) {
+    public function setPassword($password)
+    {
         $this->setField('password', $password);
     }
 
@@ -286,14 +301,16 @@ class User extends \MPF\Db\ModelStatus {
      * @param string $password
      * @return boolean
      */
-    public function verifyPassword($password) {
+    public function verifyPassword($password)
+    {
         if ($this->password == $this->verifyField('password', $password)) {
             return true;
         }
         return false;
     }
 
-    public function save() {
+    public function save()
+    {
         $dbLayer = \MPF\Db::byName($this->getDatabase());
         $dbLayer->transactionStart();
 
@@ -314,7 +331,7 @@ class User extends \MPF\Db\ModelStatus {
                     $linkTables[] = new \MPF\Db\ModelLinkTable(array(
                         $userIdField,
                         $group->getField('id')
-                    ), null, self::getDb(get_called_class()), 'user_group_link');
+                            ), null, self::getDb(get_called_class()), 'user_group_link');
                 }
                 \MPF\Db\ModelLinkTable::saveAll($linkTables);
             }
@@ -326,11 +343,11 @@ class User extends \MPF\Db\ModelStatus {
         $dbLayer->transactionCommit();
     }
 
-
     /**
      * @return array
      */
-    public function toArray() {
+    public function toArray()
+    {
         $array = parent::toArray();
         $array['groups'] = array();
         foreach ($this->getGroups() as $group) {
@@ -338,4 +355,5 @@ class User extends \MPF\Db\ModelStatus {
         }
         return $array;
     }
+
 }

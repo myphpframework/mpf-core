@@ -4,7 +4,8 @@ namespace MPF;
 
 use MPF\Locale;
 
-class Text {
+class Text
+{
 
     /**
      * Fetches the i18n file and returns the instantiated Text
@@ -15,7 +16,8 @@ class Text {
      * @param  $filename
      * @return This
      */
-    public static function byXml($filename) {
+    public static function byXml($filename)
+    {
         static $files = array();
 
         if (!array_key_exists($filename, $files)) {
@@ -84,14 +86,16 @@ class Text {
      */
     private $pluginArguments = array();
 
-    private function __construct($pluginsArgs=array()) {
+    private function __construct($pluginsArgs = array())
+    {
         $this->pluginArguments = $pluginsArgs;
     }
 
     /**
      * @param Text[]
      */
-    protected function add($texts) {
+    protected function add($texts)
+    {
         $this->texts = $this->texts + $texts;
     }
 
@@ -102,7 +106,8 @@ class Text {
      * @param string $id
      * @return string
      */
-    public function get($id, $pluginsArgs=array()) {
+    public function get($id, $pluginsArgs = array())
+    {
         if (!array_key_exists($id, $this->texts)) {
             $exception = new Text\Exception\IdNotFound($id, array_keys($this->texts));
             Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
@@ -116,7 +121,8 @@ class Text {
      *
      * @return json
      */
-    public function toJson() {
+    public function toJson()
+    {
         return json_encode($this->texts);
     }
 
@@ -125,7 +131,9 @@ class Text {
      *
      * @return array
      */
-    public function toArray() {
+
+    public function toArray()
+    {
         return $this->texts;
     }
 
@@ -133,7 +141,8 @@ class Text {
      * Compiles a list of plugins for the text.
      * Populates the property plugins
      */
-    private function loadPlugins() {
+    private function loadPlugins()
+    {
         if (null == self::$plugins) {
             self::$plugins = array();
 
@@ -164,7 +173,8 @@ class Text {
      * @param string $id
      * @return string
      */
-    private function parseTextId($id, $pluginsArgs) {
+    private function parseTextId($id, $pluginsArgs)
+    {
         $this->loadPlugins();
 
         if (!array_key_exists($id, $this->texts)) {

@@ -1,4 +1,5 @@
 <?php
+
 namespace MPF\Db;
 
 /**
@@ -6,6 +7,7 @@ namespace MPF\Db;
  */
 class Entry implements \ArrayAccess, \Iterator, \Serializable
 {
+
     /**
      * Contains all the values of the fields in this entry, with the field name as a key.
      * Limited to what fields are returned by the Sql Query.
@@ -34,12 +36,12 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
      *
      * @param array $fieldValues
      */
-    public function __construct($fieldValues, $oldMd5=null)
+    public function __construct($fieldValues, $oldMd5 = null)
     {
-    	$this->fieldValues = $fieldValues;
-      ksort($fieldValues);
-    	$this->md5 = md5(implode('', $fieldValues));
-      $this->oldMd5 = $oldMd5;
+        $this->fieldValues = $fieldValues;
+        ksort($fieldValues);
+        $this->md5 = md5(implode('', $fieldValues));
+        $this->oldMd5 = $oldMd5;
     }
 
     /**
@@ -47,7 +49,8 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
      *
      * @return type
      */
-    public function getMD5() {
+    public function getMD5()
+    {
         return $this->md5;
     }
 
@@ -59,7 +62,7 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
      */
     public function set($fieldName, $value)
     {
-    	$this->fieldValues[ $fieldName ] = $value;
+        $this->fieldValues[$fieldName] = $value;
     }
 
     /**
@@ -79,9 +82,9 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
      * @param Mixed $offset
      * @return Mixed
      */
- 	public function offsetGet($offset)
+    public function offsetGet($offset)
     {
-        return $this->fieldValues[ $offset ];
+        return $this->fieldValues[$offset];
     }
 
     /**
@@ -92,7 +95,7 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
      */
     public function offsetSet($offset, $value)
     {
-        $this->fieldValues[ $offset ] = $value;
+        $this->fieldValues[$offset] = $value;
     }
 
     /**
@@ -102,13 +105,13 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
      */
     public function offsetUnset($offset)
     {
-        unset($this->fieldValues[ $offset ]);
+        unset($this->fieldValues[$offset]);
     }
 
     /**
-    * Rewinds the pointer to the firs record.
-    *
-    */
+     * Rewinds the pointer to the firs record.
+     *
+     */
     public function rewind()
     {
         reset($this->fieldValues);
@@ -156,17 +159,18 @@ class Entry implements \ArrayAccess, \Iterator, \Serializable
 
     public function serialize()
     {
-    	$data = array(
-    	   'md5' => $this->md5,
-    	   'fieldValues' => $this->fieldValues,
-    	);
-    	return serialize($data);
+        $data = array(
+            'md5' => $this->md5,
+            'fieldValues' => $this->fieldValues,
+        );
+        return serialize($data);
     }
 
     public function unserialize($data)
     {
-    	$data = unserialize($data);
+        $data = unserialize($data);
         $this->md5 = $data['md5'];
         $this->fieldValues = $data['fieldValues'];
     }
+
 }

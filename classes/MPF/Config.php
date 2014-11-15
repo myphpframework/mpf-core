@@ -4,11 +4,14 @@ namespace MPF;
 
 use MPF\ENV;
 
-class Config {
+class Config
+{
+
     public static $cache_enabled = false;
     public static $cache_path = '/tmp/';
 
-    public static function checkCacheDir() {
+    public static function checkCacheDir()
+    {
         if ($dir && (!is_dir($dir) || !is_writable($dir))) {
             if (!@mkdir($dir, 0775, true)) {
                 return false;
@@ -17,8 +20,9 @@ class Config {
         return true;
     }
 
-    public static function clearCache() {
-        if (null === shell_exec('rm -rf ' . escapeshellarg(self::$cache_path).'  && echo "success"')) {
+    public static function clearCache()
+    {
+        if (null === shell_exec('rm -rf ' . escapeshellarg(self::$cache_path) . '  && echo "success"')) {
             return false;
         }
         return true;
@@ -32,7 +36,8 @@ class Config {
      * @param bool $useCache
      * @return StdObj
      */
-    public static function get($filename, $useCache=true) {
+    public static function get($filename, $useCache = true)
+    {
         static $configs = array();
 
         if (ENV::getType() === '') {
@@ -95,7 +100,8 @@ class Config {
      * @param Config $config
      * @return stdClass
      */
-    private static function getEnv(Config $config) {
+    private static function getEnv(Config $config)
+    {
         if (!array_key_exists(ENV::getType(), $config->configs)) {
             throw new Config\Exception\EnvironmentNotFound('Enviroment "' . ENV::getType() . '" does not exist in the config file!');
         }
@@ -114,7 +120,8 @@ class Config {
      *
      * @return string
      */
-    private static function getCacheId($filename) {
+    private static function getCacheId($filename)
+    {
         $pathInfo = pathinfo(ENV::paths()->getCurrentDir());
         return md5(@$pathInfo['dirname'] . $filename);
     }
@@ -126,7 +133,9 @@ class Config {
      *
      * @param string $filename
      */
-    protected function __construct($filename) {
+    protected function __construct($filename)
+    {
+        
     }
 
     /**
@@ -134,7 +143,8 @@ class Config {
      * @throws Config\Exception\Overlapping
      * @param type $iniSections
      */
-    protected function addIni($iniSections) {
+    protected function addIni($iniSections)
+    {
         foreach ($iniSections as $sectionName => $values) {
             if (strpos($sectionName, ':') !== false) {
                 list ($sectionName, $extendName) = preg_split("/\s{0,}:\s{0,}/", $sectionName);

@@ -1,8 +1,10 @@
 <?php
+
 namespace MPF\Text\Plugin;
 
 interface Intheface
 {
+
     /**
      * Every text plugin needs to have a way to detect if they need to run or not.
      * To detect if they need to parse this text or not

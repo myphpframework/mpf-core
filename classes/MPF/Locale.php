@@ -1,11 +1,13 @@
 <?php
+
 namespace MPF;
 
 use MPF\Session;
 
 class Locale
 {
-  /**
+
+    /**
      *  The locale
      *
      * @var string
@@ -17,8 +19,9 @@ class Locale
      *
      * @return Locale
      */
-    public static function bySession() {
-       return Session::getLocale();
+    public static function bySession()
+    {
+        return Session::getLocale();
     }
 
     public function __construct($locale)
@@ -36,7 +39,7 @@ class Locale
         return $this->getCode();
     }
 
-  /**
+    /**
      * Returns the language
      *
      * @return string
@@ -47,7 +50,7 @@ class Locale
         return $languageCode;
     }
 
-  /**
+    /**
      * Returns the country
      *
      * @return string
@@ -57,4 +60,5 @@ class Locale
         list($languageCode, $countryCode) = explode('_', $this->getCode());
         return $countryCode;
     }
+
 }

@@ -5,9 +5,11 @@ namespace MPF\Bootstrap;
 use MPF\ENV;
 use MPF\Logger;
 
-class Session extends \MPF\Bootstrap implements Intheface {
+class Session extends \MPF\Bootstrap implements Intheface
+{
 
-    public function init($args=array()) {
+    public function init($args = array())
+    {
         ENV::bootstrap(ENV::DATABASE);
 
         ini_set('session.cookie_domain', SESSION_COOKIE_DOMAIN);
@@ -18,7 +20,8 @@ class Session extends \MPF\Bootstrap implements Intheface {
         $this->initialized = true;
     }
 
-    public function shutdown() {
+    public function shutdown()
+    {
         Logger::Log('ENV/Boostrap/Session', 'shutting down session', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
         @session_write_close();
         //session_regenerate_id(FALSE);

@@ -2,11 +2,12 @@
 
 namespace MPF;
 
-abstract class PhpDoc {
+abstract class PhpDoc
+{
+
     const CLASS_NAME = 'object';
     const CLASS_DATABASE = 'database';
     const CLASS_TABLE = 'table';
-
     const PROPERTY_PRIMARY_KEY = 'primaryKey';
     const PROPERTY_READONLY = 'readonly';
     const PROPERTY_TYPE = 'type';
@@ -29,7 +30,8 @@ abstract class PhpDoc {
      */
     protected $className = '';
 
-    protected static function generatePhpDoc($className) {
+    protected static function generatePhpDoc($className)
+    {
         if (!array_key_exists($className, self::$phpdoc)) {
             self::$phpdoc[$className] = array();
             $class = new \ReflectionClass($className);
@@ -53,7 +55,8 @@ abstract class PhpDoc {
      * @param  string $rawPhpdoc
      * @return array
      */
-    private static function getPhpDoc($rawPhpdoc) {
+    private static function getPhpDoc($rawPhpdoc)
+    {
         preg_match_all("/@([a-z0-9]+)([a-z0-9 _\-:,\\\]{0,})\n/i", $rawPhpdoc, $matches);
         $phpdoc = array();
         foreach ($matches[1] as $index => $match) {
@@ -72,7 +75,8 @@ abstract class PhpDoc {
         return $phpdoc;
     }
 
-    protected function __construct() {
+    protected function __construct()
+    {
         $this->className = get_class($this);
         if (!array_key_exists($this->className, self::$phpdoc)) {
             self::generatePhpDoc($this->className);
@@ -83,4 +87,3 @@ abstract class PhpDoc {
     }
 
 }
-

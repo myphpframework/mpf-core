@@ -1,4 +1,5 @@
 <?php
+
 namespace MPF\Db\Connection;
 
 class SQLite extends \MPF\Db\Connection
@@ -16,17 +17,13 @@ class SQLite extends \MPF\Db\Connection
      */
     public function connect()
     {
-        if ($this->isInfoValid() && !$this->isConnected())
-        {
-            $resource = new \SQLite3($this->host.$this->database);
-            if ($resource)
-            {
+        if ($this->isInfoValid() && !$this->isConnected()) {
+            $resource = new \SQLite3($this->host . $this->database);
+            if ($resource) {
                 $this->setResource($resource);
                 return true;
             }
-        }
-        elseif ($this->isConnected())
-        {
+        } elseif ($this->isConnected()) {
             return true;
         }
 
@@ -35,8 +32,7 @@ class SQLite extends \MPF\Db\Connection
 
     public function disconnect()
     {
-        if ($this->resource instanceof \SQLite3)
-        {
+        if ($this->resource instanceof \SQLite3) {
             $this->resource->close();
         }
     }
@@ -48,8 +44,7 @@ class SQLite extends \MPF\Db\Connection
      */
     public function isInfoValid()
     {
-        if ($this->engine != '')
-        {
+        if ($this->engine != '') {
             return ($this->host != '' && $this->database != '');
         }
         return false;

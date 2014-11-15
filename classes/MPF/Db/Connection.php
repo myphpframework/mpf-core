@@ -2,7 +2,8 @@
 
 namespace MPF\Db;
 
-abstract class Connection implements Connection\Intheface {
+abstract class Connection implements Connection\Intheface
+{
 
     public $engine = '';
     public $host = '';
@@ -14,13 +15,16 @@ abstract class Connection implements Connection\Intheface {
     private $inUse = false;
     private $readWrite = 'r';
 
-    public function __construct() {
+    public function __construct()
+    {
+        
     }
 
     /**
      * Id can only be set one and should be set in the constructor Layer
      */
-    public function setId($id) {
+    public function setId($id)
+    {
         $this->id = (int) $id;
     }
 
@@ -30,7 +34,8 @@ abstract class Connection implements Connection\Intheface {
      *
      * @param bool $inUse
      */
-    public function setInUse($inUse) {
+    public function setInUse($inUse)
+    {
         $this->inUse = $inUse;
     }
 
@@ -40,7 +45,8 @@ abstract class Connection implements Connection\Intheface {
      *
      * @return int
      */
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -49,7 +55,8 @@ abstract class Connection implements Connection\Intheface {
      *
      * @param mixed $resource
      */
-    protected function setResource($resource) {
+    protected function setResource($resource)
+    {
         $this->resource = $resource;
     }
 
@@ -64,7 +71,8 @@ abstract class Connection implements Connection\Intheface {
      * @param string $password
      * @param string $readWrite
      */
-    public function setInfo($engine, $host, $port, $database, $login, $password, $readWrite="r") {
+    public function setInfo($engine, $host, $port, $database, $login, $password, $readWrite = "r")
+    {
         $this->engine = $engine;
         $this->host = $host;
         $this->port = $port;
@@ -77,7 +85,8 @@ abstract class Connection implements Connection\Intheface {
     /**
      * @return string
      */
-    public function getPassword() {
+    public function getPassword()
+    {
         return $this->password;
     }
 
@@ -87,7 +96,8 @@ abstract class Connection implements Connection\Intheface {
      *
      * @return bool
      */
-    public function isInUse() {
+    public function isInUse()
+    {
         return $this->inUse;
     }
 
@@ -96,23 +106,28 @@ abstract class Connection implements Connection\Intheface {
      *
      * @return bool
      */
-    public function isConnected() {
+    public function isConnected()
+    {
         return ($this->resource !== null);
     }
 
-    public function canRead() {
+    public function canRead()
+    {
         return (strpos($this->readWrite, 'r') === false ? false : true);
     }
 
-    public function canWrite() {
+    public function canWrite()
+    {
         return (strpos($this->readWrite, 'w') === false ? false : true);
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->disconnect();
     }
 
-    public function __clone() {
+    public function __clone()
+    {
         $this->id = 0;
         $this->resource = null;
     }

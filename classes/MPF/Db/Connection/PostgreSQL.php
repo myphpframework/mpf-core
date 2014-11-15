@@ -1,4 +1,5 @@
 <?php
+
 namespace MPF\Db\Connection;
 
 class PostgreSQL extends \MPF\Db\Connection
@@ -16,18 +17,14 @@ class PostgreSQL extends \MPF\Db\Connection
      */
     public function connect()
     {
-        if ($this->isInfoValid() && !$this->isConnected())
-        {
-            $connectString = 'host='.$this->host.' port='.$this->port.' user='.$this->login.' password='.$this->getPassword().' dbname='.$this->database.' connect_timeout=5';
+        if ($this->isInfoValid() && !$this->isConnected()) {
+            $connectString = 'host=' . $this->host . ' port=' . $this->port . ' user=' . $this->login . ' password=' . $this->getPassword() . ' dbname=' . $this->database . ' connect_timeout=5';
             $resource = pg_connect($connectString);
-            if (is_resource($resource))
-            {
+            if (is_resource($resource)) {
                 $this->setResource($resource);
                 return true;
             }
-        }
-        elseif ($this->isConnected())
-        {
+        } elseif ($this->isConnected()) {
             return true;
         }
 
@@ -39,8 +36,7 @@ class PostgreSQL extends \MPF\Db\Connection
      */
     public function disconnect()
     {
-        if ($this->resource)
-        {
+        if ($this->resource) {
             pg_close($this->resource);
         }
     }
@@ -52,14 +48,10 @@ class PostgreSQL extends \MPF\Db\Connection
      */
     public function isInfoValid()
     {
-        if ($this->engine != '')
-        {
-            return ($this->host != ''
-                 && $this->port != 0
-                 && $this->database != ''
-                 && $this->login != ''
-                 && $this->getPassword() != '');
+        if ($this->engine != '') {
+            return ($this->host != '' && $this->port != 0 && $this->database != '' && $this->login != '' && $this->getPassword() != '');
         }
         return false;
     }
+
 }

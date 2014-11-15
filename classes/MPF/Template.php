@@ -7,7 +7,8 @@ use MPF\Template\Marker;
 use MPF\ENV;
 use MPF\Text;
 
-class Template {
+class Template
+{
 
     /**
      * Contains an array of templates output to overwrite stuff
@@ -62,7 +63,8 @@ class Template {
      *
      * @param Exception $e
      */
-    public static function errorHandler($errno, $errstr, $errfile, $errline) {
+    public static function errorHandler($errno, $errstr, $errfile, $errline)
+    {
         $GLOBALS['userErrors'][] = new \Exception($errstr, $errno);
     }
 
@@ -74,7 +76,8 @@ class Template {
      * @param bool $exitIfCached
      * @return Template
      */
-    public static function getFile($filename, $parent = null, $exitIfCached=false) {
+    public static function getFile($filename, $parent = null, $exitIfCached = false)
+    {
         $template = new Template($filename, $parent);
         if ($template->isCached() && $exitIfCached) {
             Logger::Log('Template(' . $filename . ')', 'isCached, echo parse and returning null', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
@@ -84,14 +87,16 @@ class Template {
         return $template;
     }
 
-    public static function clearCache() {
-        if (null === shell_exec('rm -rf ' . escapeshellarg(Config::get('settings')->template->cache->dir).'  && echo "success"')) {
+    public static function clearCache()
+    {
+        if (null === shell_exec('rm -rf ' . escapeshellarg(Config::get('settings')->template->cache->dir) . '  && echo "success"')) {
             return false;
         }
         return true;
     }
 
-    private function __construct($filename, Template $parent = null) {
+    private function __construct($filename, Template $parent = null)
+    {
         $this->parent = $parent;
         $this->filename = $filename;
 
@@ -114,7 +119,8 @@ class Template {
      * @param string $filename
      * @return string
      */
-    protected function getText($id, $filename='') {
+    protected function getText($id, $filename = '')
+    {
         $filename = ($filename ? $filename : $this->filename);
         return Text::byXml($filename)->get($id);
     }
@@ -122,7 +128,8 @@ class Template {
     /**
      * Initiate the markers for the template
      */
-    protected function initMarkers() {
+    protected function initMarkers()
+    {
         $this->markers = $this->getMarkers();
         foreach ($this->markers as $marker) {
             $marker->init($this, $this->rawTemplate);
@@ -135,27 +142,31 @@ class Template {
      * @param string $content
      * @param string $id
      */
-    public function setContent($content, $id='content') {
+    public function setContent($content, $id = 'content')
+    {
         $this->contents[$id] = $content;
     }
 
     /**
      * ob_start()
      */
-    public function startContent() {
+    public function startContent()
+    {
         ob_start();
     }
 
     /**
      * ob_get_contents and puts it in the content
      */
-    public function stopContent() {
+    public function stopContent()
+    {
         $this->setContent(ob_get_contents());
         ob_end_clean();
         return $this;
     }
 
-    public function evalError($errno, $errstr, $errfile, $errline) {
+    public function evalError($errno, $errstr, $errfile, $errline)
+    {
         if (ENV::getType() == 'development') {
             $GLOBALS['userErrors'][] = new \Exception($errstr . ' in ' . $this->getFilename() . " on line " . $errline, $errno);
         }
@@ -166,7 +177,8 @@ class Template {
      *
      * @return string
      */
-    public function parse() {
+    public function parse()
+    {
         if ($this->parent && array_key_exists($this->filename, $this->parent->contents)) {
             return $this->parent->contents[$this->filename];
         }
@@ -206,7 +218,9 @@ class Template {
         if ($oldErrorHandler) {
             set_error_handler($oldErrorHandler);
         } else {
-            set_error_handler(function () {});
+            set_error_handler(function () {
+                
+            });
         }
 
         return $templateOutput;
@@ -217,7 +231,8 @@ class Template {
      *
      * @return string
      */
-    public function getFilename() {
+    public function getFilename()
+    {
         $pathinfo = pathinfo($this->filename);
         if (array_key_exists('extension', $pathinfo)) {
             return $this->filename;
@@ -230,7 +245,8 @@ class Template {
      *
      * @return boolean
      */
-    public function isCached() {
+    public function isCached()
+    {
         static $isCached = null;
 
         if (null === $isCached) {
@@ -247,7 +263,8 @@ class Template {
     /**
      * Sets if the template is cachable, it is by default
      */
-    public function setCacheable($isCacheable) {
+    public function setCacheable($isCacheable)
+    {
         $this->isCacheable = $isCacheable;
     }
 
@@ -256,14 +273,15 @@ class Template {
      *
      * @return bool
      */
-    public function isCacheable() {
+    public function isCacheable()
+    {
         $isCacheable = ($this->isCacheable && Config::get('settings')->template->cache->enabled && !$this->isCached());
         if (!$isCacheable) {
-            Logger::Log('Template(' . $this->filename . ')', ' template is not cacheable: '."\n"
-                .'Property: '.($this->isCacheable ? 'TRUE' : 'FALSE')."\n"
-                .'Config: '.(Config::get('settings')->template->cache->enabled ? 'TRUE' : 'FALSE')."\n"
-                .'Already cached: '.($this->isCached() ? 'TRUE' : 'FALSE')."\n"
-              , Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE
+            Logger::Log('Template(' . $this->filename . ')', ' template is not cacheable: ' . "\n"
+                    . 'Property: ' . ($this->isCacheable ? 'TRUE' : 'FALSE') . "\n"
+                    . 'Config: ' . (Config::get('settings')->template->cache->enabled ? 'TRUE' : 'FALSE') . "\n"
+                    . 'Already cached: ' . ($this->isCached() ? 'TRUE' : 'FALSE') . "\n"
+                    , Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE
             );
         }
         return $isCacheable;
@@ -274,7 +292,8 @@ class Template {
      *
      * @return string
      */
-    protected function getCachePath() {
+    protected function getCachePath()
+    {
         return Config::get('settings')->template->cache->dir . Session::getLocale() . '/';
     }
 
@@ -283,21 +302,23 @@ class Template {
      *
      * @return string
      */
-    public function getTemplateId() {
+    public function getTemplateId()
+    {
         return md5(ENV::paths()->getCurrentDir() . $this->getNearestFilePath());
     }
 
     /**
      * Caches the template on the file system
      */
-    protected function cacheOutput($output) {
+    protected function cacheOutput($output)
+    {
         $file = $this->getCachePath();
         if (!file_exists($file)) {
             @mkdir($file);
         }
         $file .= $this->getTemplateId();
         @file_put_contents($file, $output);
-        Logger::Log('Template(' . $this->filename . ')', ' caching template at "'.$file.'"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
+        Logger::Log('Template(' . $this->filename . ')', ' caching template at "' . $file . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
     }
 
     /**
@@ -305,7 +326,8 @@ class Template {
      *
      * @return string
      */
-    protected function retrieveCache() {
+    protected function retrieveCache()
+    {
         $file = $this->getCachePath() . $this->getTemplateId();
         return file_get_contents($file);
     }
@@ -316,7 +338,8 @@ class Template {
      *
      * @return Marker[]
      */
-    public function getMarkers() {
+    public function getMarkers()
+    {
         $markers = array();
 
         // Match all markers that have closing tags first
@@ -350,7 +373,8 @@ class Template {
      *
      * @return string
      */
-    public function getNearestFilePath() {
+    public function getNearestFilePath()
+    {
         // if we already found the nearest path for the file name we return it
         if ($this->nearestPath) {
             return $this->nearestPath . $this->getFilename();
@@ -371,7 +395,8 @@ class Template {
      * @see parse
      * @return string
      */
-    public function __toString() {
+    public function __toString()
+    {
         Logger::Log('Template(' . $this->filename . ')', '__toString() thus parsing template', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
         return $this->parse();
     }

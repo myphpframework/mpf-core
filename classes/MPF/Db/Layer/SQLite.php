@@ -8,7 +8,8 @@ use MPF\Db\Exception\InvalidQuery;
 use MPF\Db\Result;
 use MPF\Db\Entry;
 
-class SQLite extends \MPF\Db\Layer {
+class SQLite extends \MPF\Db\Layer
+{
 
     /**
      * Executes the fetch for the given result
@@ -17,7 +18,8 @@ class SQLite extends \MPF\Db\Layer {
      * @throws InvalidResultResourceType
      * @return Result
      */
-    public function fetch(Result $result) {
+    public function fetch(Result $result)
+    {
         $connection = $result->getConnection();
         $connection->setInUse(true);
         if (!($connection instanceof \MPF\Db\Connection\SQLite)) {
@@ -41,7 +43,9 @@ class SQLite extends \MPF\Db\Layer {
         return new Entry($entry);
     }
 
-    public function getTotal($table) {
+    public function getTotal($table)
+    {
+        
     }
 
     /**
@@ -50,14 +54,19 @@ class SQLite extends \MPF\Db\Layer {
      * @param \MPF\Db\Field $field
      * @return \MPF\Db\Result
      */
-    public function queryModelField(\MPF\Db\Field $field) {
+    public function queryModelField(\MPF\Db\Field $field)
+    {
+        
     }
 
-    public function fetchModels(\MPF\Db\Model $model, $condition='AND') {
-
+    public function fetchModels(\MPF\Db\Model $model, $condition = 'AND')
+    {
+        
     }
 
-    public function saveModel(\MPF\Db\Model $model) {
+    public function saveModel(\MPF\Db\Model $model)
+    {
+        
     }
 
     /**
@@ -65,7 +74,8 @@ class SQLite extends \MPF\Db\Layer {
      *
      * @param Result $result
      */
-    public function freeResult(Result $result) {
+    public function freeResult(Result $result)
+    {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\SQLite)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\SQLite');
@@ -88,7 +98,8 @@ class SQLite extends \MPF\Db\Layer {
      * @param string $query
      * @return string
      */
-    protected function sanitizeQuery($query) {
+    protected function sanitizeQuery($query)
+    {
         return $query;
     }
 
@@ -101,7 +112,8 @@ class SQLite extends \MPF\Db\Layer {
      * @param Result $result
      * @return Result
      */
-    protected function executeQuery(Result $result) {
+    protected function executeQuery(Result $result)
+    {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\SQLite)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\SQLite');
@@ -138,7 +150,8 @@ class SQLite extends \MPF\Db\Layer {
      *
      * @return integer
      */
-    protected function getRowsTotal(Result $result) {
+    protected function getRowsTotal(Result $result)
+    {
         return (int) $result->getResource()->numColumns();
     }
 
@@ -147,7 +160,8 @@ class SQLite extends \MPF\Db\Layer {
      *
      * @return integer
      */
-    protected function getRowsAffected(Result $result) {
+    protected function getRowsAffected(Result $result)
+    {
         $connection = $result->getConnection();
         return (int) $connection->resource->changes();
     }

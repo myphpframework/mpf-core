@@ -19,6 +19,7 @@ namespace Psr\Log;
  */
 interface LoggerInterface
 {
+
     /**
      * System is unusable.
      *

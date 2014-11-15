@@ -9,7 +9,9 @@ use MPF\Config;
 /**
  * Logs information
  */
-class Logger {
+class Logger
+{
+
     const LEVEL_NONE = 0;
     const LEVEL_ALL = 1;
     const LEVEL_DEBUG = 2;
@@ -17,7 +19,6 @@ class Logger {
     const LEVEL_FATAL = 8;
     const LEVEL_WARNING = 16;
     const LEVEL_INFO = 32;
-
     const CATEGORY_NONE = 0;
     const CATEGORY_ALL = 1;
     const CATEGORY_FRAMEWORK = 2;
@@ -39,7 +40,8 @@ class Logger {
      * @param  bit $category
      * @return void
      */
-    public static function Log($className, $message, $level, $category=1) {
+    public static function Log($className, $message, $level, $category = 1)
+    {
         static $currentLogLevel = null;
         static $currentLogCategory = null;
 
@@ -78,7 +80,7 @@ class Logger {
         if (($level == ($currentLogLevel & $level)) || (self::LEVEL_ALL == $currentLogLevel)) {
             if (($category == ($currentLogCategory & $category)) || (self::LEVEL_ALL == $currentLogCategory)) {
                 $microseconds = explode('.', sprintf('%0.4f', microtime(true)));
-                if (!@file_put_contents($logFile, '[' . date('Y-m-d H:i:s.'.$microseconds[1]) . '][' . getmypid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . str_replace("\n", ' ', $message) . "\n", FILE_APPEND)) {
+                if (!@file_put_contents($logFile, '[' . date('Y-m-d H:i:s.' . $microseconds[1]) . '][' . getmypid() . '][ ' . self::getLevelText($level) . ' ][ ' . self::getCategoryText($category) . ' ][ ' . $className . ' ] ' . str_replace("\n", ' ', $message) . "\n", FILE_APPEND)) {
                     throw new Exception\FileNotWritable($logFile);
                 }
             }
@@ -100,7 +102,8 @@ class Logger {
      * @param  bit $category
      * @return void
      */
-    public static function Buffer($className, $message, $level, $category) {
+    public static function Buffer($className, $message, $level, $category)
+    {
         self::$buffer[] = array(
             'level' => $level,
             'category' => $category,
@@ -115,7 +118,8 @@ class Logger {
      * @param  bit $level
      * @return string
      */
-    private static function getLevelText($level) {
+    private static function getLevelText($level)
+    {
         $levelText = array();
         if (self::LEVEL_DEBUG == (self::LEVEL_DEBUG & $level)) {
             $levelText[] = str_pad('DEBUG', 7);
@@ -147,7 +151,8 @@ class Logger {
      * @param  bit $category
      * @return string
      */
-    private static function getCategoryText($category) {
+    private static function getCategoryText($category)
+    {
         $categoryText = array();
         if (self::CATEGORY_FRAMEWORK == (self::CATEGORY_FRAMEWORK & $category)) {
             $categoryText[] = 'FRAMEWORK';
@@ -171,6 +176,9 @@ class Logger {
         return implode('.', $categoryText);
     }
 
-    private function __construct() {}
+    private function __construct()
+    {
+        
+    }
 
 }

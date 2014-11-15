@@ -2,7 +2,9 @@
 
 namespace MPF\REST;
 
-abstract class Parser {
+abstract class Parser
+{
+
     /**
      * Converts input to proper output
      * @param array $input
@@ -20,8 +22,10 @@ abstract class Parser {
     protected $serviceName;
     protected $action;
 
-    public function __construct($serviceName, $action) {
+    public function __construct($serviceName, $action)
+    {
         $this->serviceName = $serviceName;
         $this->action = $action;
     }
+
 }
