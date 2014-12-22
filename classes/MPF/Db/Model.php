@@ -4,7 +4,7 @@ namespace MPF\Db;
 
 use \MPF\PhpDoc;
 use \MPF\Config;
-use \MPF\Logger;
+use MPF\Log\Category;
 
 \MPF\ENV::bootstrap(\MPF\ENV::DATABASE);
 
@@ -22,7 +22,12 @@ abstract class Model extends \MPF\PhpDoc
         if (null === $properties) {
             // TODO: Custom exception fromJson error
             $exception = new \Exception('Bad json, cannot instantiate model');
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -94,7 +99,12 @@ abstract class Model extends \MPF\PhpDoc
 
         if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
             $exception = new Exception\ModelMissingPhpDoc($className, PhpDoc::CLASS_DATABASE);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -136,7 +146,12 @@ abstract class Model extends \MPF\PhpDoc
 
         if (!array_key_exists($fieldName, self::$phpdoc[$className]['properties'])) {
             $exception = new Exception\InvalidFieldName($fieldName, $className);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -174,7 +189,12 @@ abstract class Model extends \MPF\PhpDoc
         $primaryFields = $this->getPrimaryFields();
         if (count($primaryFields) > 1) {
             $exception = new MPF\Db\Exception\TooManyPrimaryKeys();
-            Logger::Log('Status', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -202,7 +222,12 @@ abstract class Model extends \MPF\PhpDoc
     {
         if (!array_key_exists($fieldName, self::$phpdoc[$this->className]['properties'])) {
             $exception = new Exception\InvalidFieldName($fieldName, $this->className);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -293,13 +318,23 @@ abstract class Model extends \MPF\PhpDoc
         $field = $this->getField($fieldName);
         if ($field->isReadonly()) {
             $exception = new Exception\FieldReadonly($fieldName, $this->className);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
         if (is_null($fieldValue) && !$field->isNullable()) {
             $exception = new Exception\FieldNotNull($fieldName, $this->className);
-            Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Model',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -308,7 +343,12 @@ abstract class Model extends \MPF\PhpDoc
             $length = $field->getTypeLength();
             if (is_object($fieldValue)) {
                 $exception = new Exception\InvalidFieldType($fieldName, $this->className);
-                Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                $this->getLogger()->warning($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::DATABASE, 
+                    'className' => 'Db/Model',
+                    'exception' => $exception
+                ));
                 throw $exception;
             }
 
@@ -319,7 +359,12 @@ abstract class Model extends \MPF\PhpDoc
                 case 'date':
                     if (!strtotime($fieldValue)) {
                         $exception = new Exception\InvalidFieldValue($fieldName, $this->className);
-                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                        $this->getLogger()->warning($exception->getMessage(), array(
+                            'category' => Category::FRAMEWORK | Category::DATABASE, 
+                            'className' => 'Db/Model',
+                            'exception' => $exception
+                        ));
                         throw $exception;
                     }
                     break;
@@ -328,14 +373,24 @@ abstract class Model extends \MPF\PhpDoc
                 case 'integer':
                     if (!is_numeric($fieldValue)) {
                         $exception = new Exception\InvalidFieldValue($fieldName, $this->className);
-                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                        $this->getLogger()->warning($exception->getMessage(), array(
+                            'category' => Category::FRAMEWORK | Category::DATABASE, 
+                            'className' => 'Db/Model',
+                            'exception' => $exception
+                        ));
                         throw $exception;
                     }
                     break;
                 case 'text':
                     if (!is_string($fieldValue)) {
                         $exception = new Exception\InvalidFieldValue($fieldName, $this->className);
-                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                        $this->getLogger()->warning($exception->getMessage(), array(
+                            'category' => Category::FRAMEWORK | Category::DATABASE, 
+                            'className' => 'Db/Model',
+                            'exception' => $exception
+                        ));
                         throw $exception;
                     }
                     break;
@@ -343,7 +398,12 @@ abstract class Model extends \MPF\PhpDoc
                 case 'varchar':
                     if ($length < strlen($fieldValue)) {
                         $exception = new Exception\InvalidFieldLength($fieldName, $this->className);
-                        Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                        $this->getLogger()->warning($exception->getMessage(), array(
+                            'category' => Category::FRAMEWORK | Category::DATABASE, 
+                            'className' => 'Db/Model',
+                            'exception' => $exception
+                        ));
                         throw $exception;
                     }
                     break;
@@ -371,7 +431,12 @@ abstract class Model extends \MPF\PhpDoc
 
             if (!in_array($field->getPasswordType(), hash_algos())) {
                 $exception = new Exception\InvalidHashAlgo($field->getPasswordType());
-                Logger::Log('Db/Model', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                $this->getLogger()->warning($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::DATABASE, 
+                    'className' => 'Db/Model',
+                    'exception' => $exception
+                ));
                 throw $exception;
             }
 

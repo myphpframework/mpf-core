@@ -7,6 +7,7 @@ use MPF\Db\Exception\InvalidResultResourceType;
 use MPF\Db\Exception\InvalidQuery;
 use MPF\Db\Result;
 use MPF\Db\Entry;
+use MPF\Log\Category;
 
 class PostgreSQL extends \MPF\Db\Layer
 {
@@ -25,14 +26,24 @@ class PostgreSQL extends \MPF\Db\Layer
         $connection->setInUse(true);
         if (!($connection instanceof \MPF\Db\Connection\PostgreSQL)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\PostgreSQL');
-            Logger::Log('Db/Layer/PostgreSQL', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/PostgreSQL',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
         $resource = $result->getResource();
         if (!is_resource($resource)) {
             $exception = new InvalidResultResourceType($resource, 'resource');
-            Logger::Log('Db/Layer/PostgreSQL', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/PostgreSQL',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -79,8 +90,13 @@ class PostgreSQL extends \MPF\Db\Layer
     {
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\PostgreSQL)) {
-            $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
-            Logger::Log('Db/Layer/PostgreSQL', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\PostgreSQL');
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/PostgreSQL',
+                'exception' => $exception
+            ));
             throw $exeption;
         }
 
@@ -124,7 +140,12 @@ class PostgreSQL extends \MPF\Db\Layer
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\PostgreSQL)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\PostgreSQL');
-            Logger::Log('Db/Layer/PostgreSQL', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/PostgreSQL',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -133,7 +154,12 @@ class PostgreSQL extends \MPF\Db\Layer
         } catch (\Exception $e) {
             $result->setError($e->getMessage());
             $exception = new InvalidQuery($result);
-            Logger::Log('Db/Layer/PostgreSQL', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/PostgreSQL',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 

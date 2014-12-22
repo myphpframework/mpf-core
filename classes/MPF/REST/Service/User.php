@@ -5,7 +5,7 @@ namespace MPF\REST\Service;
 use MPF\Session;
 use MPF\ENV;
 use MPF\Text;
-use MPF\Logger;
+use MPF\Log\Category;
 use MPF\User as Usr;
 use MPF\User\Group;
 
@@ -45,7 +45,12 @@ class User extends \MPF\REST\Service
 
             // if its the first user we add it to the Admin group
             if (Usr::getTotalEntries() == 1) {
-                Logger::Log('Service', 'First user creation in system, adding to ADMIN group & Active status.', Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+                $this->getLogger()->notice('First user creation in system, adding to ADMIN group & Active status.', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service\User'
+                ));
+
                 $user->addGroup(Group::ADMIN());
                 $user->setStatus(\MPF\Status::create($user, \MPF\User::STATUS_ACTIVE, \MPF\User::SYSTEM()->getId()));
             }
@@ -112,7 +117,12 @@ class User extends \MPF\REST\Service
 
         if (!isSet($data['reset_password'])) {
             $exception = new Service\Exception\MissingRequestFields('reset_password');
-            Logger::Log('Service', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'Service\User',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -143,7 +153,12 @@ class User extends \MPF\REST\Service
             $user->save();
 
             if ($user->verifyPassword($data['password'])) {
-                Logger::Log('Service\User', Text::byXml('mpf_exception')->get('serviceUserSuccessfulLogin', array('Replace' => array('username' => $id, 'id' => $user->getId()))), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+                $this->getLogger()->info('User (#{id}) {username} successfully logged in', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service\User',
+                    'id' => $user->getId(),
+                    'username' => $id
+                ));
                 $_SESSION['userId'] = $user->getId();
                 return;
             }
@@ -151,7 +166,12 @@ class User extends \MPF\REST\Service
 
         $exception = new Exception\InvalidCredentials();
         $exception->restCode = self::HTTPCODE_UNAUTHORIZED;
-        Logger::Log('Service\User', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+        $this->getLogger()->warning($exception, array(
+            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'className' => 'Service\User',
+            'exception' => $exception
+        ));
         throw $exception;
     }
 

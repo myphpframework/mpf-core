@@ -3,7 +3,7 @@
 namespace MPF\Bootstrap;
 
 use MPF\ENV;
-use MPF\Logger;
+use MPF\Log\Category;
 
 class Session extends \MPF\Bootstrap implements Intheface
 {
@@ -22,7 +22,11 @@ class Session extends \MPF\Bootstrap implements Intheface
 
     public function shutdown()
     {
-        Logger::Log('ENV/Boostrap/Session', 'shutting down session', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+        $this->getLogger()->info('Shutting down session', array(
+            'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+            'className' => 'ENV/Boostrap/Session'
+        ));
+
         @session_write_close();
         //session_regenerate_id(FALSE);
         @session_unset();

@@ -2,9 +2,10 @@
 
 namespace MPF;
 
+use MPF\Log\Category;
 use MPF\Locale;
 
-class Text
+class Text extends \MPF\Base
 {
 
     /**
@@ -33,7 +34,12 @@ class Text
                     $xml = @simplexml_load_string($xmlFile);
                     if (!$xml) {
                         $exception = new Exception\InvalidXml($filename);
-                        Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                        $this->getLogger()->warning($exception->getMessage(), array(
+                            'category' => Category::FRAMEWORK | Category::TEXT, 
+                            'className' => 'Text',
+                            'exception' => $exception
+                        ));
                         throw $exception;
                     }
 
@@ -57,7 +63,12 @@ class Text
             // if we still haven't found the file we throw an exception
             if (!array_key_exists($filename, $files)) {
                 $exception = new Text\Exception\FileNotFound($filename, ENV::paths()->i18n());
-                Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                $this->getLogger()->emergency($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::TEXT, 
+                    'className' => 'Text',
+                    'exception' => $exception
+                ));
                 throw $exception;
             }
         }
@@ -110,7 +121,12 @@ class Text
     {
         if (!array_key_exists($id, $this->texts)) {
             $exception = new Text\Exception\IdNotFound($id, array_keys($this->texts));
-            Logger::Log('Text', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::TEXT, 
+                'className' => 'Text',
+                'exception' => $exception
+            ));
             $GLOBALS['userErrors'][] = $exception;
         }
         return $this->parseTextId($id, $pluginsArgs);

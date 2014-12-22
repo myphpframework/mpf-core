@@ -2,9 +2,9 @@
 
 namespace MPF\Bootstrap;
 
-use MPF\Env;
 use MPF\Db;
-use MPF\Logger;
+use MPF\ENV;
+use MPF\Log\Category;
 
 require(__DIR__ . '/../Db.php');
 
@@ -57,7 +57,10 @@ class Database extends \MPF\Bootstrap implements Intheface
 
     public function shutdown()
     {
-        Logger::Log('ENV/Boostrap/Database', 'shutting down databases', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+        $this->getLogger()->info('Shutting down databases', array(
+            'category' => Category::FRAMEWORK | Category::CATEGORY_ENVIRONMENT, 
+            'className' => 'ENV/Boostrap/Database'
+        ));
     }
 
 }

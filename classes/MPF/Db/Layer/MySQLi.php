@@ -8,7 +8,7 @@ use MPF\Db\Exception\InvalidQuery;
 use MPF\Db\Exception\DuplicateEntry;
 use MPF\Db\Result;
 use MPF\Db\Entry;
-use MPF\Logger;
+use MPF\Log\Category;
 
 class MySQLi extends \MPF\Db\Layer
 {
@@ -27,14 +27,24 @@ class MySQLi extends \MPF\Db\Layer
         $connection->setInUse(true);
         if (!($connection instanceof \MPF\Db\Connection\MySQLi)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
-            Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/MySQLi',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
         $resource = $result->getResource();
         if (!($resource instanceof \mysqli_result)) {
             $exception = new InvalidResultResourceType($resource, 'mysqli_result');
-            Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/MySQLi',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -274,7 +284,12 @@ class MySQLi extends \MPF\Db\Layer
         } catch (InvalidQuery $e) {
             if (preg_match('/duplicate/i', $e->result->getError())) {
                 $exception = new DuplicateEntry($e->result, $model->getTable());
-                Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                $this->getLogger()->emergency($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::DATABASE, 
+                    'className' => 'Db/Layer/MySQLi',
+                    'exception' => $exception
+                ));
                 throw $exception;
             }
 
@@ -365,7 +380,12 @@ class MySQLi extends \MPF\Db\Layer
             } catch (InvalidQuery $e) {
                 if (preg_match('/duplicate/i', $e->result->getError())) {
                     $exception = new DuplicateEntry($e->result, $model->getTable());
-                    Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                    $this->getLogger()->emergency($exception->getMessage(), array(
+                        'category' => Category::FRAMEWORK | Category::DATABASE, 
+                        'className' => 'Db/Layer/MySQLi',
+                        'exception' => $exception
+                    ));
                     throw $exception;
                 }
 
@@ -445,7 +465,12 @@ class MySQLi extends \MPF\Db\Layer
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\MySQLi)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
-            Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/MySQLi',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -455,7 +480,12 @@ class MySQLi extends \MPF\Db\Layer
         }
 
         $connection->setInUse(false);
-        Logger::Log('Db/Layer', 'Connection #' . $result->getConnection()->getId() . ' has been freed', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+        $this->getLogger()->info('Connection #{connectionId} has been freed', array(
+            'category' => Category::FRAMEWORK | Category::DATABASE, 
+            'className' => 'Db/Layer/MySQLi',
+            'connectionId' => $result->getConnection()->getId()
+        ));
     }
 
     /**
@@ -485,7 +515,12 @@ class MySQLi extends \MPF\Db\Layer
         $connection = $result->getConnection();
         if (!($connection instanceof \MPF\Db\Connection\MySQLi)) {
             $exception = new InvalidConnectionType($connection, 'MPF\Db\Connection\MySQLi');
-            Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/Layer/MySQLi',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -494,7 +529,12 @@ class MySQLi extends \MPF\Db\Layer
             if (!$mysqliResult) {
                 $result->setError($connection->resource->error);
                 $exception = new InvalidQuery($result);
-                Logger::Log('Db/Layer/MySQLi', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                $this->getLogger()->warning($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::DATABASE, 
+                    'className' => 'Db/Layer/MySQLi',
+                    'exception' => $exception
+                ));
                 throw $exception;
             } else { // This is NOT a SELECT, SHOW, DESCRIBE or EXPLAIN
                 $result->rowsAffected = $this->getRowsAffected($result);

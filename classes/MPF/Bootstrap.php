@@ -7,7 +7,7 @@ namespace MPF;
 /**
  * Represent a table structure in the database
  */
-class Bootstrap
+class Bootstrap extends \MPF\Base
 {
 
     protected $initialized = false;

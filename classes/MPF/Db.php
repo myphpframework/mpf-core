@@ -2,7 +2,9 @@
 
 namespace MPF;
 
-class Db
+use MPF\Log\Category;
+
+class Db extends \MPF\Base
 {
 
     const TYPE_MYSQLI = 'MySQLi';
@@ -69,7 +71,12 @@ class Db
     {
         if (!$name) {
             $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
-            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -79,7 +86,12 @@ class Db
 
         if (!array_key_exists($name, self::$database_xmls)) {
             $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
-            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -130,7 +142,12 @@ class Db
         // Verify if the database is supported (If we have a Db\Layer class for it)
         if (!class_exists($className) || !in_array('MPF\Db\\' . $prefix . '\Intheface', class_implements($className)) || !in_array('MPF\Db\\' . $prefix, class_parents($className))) {
             $exception = new Db\Exception\UnsupportedType($dbType);
-            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -175,7 +192,12 @@ class Db
     {
         if (!$conf->server || !$conf->name || !$conf->engine) {
             $exception = new Db\Exception\InvalidConfig($filename);
-            Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -183,14 +205,24 @@ class Db
         foreach ($conf->server as $server) {
             if (!$server->host || !$server->port || !$server->access) {
                 $exception = new Db\Exception\InvalidConfig($filename);
-                Logger::Log('Db', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                $this->getLogger()->emergency($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::DATABASE, 
+                    'className' => 'Db',
+                    'exception' => $exception
+                ));
                 throw $exception;
             }
 
             foreach ($server->access as $access) {
                 if (!$access['type'] || !$access->login || !$access->password) {
                     $exception = new Db\Exception\InvalidConfig($filename);
-                    Logger::Log('DB', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+                    $this->getLogger()->emergency($exception->getMessage(), array(
+                        'category' => Category::FRAMEWORK | Category::DATABASE, 
+                        'className' => 'Db',
+                        'exception' => $exception
+                    ));
                     throw $exception;
                 }
             }

@@ -4,16 +4,16 @@
 
 namespace MPF {
 
-    use MPF\Logger;
+    use MPF\Log\Category;
+    use Psr\Log\LogLevel;
+
     use MPF\Config;
     use MPF\Text;
     use MPF\ENV\Paths;
 
-//use MPF\Bootstrap;
-
     require(__DIR__ . '/Bootstrap/Intheface.php');
 
-    class ENV
+    class ENV extends \MPF\Base
     {
 
         const TEMPLATE = 'Template';
@@ -125,12 +125,16 @@ namespace MPF {
             }
 
             if (!array_key_exists($type, self::$bootstraps)) {
-                Logger::Log('ENV', 'Instantiating bootstrap "' . $type . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
-
                 $class = 'MPF\\Bootstrap\\' . $type;
                 $bootstrap = new $class();
                 if (!$bootstrap->isInitialized()) {
-                    Logger::Log('ENV', 'Initiating bootstrap "' . $type . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                    $logger = new \MPF\Log\Logger();
+                    $logger->info('Initializing bootstrap "{type}"', array(
+                        'category' => Category::FRAMEWORK | Category::ENVIRONMENT,
+                        'className' => 'ENV',
+                        'type' => $type
+                    ));
+
                     $bootstrap->init($filename);
                 }
 
@@ -183,8 +187,9 @@ namespace MPF {
 
 namespace MPF\ENV {
 
-    use MPF\Logger;
-
+    use MPF\Log\Category;
+    use Psr\Log\LogLevel;
+    
     /**
      * Class that is capable for crawling thru dirs to find
      * all the paths for a certain type.
@@ -207,8 +212,13 @@ namespace MPF\ENV {
 
         public function __construct()
         {
+            $logger = new \MPF\Log\Logger();
+
             if (empty(self::$paths)) {
-                Logger::Buffer('ENV\Paths', 'initiating environment paths...', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                $logger->buffer(LogLevel::INFO, 'initiating environment paths...', array(
+                    'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                    'className' => 'ENV\Paths'
+                ));
                 $this->currentDir = dirname(filter_var($_SERVER['SCRIPT_FILENAME'], \FILTER_SANITIZE_URL)) . '/';
 
                 // If we are in a console or purposely overwriting we use PWD
@@ -216,7 +226,10 @@ namespace MPF\ENV {
                     $this->currentDir = filter_var($_SERVER['PWD'], \FILTER_SANITIZE_URL);
                 }
 
-                Logger::Buffer('ENV\Paths', 'current dir:' . $this->currentDir . ' == ' . PATH_SITE, Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                $logger->buffer(LogLevel::INFO, 'current dir:' . $this->currentDir . ' == ' . PATH_SITE, array(
+                    'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                    'className' => 'ENV\Paths'
+                ));
 
                 $folderNames = array(
                     self::FOLDER_BUCKET,
@@ -227,7 +240,11 @@ namespace MPF\ENV {
                     self::FOLDER_INCLUDE,
                 );
                 foreach ($folderNames as $type) {
-                    Logger::Buffer('ENV\Paths', 'initiating type "' . $type . '"\'s array', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                    $logger->buffer(LogLevel::DEBUG, 'initiating type "' . $type . '"\'s array', array(
+                        'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                        'className' => 'ENV\Paths'
+                    ));
+
                     if (!array_key_exists($type, self::$paths)) {
                         self::$paths[$type] = array();
                     }
@@ -236,26 +253,39 @@ namespace MPF\ENV {
 
                     while (PATH_SITE != $dir) {
                         if (is_dir($dir . $type)) {
-                            Logger::Buffer('ENV\Paths', 'Found dir "' . $dir . $type . '/' . '"', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                            $logger->buffer(LogLevel::DEBUG, 'Found dir "' . $dir . $type . '/' . '"', array(
+                                'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                                'className' => 'ENV\Paths'
+                            ));
+
                             self::$paths[$type][] = $dir . $type . '/';
                         }
 
                         $failSafeCounter++;
                         if ($failSafeCounter >= self::DEPTH_LIMIT) {
-                            Logger::Buffer('ENV\Paths', 'Depth limit as been reached while walking through dirs', Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                            $logger->buffer(LogLevel::WARNING, 'Depth limit as been reached while walking through dirs', array(
+                                'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                                'className' => 'ENV\Paths'
+                            ));
                             break;
                         }
 
                         preg_match('~/([a-zA-Z0-9_ \-]+/)$~', $dir, $matches);
                         if (empty($matches)) {
-                            Logger::Buffer('ENV\Paths', 'no more dir matches, breaking out of dir walk', Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                            $logger->buffer(LogLevel::WARNING, 'no more dir matches, breaking out of dir walk', array(
+                                'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                                'className' => 'ENV\Paths'
+                            ));
                             break;
                         }
                         $dir = preg_replace('~' . $matches[1] . '$~', '', $dir);
                     }
 
                     if (is_dir($dir . $type) && !in_array($dir . $type . '/', self::$paths[$type])) {
-                        Logger::Buffer('ENV\Paths', 'Found dir "' . $dir . $type . '/' . '"', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                        $logger->buffer(LogLevel::DEBUG, 'Found dir "' . $dir . $type . '/' . '"', array(
+                            'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                            'className' => 'ENV\Paths'
+                        ));
                         self::$paths[$type][] = $dir . $type . '/';
                     }
 
@@ -265,10 +295,16 @@ namespace MPF\ENV {
                 }
 
                 // TODO: Do we really need to set include paths since we are looping thru our own ENV:paths in autoload? (Messes up PHPUnit to reset include_path), should sanitize for performance? .
-                //Logger::Buffer('ENV\Paths', 'setting include paths to:'.implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]), Logger::LEVEL_INFO|Logger::CATEGORY_FRAMEWORK);
+                //$logger->buffer(LogLevel::INFO, 'setting include paths to:'.implode(PATH_SEPARATOR, array(
+                //    'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                //    'className' => 'ENV\Paths'
+                //));
                 //set_include_path(implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]));
 
-                Logger::Buffer('ENV\Paths', 'Final paths ' . var_export(self::$paths, true), Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                $logger->buffer(LogLevel::DEBUG, 'Final paths ' . var_export(self::$paths, true), array(
+                    'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                    'className' => 'ENV\Paths'
+                ));
             }
         }
 
@@ -298,6 +334,8 @@ namespace MPF\ENV {
                 self::FOLDER_INCLUDE,
             );
 
+            $logger = new \MPF\Log\Logger();
+
             foreach ($folderNames as $type) {
                 if (is_dir($path . $type)) {
                     $newPath = $path . $type . '/';
@@ -310,7 +348,11 @@ namespace MPF\ENV {
                         unset(self::$paths[$type][$foundKey]);
                     }
 
-                    Logger::log('ENV\Paths', 'Found dir "' . $newPath . '"', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                    $logger->debug('Found dir "{newPath}"', array(
+                        'category' => Category::FRAMEWORK | Category::ENVIRONMENT,
+                        'className' => 'ENV',
+                        'newPath' => $newPath
+                    ));
                     array_unshift(self::$paths[$type], $newPath);
                 }
             }
@@ -342,11 +384,20 @@ namespace MPF\ENV {
                 throw new \Exception('Must provide an existing directory');
             }
 
+            $logger = new \MPF\Log\Logger();
+
             if (!in_array($path, self::$paths[$type])) {
-                Logger::Buffer('ENV\Paths', 'adding path "' . $path . '" of type "' . $type . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                $logger->buffer(LogLevel::INFO, 'adding path "' . $path . '" of type "' . $type . '"', array(
+                    'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                    'className' => 'ENV\Paths'
+                ));
+
                 array_unshift(self::$paths[$type], $path);
                 if (self::FOLDER_INCLUDE == $type) {
-                    Logger::Buffer('ENV\Paths', 'adding new include path set_include_path:' . implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]), Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+                    $logger->buffer(LogLevel::INFO, 'adding new include path set_include_path:' . implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]), array(
+                        'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
+                        'className' => 'ENV\Paths'
+                    ));
                     set_include_path(implode(PATH_SEPARATOR, self::$paths[self::FOLDER_INCLUDE]));
                 }
             }

@@ -2,12 +2,12 @@
 
 namespace MPF;
 
-use MPF\Logger;
+use MPF\Log\Category;
 use MPF\Template\Marker;
 use MPF\ENV;
 use MPF\Text;
 
-class Template
+class Template extends \MPF\Base
 {
 
     /**
@@ -80,7 +80,10 @@ class Template
     {
         $template = new Template($filename, $parent);
         if ($template->isCached() && $exitIfCached) {
-            Logger::Log('Template(' . $filename . ')', 'isCached, echo parse and returning null', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
+            $this->getLogger()->info('isCached, echo parse and returning null', array(
+                'category' => Category::FRAMEWORK | Category::TEMPLATE, 
+                'className' => 'Template(' . $filename . ')'
+            ));
             echo $template->parse();
             exit;
         }
@@ -277,12 +280,14 @@ class Template
     {
         $isCacheable = ($this->isCacheable && Config::get('settings')->template->cache->enabled && !$this->isCached());
         if (!$isCacheable) {
-            Logger::Log('Template(' . $this->filename . ')', ' template is not cacheable: ' . "\n"
-                    . 'Property: ' . ($this->isCacheable ? 'TRUE' : 'FALSE') . "\n"
-                    . 'Config: ' . (Config::get('settings')->template->cache->enabled ? 'TRUE' : 'FALSE') . "\n"
-                    . 'Already cached: ' . ($this->isCached() ? 'TRUE' : 'FALSE') . "\n"
-                    , Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE
-            );
+            $this->getLogger()->debug("Template is not cacheable: \n"
+                . 'Property: ' . ($this->isCacheable ? 'TRUE' : 'FALSE') . "\n"
+                . 'Config: ' . (Config::get('settings')->template->cache->enabled ? 'TRUE' : 'FALSE') . "\n"
+                . 'Already cached: ' . ($this->isCached() ? 'TRUE' : 'FALSE') . "\n", array(
+                'category' => Category::FRAMEWORK | Category::TEMPLATE, 
+                'className' => 'Template(' . $this->filename . ')',
+                'filename' => $this->filename,
+            ));
         }
         return $isCacheable;
     }
@@ -318,7 +323,13 @@ class Template
         }
         $file .= $this->getTemplateId();
         @file_put_contents($file, $output);
-        Logger::Log('Template(' . $this->filename . ')', ' caching template at "' . $file . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
+
+        $this->getLogger()->info('Caching template at "{filename}"', array(
+            'category' => Category::FRAMEWORK | Category::TEMPLATE, 
+            'className' => 'Template(' . $this->filename . ')',
+            'filename' => $file
+            
+        ));
     }
 
     /**
@@ -397,7 +408,10 @@ class Template
      */
     public function __toString()
     {
-        Logger::Log('Template(' . $this->filename . ')', '__toString() thus parsing template', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
+        $this->getLogger()->info('__toString() thus parsing template', array(
+            'category' => Category::FRAMEWORK | Category::TEMPLATE, 
+            'className' => 'Template(' . $this->filename . ')',
+        ));
         return $this->parse();
     }
 

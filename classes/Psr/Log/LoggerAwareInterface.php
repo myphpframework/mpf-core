@@ -7,7 +7,6 @@ namespace Psr\Log;
  */
 interface LoggerAwareInterface
 {
-
     /**
      * Sets a logger instance on the object
      *

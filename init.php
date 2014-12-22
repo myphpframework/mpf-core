@@ -3,25 +3,30 @@ use MPF\Logger;
 use MPF\ENV;
 use MPF\Autoloader;
 
+date_default_timezone_set('America/Montreal');
+
 header('x-powered-by: MPF/0.1.0');
 
 include (PATH_MPF_CORE .'includes/utils.php');
-include (PATH_MPF_CORE .'classes/MPF/Logger.php');
+include (PATH_MPF_CORE .'classes/MPF/Base.php');
 require_once (PATH_MPF_CORE .'classes/MPF/Config.php');
 include (PATH_MPF_CORE .'classes/MPF/ENV.php');
 include (PATH_MPF_CORE .'classes/MPF/Autoloader.php');
 
+include (PATH_MPF_CORE .'classes/Psr/Log/LogLevel.php');
+include (PATH_MPF_CORE .'classes/Psr/Log/LoggerInterface.php');
+include (PATH_MPF_CORE .'classes/Psr/Log/AbstractLogger.php');
+include (PATH_MPF_CORE .'classes/MPF/Log/Category.php');
+include (PATH_MPF_CORE .'classes/MPF/Log/Logger.php');
+
+ENV::init(get_cfg_var('mpf.env'));
 $autoloader = new Autoloader();
 foreach (ENV::paths()->classes() as $path) {
     $autoloader->addPath($path);
 }
 $autoloader->register();
 
-ENV::init(get_cfg_var('mpf.env'));
-
 register_shutdown_function(array('\MPF\ENV', 'shutdown'));
-
-Logger::Log('Framework.init', 'framework initialized', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK|Logger::CATEGORY_ENVIRONMENT);
 
 // if we have a post-inits scripts we include them all from the closest to initial path
 foreach (ENV::paths()->includes() as $path) {

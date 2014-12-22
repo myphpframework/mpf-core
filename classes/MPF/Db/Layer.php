@@ -2,14 +2,14 @@
 
 namespace MPF\Db;
 
-use MPF\Logger;
+use MPF\Log\Category;
 
 \MPF\ENV::bootstrap(\MPF\ENV::DATABASE);
 
 /**
  * Layer of abstraction that every db layer needs to extends
  */
-abstract class Layer implements Layer\Intheface
+abstract class Layer extends \MPF\Base implements Layer\Intheface
 {
 
     protected static $modelCache = array();
@@ -110,8 +110,11 @@ abstract class Layer implements Layer\Intheface
     public function query($query, $isReadOnly = false)
     {
         $query = $this->sanitizeQuery($query);
+        $this->getLogger()->info($query, array(
+            'category' => Category::FRAMEWORK | Category::DATABASE,
+            'className' => 'Db/Layer',
+        ));
         $result = new Result($query, $this->getFirstAvailableConnection($isReadOnly), $this);
-        Logger::Log('Db/Layer', $query, Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
         return $this->executeQuery($result);
     }
 
@@ -170,7 +173,14 @@ abstract class Layer implements Layer\Intheface
             // if we dont have the same count as the database we return nothing
             $count = $this->resultCountByField($field, $page);
             $countCache = count($entriesFound);
-            Logger::Log('Db/Layer', 'Searching \MPF\Db\Entry cache, result: cache(' . $countCache . ')  db(' . $count . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+            
+            $this->getLogger()->info('Searching \MPF\Db\Entry cache, result: cache({countCache})  db({count})', array(
+                'category' => Category::FRAMEWORK | Category::DATABASE,
+                'className' => 'Db/Layer',
+                'countCache' => $countCache,
+                'count' => $count
+                
+            ));
             if ($count != $countCache) {
                 return array();
             }
@@ -210,12 +220,20 @@ abstract class Layer implements Layer\Intheface
             if ($connection->isInfoValid()) {
                 // if the connection is being use by a fetch
                 if ($connection->isConnected() && !$connection->isInUse()) {
-                    Logger::Log('Db/Layer', 'Connection #' . $connection->getId() . ' is available, using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                    $this->getLogger()->info('Connection #{connectionId} is available, using it for next query', array(
+                        'category' => Category::FRAMEWORK | Category::DATABASE,
+                        'className' => 'Db/Layer',
+                        'connectionId' => $connection->getId()
+                    ));
                     return $connection;
                 }
                 // Only connect if we arent already connected
                 elseif (!$connection->isConnected() && $connection->connect()) {
-                    Logger::Log('Db/Layer', 'Connection #' . $connection->getId() . ' just connected and is available, using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                    $this->getLogger()->info('Connection #{connectionId} just connected and is available, using it for next query', array(
+                        'category' => Category::FRAMEWORK | Category::DATABASE,
+                        'className' => 'Db/Layer',
+                        'connectionId' => $connection->getId()
+                    ));
                     return $connection;
                 } elseif ($connection->isConnected()) {
                     $potentialClones[] = $connection;
@@ -231,7 +249,12 @@ abstract class Layer implements Layer\Intheface
                     $this->connections[] = $newConnection;
                     $id = end(array_keys($this->connections));
                     $newConnection->setId($id);
-                    Logger::Log('Db/Layer', 'Cloning connection #' . $potential->getId() . ' to #' . $id . ' and using it for next query', Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                    $this->getLogger()->info('Cloning connection #{connectionId}  to #{id} and using it for next query', array(
+                        'category' => Category::FRAMEWORK | Category::DATABASE,
+                        'className' => 'Db/Layer',
+                        'connectionId' => $connection->getId(),
+                        'id' => $id
+                    ));
                     return $this->connections[$id];
                 }
             }
@@ -240,7 +263,11 @@ abstract class Layer implements Layer\Intheface
 
         // TODO: Need custom multi-lang exception here
         $exception = new \Exception('No connection available!');
-        Logger::Log('Db/Layer', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+        $this->getLogger()->warning($exception->getMessage(), array(
+            'category' => Category::FRAMEWORK | Category::DATABASE,
+            'className' => 'Db/Layer',
+            'exception' => $exception
+        ));
         throw $exception;
     }
 

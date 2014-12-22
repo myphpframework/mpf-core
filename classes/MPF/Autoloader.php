@@ -52,8 +52,6 @@ class Autoloader
                 return $path . $className;
             }
         }
-
-        Logger::Buffer('__autoload', 'could NOT find class "' . $className . '"', Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
         return false;
     }
 

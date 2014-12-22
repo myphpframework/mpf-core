@@ -4,7 +4,7 @@ namespace MPF\Db;
 
 use MPF\PhpDoc;
 use MPF\Config;
-use MPF\Logger;
+use MPF\Log\Category;
 use MPF\Status;
 
 abstract class ModelStatus extends Model
@@ -85,7 +85,13 @@ abstract class ModelStatus extends Model
                 foreach ($this->statuses as $status) {
                     // only save the status if its a new one
                     if ($status->isNew()) {
-                        Logger::Log('Db/ModelStatus', 'Adding new status(' . $status->getValue() . ') for ' . get_class($this) . '(' . $this->getId() . ')', Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+                        $this->getLogger()->info('Adding new status({status}) for {modelClass}({modelId})', array(
+                            'category' => Category::FRAMEWORK | Category::DATABASE, 
+                            'className' => 'Db/ModelStatus',
+                            'status' => $status->getValue(),
+                            'modelClass' => get_class($this),
+                            'modelId' => $this->getId()
+                        ));
                         $status->save();
                     }
                 }
@@ -142,7 +148,12 @@ abstract class ModelStatus extends Model
 
         if (empty($statusFields) || count($statusFields) > 1) {
             $exception = new Exception\ModelMissingStatuses();
-            Logger::Log('Db/ModelStatus', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_DATABASE);
+
+            $this->getLogger()->emergency($exception, array(
+                'category' => Category::FRAMEWORK | Category::DATABASE, 
+                'className' => 'Db/ModelStatus',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 

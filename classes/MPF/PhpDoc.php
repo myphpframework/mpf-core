@@ -2,7 +2,7 @@
 
 namespace MPF;
 
-abstract class PhpDoc
+abstract class PhpDoc extends \MPF\Base
 {
 
     const CLASS_NAME = 'object';

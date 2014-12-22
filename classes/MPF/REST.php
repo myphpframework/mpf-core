@@ -5,8 +5,9 @@ namespace MPF;
 use MPF\REST\Service;
 use MPF\Rest\Parser;
 use MPF\ENV;
+use MPF\Log\Category;
 
-class REST
+class REST extends \MPF\Base
 {
 
     protected static $basePath = '';
@@ -63,7 +64,12 @@ class REST
             $data = self::getData();
             list($serviceClass, $id, $action, $parser) = self::getParts();
 
-            Logger::Log('\MPF\REST', 'Generated class: ' . $serviceClass . "\n\tREQUEST_URI: " . $_SERVER['REQUEST_URI'] . "\n", Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            $this->getLogger()->debug("Generated class: {name}\n\tREQUEST_URI: {uri}\n", array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'uri' => $_SERVER['REQUEST_URI'],
+                'name' => $serviceClass
+            ));
 
             if (!class_exists($serviceClass)) {
                 Service::setResponseCode(Service::HTTPCODE_NOT_FOUND);
@@ -99,26 +105,50 @@ class REST
             $response = array('errors' => array(
                     array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+            $this->getLogger()->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => print_r($response, true),
+                'exception' => $e
+            ));
             $service->output($response);
         } catch (Service\Exception\MissingRequestFields $e) {
             $response = array('errors' => array(
                     array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+            $this->getLogger()->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => print_r($response, true),
+                'exception' => $e
+            ));
             $service->output($response);
         } catch (Service\Exception\InvalidRequestMethod $e) {
             $response = array('errors' => array(
                     array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+            $this->getLogger()->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => print_r($response, true),
+                'exception' => $e
+            ));
             $service->output($response);
         } catch (\MPF\REST\Service\Exception $e) {
             $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
             $response = array('errors' => array(
                     array("code" => $errorCode, "msg" => $e->getMessage())
             ));
-            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+            $this->getLogger()->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => print_r($response, true),
+                'exception' => $e
+            ));
             $service->output($response);
         } catch (\Exception $e) {
             $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
@@ -129,7 +159,13 @@ class REST
             $response = array('errors' => array(
                     array("code" => $errorCode, "msg" => $msg)
             ));
-            Logger::Log('\MPF\REST', 'Response: ' . print_r($response, true), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+            $this->getLogger()->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => print_r($response, true),
+                'exception' => $e
+            ));
             $service->output($response);
         }
     }

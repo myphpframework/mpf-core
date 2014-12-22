@@ -4,9 +4,9 @@ namespace MPF\REST;
 
 use MPF\ENV;
 use MPF\Text;
-use MPF\Logger;
+use MPF\Log\Category;
 
-abstract class Service
+abstract class Service extends \MPF\Base
 {
 
     public static $errors = array();
@@ -88,46 +88,94 @@ abstract class Service
     public function execute($id, $action)
     {
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
-        Logger::Log('Service', $method . ' :: ' . $id . ' :: ' . $action, Logger::LEVEL_DEBUG, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+        $this->getLogger()->debug('{method} :: {id} :: {action}', array(
+            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'className' => 'Service',
+            'method' => $method,
+            'id' => $id,
+            'action' => $action
+        ));
 
         // if we have an action we validate it and call the proper function
         if ($action) {
             if (!method_exists($this, $action)) {
                 self::setResponseCode(self::HTTPCODE_BAD_REQUEST);
                 $exception = new Service\Exception\InvalidRequestAction($action);
-                Logger::Log('Service', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+                $this->getLogger()->warning($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'exception' => $exception
+                ));
                 throw $exception;
             }
 
-            Logger::Log('Service', get_called_class() . '->' . $action . '(' . $id . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            $this->getLogger()->debug('{calledClass}->{action}({id})', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'Service',
+                'calledClass' => get_called_class(),
+                'id' => $id,
+                'action' => $action
+            ));
             return $this->$action($id, $this->data);
         }
 
         switch ($method) {
             case 'GET':
-                Logger::Log('Service', get_called_class() . '->retrieve(' . $id . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+                $this->getLogger()->debug('{calledClass}->retrieve({id})', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'calledClass' => get_called_class(),
+                    'id' => $id
+                ));
                 return $this->retrieve($id, $this->data);
                 break;
             case 'POST':
-                Logger::Log('Service', get_called_class() . '->create(' . $id . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+                $this->getLogger()->debug('{calledClass}->create({id})', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'calledClass' => get_called_class(),
+                    'id' => $id
+                ));
                 return $this->create($id, $this->data);
                 break;
             case 'PUT':
-                Logger::Log('Service', get_called_class() . '->update(' . $id . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+                $this->getLogger()->debug('{calledClass}->update({id})', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'calledClass' => get_called_class(),
+                    'id' => $id
+                ));
                 return $this->update($id, $this->data);
                 break;
             case 'DELETE':
-                Logger::Log('Service', get_called_class() . '->delete(' . $id . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+                $this->getLogger()->debug('{calledClass}->delete({id})', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'calledClass' => get_called_class(),
+                    'id' => $id
+                ));
                 return $this->delete($id);
                 break;
             case 'OPTIONS':
-                Logger::Log('Service', get_called_class() . '->options(' . $id . ')', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+                $this->getLogger()->debug('{calledClass}->options({id})', array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'calledClass' => get_called_class(),
+                    'id' => $id
+                ));
                 return $this->options($id, $action);
                 break;
             default:
                 self::setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
                 $exception = new Service\Exception\InvalidRequestMethod($method);
-                Logger::Log('Service', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+
+                $this->getLogger()->warning($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'exception' => $exception
+                ));
                 throw $exception;
                 break;
         }
@@ -271,7 +319,12 @@ abstract class Service
         if (!in_array($method, $acceptedMethods)) {
             self::setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
             $exception = new Service\Exception\InvalidRequestMethod($method);
-            Logger::Log('Service', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'Service',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -285,7 +338,12 @@ abstract class Service
         if (!empty($missingFields)) {
             self::setResponseCode(self::HTTPCODE_BAD_REQUEST);
             $exception = new Service\Exception\MissingRequestFields($missingFields);
-            Logger::Log('Service', $exception->getMessage(), Logger::LEVEL_WARNING, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_SERVICE);
+            
+            $this->getLogger()->warning($exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'Service',
+                'exception' => $exception
+            ));
             throw $exception;
         }
     }

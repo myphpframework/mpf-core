@@ -3,6 +3,8 @@
 namespace MPF;
 
 use MPF\ENV;
+use MPF\Log\Category;
+use Psr\Log\LogLevel;
 
 class Config
 {
@@ -39,6 +41,8 @@ class Config
     public static function get($filename, $useCache = true)
     {
         static $configs = array();
+        
+        $logger = new \MPF\Log\Logger();
 
         if (ENV::getType() === '') {
             die('<xmp>
@@ -56,7 +60,12 @@ class Config
 
         if (self::$cache_enabled && !self::checkCacheDir(self::$cache_path)) {
             $exception = new \MPF\Exception\FolderNotWritable(self::$cache_path);
-            Logger::Log('Bootstrap/Template', $exception->getMessage(), Logger::LEVEL_FATAL, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_TEMPLATE);
+
+            $logger->buffer(LogLevel::EMERGENCY, $exception->getMessage(), array(
+                'category' => Category::FRAMEWORK | Category::CONFIG, 
+                'className' => 'Config',
+                'exception' => $exception
+            ));
             throw $exception;
         }
 
@@ -66,7 +75,11 @@ class Config
             return self::getEnv($configs[$filename]);
         }
 
-        Logger::Buffer('Config', 'Searching for file "' . $filename . '"', Logger::LEVEL_INFO, Logger::CATEGORY_FRAMEWORK | Logger::CATEGORY_ENVIRONMENT);
+        $logger->buffer(LogLevel::INFO, 'Searching for file "{filename}"', array(
+            'category' => Category::FRAMEWORK | Category::CONFIG, 
+            'className' => 'Config',
+            'filename' => $filename
+        ));
         $config = null;
 
         // We fetch the first file that we find in the paths
