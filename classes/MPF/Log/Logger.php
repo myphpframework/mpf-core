@@ -63,7 +63,7 @@ class Logger extends AbstractLogger
     
     public function __construct($currentLogLevel = 0, $currentCategoryLevel = Category::ALL, $storageType = 'file')
     {
-        if (null === static::$currentLogLevel && 0 !== $currentLogLevel) {
+        if (null === static::$currentLogLevel) {
             static::$currentLogLevel = $currentLogLevel;
         }
         

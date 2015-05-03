@@ -25,6 +25,7 @@ namespace MPF {
         const TYPE_PRODUCTION = 'production';
 
         private static $type = null;
+        private static $tld = null;
 
         /**
          * Bootstrap that were initiated
@@ -45,6 +46,10 @@ namespace MPF {
             }
 
             self::$type = $type;
+            self::$tld = get_cfg_var('mpf.tld');
+            
+            $_ENV['type'] = self::$type;
+            $_ENV['tld'] = self::$tld;
 
             // This is just to initiate the paths and main settings/configs
             $paths = self::Paths();
@@ -65,6 +70,20 @@ namespace MPF {
         public static function getType()
         {
             return self::$type;
+        }
+
+        /**
+         * This function should not be used unless for testing purposes...
+         * @param string $tld;
+         */
+        public static function setTld($tld)
+        {
+            self::$tld = $tld;
+        }
+
+        public static function getTld()
+        {
+            return self::$tld;
         }
 
         /**
