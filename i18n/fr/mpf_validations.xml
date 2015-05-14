@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="required">Le champ "@field@" est obligatoire.</text>
+        <text id="alphanumeric">Le champ "@field@" doit contenir seulement des caractères alphanumérique.</text>
+        <text id="name">Le champ "@field@" doit contenir seulement des caractères alphabétiques.</text>
+        <text id="username">Le nom d'utilisateur ne doit pas être plus de 25 caractères et ne peut contenir que les caractères suivants: a-zA-Z0-9 '_-</text>
+        <text id="numeric">Le champ "@field@" doit contenir seulement des chiffres.</text>
+        <text id="passwordConfirm">La confirmation du mot de passe est incorrecte.</text>
+        <text id="password">Le mot de passe doit contenir au moin 8 caractères.</text>
+        <text id="email">Le champ "@field@" doit être un courriel valide.</text>
+        <text id="phone">Le champ "@field@" est un numéro de téléphone invalide.</text>
+        <text id="country">Le champ "@field@" n'est pas un pays valide.</text>
+        <text id="state">Le champ "@field@" a une province/état qui ne concorde pas avec le pays.</text>
+        <text id="creditCard">Le champ "@field@" a un numéro de carte de crédit invalide.</text>
+        <text id="unexpected">Une erreur inattendue s'est produite.</text>
+        <text id="ajaxFormError404">L'action du formulaire n'existe pas.</text>
+    </country>
+</i18n>

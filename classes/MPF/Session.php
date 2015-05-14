@@ -3,6 +3,7 @@
 namespace MPF;
 
 use MPF\Locale;
+use MPF\Config;
 
 class Session
 {
@@ -15,7 +16,7 @@ class Session
     public static function getLocale()
     {
         if (!array_key_exists('mpf_locale', $_COOKIE)) {
-            return new Locale('en_CA');
+            return new Locale(Config::get('settings')->default->locale);
         }
 
         return new Locale($_COOKIE['mpf_locale']);

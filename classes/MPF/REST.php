@@ -51,6 +51,7 @@ class REST extends \MPF\Base
 
     public static function execute($basePath = '')
     {
+        $logger = new \MPF\Log\Logger();
         self::$basePath = '/' . preg_replace('/^\/|\/$/i', '', $basePath) . '/';
 
         if (ENV::getType() !== ENV::TYPE_DEVELOPMENT) {
@@ -64,7 +65,7 @@ class REST extends \MPF\Base
             $data = self::getData();
             list($serviceClass, $id, $action, $parser) = self::getParts();
 
-            $this->getLogger()->debug("Generated class: {name}\n\tREQUEST_URI: {uri}\n", array(
+            $logger->debug("Generated class: {name}\n\tREQUEST_URI: {uri}\n", array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'uri' => $_SERVER['REQUEST_URI'],
@@ -106,7 +107,7 @@ class REST extends \MPF\Base
                     array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
 
-            $this->getLogger()->warning('Response: {response}', array(
+            $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'response' => print_r($response, true),
@@ -118,7 +119,7 @@ class REST extends \MPF\Base
                     array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
 
-            $this->getLogger()->warning('Response: {response}', array(
+            $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'response' => print_r($response, true),
@@ -130,7 +131,7 @@ class REST extends \MPF\Base
                     array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
             ));
 
-            $this->getLogger()->warning('Response: {response}', array(
+            $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'response' => print_r($response, true),
@@ -143,7 +144,7 @@ class REST extends \MPF\Base
                     array("code" => $errorCode, "msg" => $e->getMessage())
             ));
 
-            $this->getLogger()->warning('Response: {response}', array(
+            $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'response' => print_r($response, true),
@@ -160,7 +161,7 @@ class REST extends \MPF\Base
                     array("code" => $errorCode, "msg" => $msg)
             ));
 
-            $this->getLogger()->warning('Response: {response}', array(
+            $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'response' => print_r($response, true),

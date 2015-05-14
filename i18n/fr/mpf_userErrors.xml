@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="noSmileyTheme">Aucun thème de smiley activé!</text>
+    </country>
+</i18n>

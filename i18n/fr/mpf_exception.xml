@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="dbDatabaseNotBootstrapped">L'envrionement pour la base donnée n'a pas été bootstrappé, vous pouvez le faire de la manière suivante: ENV::bootstrap(ENV::DATABASE);</text>
+        <text id="dbInvalidHashAlgo">L'algorithme "@algo@" est pas pris en charge, s'il vous plaît assurez-vous que ca soit un de ceux-ci: "@algoList@"</text>
+        <text id="dbInvalidFieldValue">Le type de valeur pour le champ "@fieldName@" du modèle "@model@" est erronée.</text>
+        <text id="dbInvalidFieldType">Le type pour le champ "@fieldName@" du modèle "@model@" erroné, doit être un int, float, string ou null.</text>
+        <text id="dbInvalidFieldLength">Le champ "@fieldName@" du modèle "@model@" a une longueur supérieure à celle spécifiée dans le modèle.</text>
+        <text id="dbFieldNotNull">Le champ "@fieldName@" pour le modèle "@model@" ne supporte pas une valeur null.</text>
+        <text id="dbFieldReadonly">Le champ "@fieldName@" pour le modèle "@model@" est défini comme en lecture seule par le modèle, donc vous ne pouvez pas le modifier.</text>
+        <text id="dbInvalidDatabaseName">Nom de base de données invalide "@name@".</text>
+        <text id="dbInvalidFieldName">Le nom de champ "@fieldName@" est invalide pour le modèle "@model@".</text>
+        <text id="dbInvalidResultResourceType">Le type de resource est invalid, attendu "@expected@" reçu "@actual@".</text>
+        <text id="dbInvalidConnectionType">Le type de connection est invalide, attendu "@expected@" reçu "@actual@".</text>
+        <text id="dbInvalidQuery">La requête "@query@" n'a pas pu exécuter correctement, voir erreur: @error@.</text>
+        <text id="dbConnectInfoNotFound">Les informations de connexion pour la base de données @name@ du type @dbType@ avec l'accès "@accessType@" n'a pas pu être trouvé.</text>
+        <text id="dbInvalidAccessType">Le type d'accès "@accessType@" sont invalide.</text>
+        <text id="dbInvalidConfig">Les configs de la base de donne "@fileame@" sont invalides, certains informations sont manquant.</text>
+        <text id="dbUnsupportType">Le type "@type@" n'est pas supporté pour le moment.</text>
+        <text id="dbDuplicateEntry">Il y a déjà une entrée avec la valeur "@value@" pour la clé "@key@" dans `@database@`.@table@.</text>
+        <text id="dbModelTooManyPrimaryKeys">Le modèle doit avoir juste une clé primaire pour que le système de statut fonctionne correctement.</text>
+        <text id="dbModelNoManyPrimaryKeys">Le modèle doit avoir au moin une clé primaire pour fonctionner correctement.</text>
+
+        <text id="dbModelMissingStatuses">Le modèle a aucun statuts</text>
+        <text id="dbModelMissingPhpDoc">Le modèle "@modelName@" requiert la phpdoc "@@phpdoc@" pour fonctionne correctement.</text>
+
+        <text id="fileNotWritable">Le fichier "@filename@" n'est pas accessible en écriture.</text>
+        <text id="folderNotWritable">Le dossier "@foldername@" n'est pas accessible en écriture.</text>
+
+        <text id="textFileNotFound">Le fichier de texte "@filename@" n'a pu être trouvé dans: @paths@</text>
+        <text id="textIdNotFound">L'id de texte "@id@" n'a pu être trouvé. IDs disponible: @availableIds@</text>
+
+        <text id="bootstrapTypeNotSupported">Le type de boostrap "@type@" n'est pas supporté en se moment.</text>
+        <text id="configUnknownEnvironment">Le nom d'environnement "@mpf_env@" est inconnue, soyez sur qu'il existe dans vos fichiers ini.</text>
+        <text id="configOverlapping">La config "@config1@" rentre en conflit avec une autre.</text>
+        <text id="bootstrapUnsupportedType">Le type d'environement "@type@" est inconnue.</text>
+
+        <text id="serviceInvalidRequestMethod">La méthode "@method@" est invalide pour cette requête.</text>
+        <text id="serviceInvalidRequestAction">L'action "@action@" est invalide pour cette requête.</text>
+        <text id="serviceMissingRequestFields">La requête a certain champs manquand: "@fields@".</text>
+        <text id="serviceUserAlreadyExists">Il y a déjà un compte avec cette utilisateur "@username@".</text>
+        <text id="serviceUserNotApproved">Votre compte n'a pas encore été apprové.</text>
+        <text id="serviceInvalidCredentials">Les informations d'accès sont invalide</text>
+        <text id="serviceUserSuccessfulLogin">L'utilisateur (#@id@) @username@ a été logé avec succès.</text>
+    </country>
+</i18n>

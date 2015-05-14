@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE i18n SYSTEM "http://myphpframework.com/dtd/i18n.dtd" >
+<i18n>
+    <country code="CA">
+        <text id="usernameNotFound">L'utilisateur "@username@" n'a pu être trouvé.</text>
+        <text id="cannotResetPassword">Le compte avec l'utilisateur "@username@" n'est pas pret pour avoir sont mot de passe resetté, contactez votre administrateur.</text>
+    </country>
+</i18n>

@@ -14,7 +14,7 @@
         <text id="dbInvalidResultResourceType">Invalid result resource type, expected "@expected@" but got "@actual@".</text>
         <text id="dbInvalidConnectionType">Invalid connection type, expected "@expected@" but got "@actual@".</text>
         <text id="dbInvalidQuery">The query "@query@" failed to execute properly, see error: @error@</text>
-        <text id="dbConnectInfoNotFound">The the connection information for the database @name@ of the type @dbType@ with the access "@accessType@" could not be found.</text>
+        <text id="dbConnectInfoNotFound">The connection information for the database @name@ of the type @dbType@ with the access "@accessType@" could not be found.</text>
         <text id="dbInvalidAccessType">The database access type "@accessType@" is not valid.</text>
         <text id="dbInvalidConfig">The database config "@filename@" is invalid, some information are missing.</text>
         <text id="dbUnsupportType">The type "@type@" is not supported at this time.</text>

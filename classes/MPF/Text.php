@@ -20,6 +20,7 @@ class Text extends \MPF\Base
     public static function byXml($filename)
     {
         static $files = array();
+        $logger = new \MPF\Log\Logger();
 
         if (!array_key_exists($filename, $files)) {
             $currentCountryAbrv2 = Locale::bySession()->getCountryCode();
@@ -35,7 +36,7 @@ class Text extends \MPF\Base
                     if (!$xml) {
                         $exception = new Exception\InvalidXml($filename);
 
-                        $this->getLogger()->warning($exception->getMessage(), array(
+                        $logger->warning($exception->getMessage(), array(
                             'category' => Category::FRAMEWORK | Category::TEXT, 
                             'className' => 'Text',
                             'exception' => $exception
@@ -64,7 +65,7 @@ class Text extends \MPF\Base
             if (!array_key_exists($filename, $files)) {
                 $exception = new Text\Exception\FileNotFound($filename, ENV::paths()->i18n());
 
-                $this->getLogger()->emergency($exception->getMessage(), array(
+                $logger->emergency($exception->getMessage(), array(
                     'category' => Category::FRAMEWORK | Category::TEXT, 
                     'className' => 'Text',
                     'exception' => $exception
