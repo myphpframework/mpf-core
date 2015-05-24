@@ -80,7 +80,8 @@ class Template extends \MPF\Base
     {
         $template = new Template($filename, $parent);
         if ($template->isCached() && $exitIfCached) {
-            $this->getLogger()->info('isCached, echo parse and returning null', array(
+            $logger = new \MPF\Log\Logger();
+            $logger->info('isCached, echo parsed template + exit;', array(
                 'category' => Category::FRAMEWORK | Category::TEMPLATE, 
                 'className' => 'Template(' . $filename . ')'
             ));

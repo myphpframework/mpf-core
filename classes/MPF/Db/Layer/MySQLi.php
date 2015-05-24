@@ -115,46 +115,51 @@ class MySQLi extends \MPF\Db\Layer
     /**
      * Fetches a model from the database
      *
-     * @param \MPF\Db\Field $field
-     * @param \MPF\Db\Field $fields
+     * @param \MPF\Db\Field[] $fields
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    public function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page = null)
+    public function queryModelFields($fields, \MPF\Db\Page $page = null)
     {
-        $entriesFound = $this->searchCacheByModelField($field, $page);
+        $table = $fields[0]->getTable();
+        $class = $fields[0]->getClass();
+        
+        $entriesFound = $this->searchCacheByModelFields($fields, $page);
         if (!empty($entriesFound)) {
-            return new \MPF\Db\ModelCacheResult($entriesFound, $field->getClass());
+            return new \MPF\Db\ModelCacheResult($entriesFound, $class);
         }
+        
+        $result = $this->query($this->getSelectByFields($fields, false, $page), true);
 
-        $result = $this->query($this->getSelectByField($field, $fields), true, $page);
-
-        $modelResult = new \MPF\Db\ModelResult($result, $field->getClass());
-        $modelResult->on('fetch', array($this, 'cacheDbEntry', $field->getTable()));
+        $modelResult = new \MPF\Db\ModelResult($result, $class);
+        $modelResult->on('fetch', array($this, 'cacheDbEntry', $table));
         return $modelResult;
     }
 
     /**
      * Fetches a model from the database
      *
-     * @param \MPF\Db\Field $queryField
-     * @param \MPF\Db\Field $fields
+     * @param \MPF\Db\Field[] $queryFields
      * @param bool $count
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\ModelResult
      */
-    protected function getSelectByField(\MPF\Db\Field $queryField, $fields, $count = false, \MPF\Db\Page $page = null)
+    protected function getSelectByFields($queryFields, $count = false, \MPF\Db\Page $page = null)
     {
         $select = "SELECT * ";
         if ($count) {
             $select = "SELECT count(*) count ";
         }
 
-        $from = ' FROM `' . $queryField->getTable() . '` ';
-        $where = 'WHERE `' . $queryField->getTable() . '`.`' . $queryField->getName() . '` ' . $queryField->getOperator() . ' ' . $this->formatQueryValue($queryField);
+        $from = ' FROM `' . $queryFields[0]->getTable() . '` ';
+        $where = 'WHERE 1';
+        foreach ($queryFields as $queryField) {
+            $where .= ' AND `' . $queryField->getTable() . '`.`' . $queryField->getName() . '` ' . $queryField->getOperator() . ' ' . $this->formatQueryValue($queryField);
+        }
 
         // find the primary key
-        $primaryKeys = array();
+        $primaryKeys = array();        
+        $fields = \MPF\Db\Model::generateFields($queryFields[0]->getClass());
         foreach ($fields as $field) {
             if ($field->isPrimaryKey()) {
                 $primaryKeys[] = $field;
@@ -246,13 +251,13 @@ class MySQLi extends \MPF\Db\Layer
     /**
      * Returns the amount of rows the query should be giving
      *
-     * @param \MPF\Db\Field $field
+     * @param \MPF\Db\Field[] $fields
      * @param \MPF\Db\Page $page
      * @return int
      */
-    public function resultCountByField(\MPF\Db\Field $field, \MPF\Db\Page $page = null)
+    public function resultCountByFields($fields, \MPF\Db\Page $page = null)
     {
-        $result = $this->query($this->getSelectByField($field, array(), true, $page), true);
+        $result = $this->query($this->getSelectByFields($fields, true, $page), true);
         $dbEntry = $result->fetch();
         $result->free();
         return (int) $dbEntry['count'];

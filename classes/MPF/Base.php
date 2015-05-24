@@ -32,11 +32,7 @@ class Base
     public function getLogger()
     {
         if (null === $this->logger) {
-            $this->setLogger(new Logger(
-                Config::get('settings')->logger->level, 
-                Config::get('settings')->logger->category, 
-                Config::get('settings')->logger->storage
-            ));
+            $this->setLogger(new Logger());
         }
 
         return $this->logger;

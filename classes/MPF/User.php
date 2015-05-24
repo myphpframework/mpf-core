@@ -138,7 +138,7 @@ class User extends \MPF\Db\ModelStatus
      */
     public static function byId($id)
     {
-        $result = self::byField(self::generateField('id', $id));
+        $result = self::byFields(self::generateField('id', $id));
 
         if ($result->rowsTotal == 0) {
             $result->free();
@@ -157,7 +157,7 @@ class User extends \MPF\Db\ModelStatus
      */
     public static function byUsername($username)
     {
-        $result = self::byField(self::generateField('username', $username));
+        $result = self::byFields(self::generateField('username', $username));
         if ($result->rowsTotal == 0) {
             $result->free();
             return null;

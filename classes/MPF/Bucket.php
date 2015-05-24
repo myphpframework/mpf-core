@@ -114,7 +114,7 @@ class Bucket extends \MPF\Db\ModelStatus
      */
     public static function byId($id)
     {
-        $result = self::byField(self::generateField('id', $id));
+        $result = self::byFields(self::generateField('id', $id));
 
         if ($result->rowsTotal == 0) {
             $result->free();

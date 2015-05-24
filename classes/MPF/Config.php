@@ -42,8 +42,6 @@ class Config
     {
         static $configs = array();
         
-        $logger = new \MPF\Log\Logger();
-
         if (ENV::getType() === '') {
             die('<xmp>
         #################################################################
@@ -59,14 +57,7 @@ class Config
         }
 
         if (self::$cache_enabled && !self::checkCacheDir(self::$cache_path)) {
-            $exception = new \MPF\Exception\FolderNotWritable(self::$cache_path);
-
-            $logger->buffer(LogLevel::EMERGENCY, $exception->getMessage(), array(
-                'category' => Category::FRAMEWORK | Category::CONFIG, 
-                'className' => 'Config',
-                'exception' => $exception
-            ));
-            throw $exception;
+            throw new \MPF\Exception\FolderNotWritable(self::$cache_path);
         }
 
         $cacheFile = self::$cache_path . self::getCacheId($filename);
@@ -75,11 +66,6 @@ class Config
             return self::getEnv($configs[$filename]);
         }
 
-        $logger->buffer(LogLevel::INFO, 'Searching for file "{filename}"', array(
-            'category' => Category::FRAMEWORK | Category::CONFIG, 
-            'className' => 'Config',
-            'filename' => $filename
-        ));
         $config = null;
 
         // We fetch the first file that we find in the paths

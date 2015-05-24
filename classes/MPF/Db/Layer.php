@@ -23,12 +23,11 @@ abstract class Layer extends \MPF\Base implements Layer\Intheface
     /**
      * Fetches a model from the database
      *
-     * @param \MPF\Db\Field $field
-     * @param \MPF\Db\Field $fields
+     * @param \MPF\Db\Field[] $fields
      * @param \MPF\Db\Page $page
      * @return \MPF\Db\Result
      */
-    public abstract function queryModelField(\MPF\Db\Field $field, $fields, \MPF\Db\Page $page = null);
+    public abstract function queryModelFields($fields, \MPF\Db\Page $page = null);
 
     /**
      * Fetches models from the database via a link table
@@ -145,15 +144,23 @@ abstract class Layer extends \MPF\Base implements Layer\Intheface
     /**
      * Searches the database entry to match the given database field
      *
-     * @param \MPF\Db\Field $field
+     * @param \MPF\Db\Field[] $fields
      * @return \MPF\Db\Entry
      */
-    protected function searchCacheByModelField(\MPF\Db\Field $field, \MPF\Db\Page $page = null)
+    protected function searchCacheByModelFields($fields, \MPF\Db\Page $page = null)
     {
-        if (!array_key_exists($field->getTable(), self::$modelCache)) {
+        $table = $fields[0]->getTable();
+        if (!array_key_exists($table, self::$modelCache)) {
             return array();
         }
 
+        // for now cache search is still only if there is only 1 field
+        if (count($fields) > 1 || count($fields) == 0) {
+            return array();
+        }
+        
+        $field = $fields[0];
+        
         // we dont search if its a foreign field
         // TODO: we could potentially search for foreign fields since its per table cache...
         if ($field->isForeign()) {
@@ -161,7 +168,7 @@ abstract class Layer extends \MPF\Base implements Layer\Intheface
         }
 
         $entriesFound = array();
-        foreach (self::$modelCache[$field->getTable()] as $dbEntry) {
+        foreach (self::$modelCache[$table] as $dbEntry) {
             // TODO: Since introduction of the page system in the ORM there is a problem with the cache where we dont filter de cached entries by it and they are not "ordered by"
             if ($field->matches($dbEntry[$field->getName()])) {
                 $entriesFound[] = $dbEntry;
@@ -171,7 +178,7 @@ abstract class Layer extends \MPF\Base implements Layer\Intheface
         // we only check the count if its NOT a primary key. Or if its a primary key with a special operator (Not an equal)
         if (!$field->isPrimaryKey() || ($field->isPrimaryKey() && $field->hasOperator())) {
             // if we dont have the same count as the database we return nothing
-            $count = $this->resultCountByField($field, $page);
+            $count = $this->resultCountByFields($fields, $page);
             $countCache = count($entriesFound);
             
             $this->getLogger()->info('Searching \MPF\Db\Entry cache, result: cache({countCache})  db({count})', array(

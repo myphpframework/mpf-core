@@ -46,7 +46,7 @@ class Group extends \MPF\Db\Model
      */
     public static function ADMIN()
     {
-        $result = self::byField(self::generateField('id', self::ADMIN_ID));
+        $result = self::byFields(self::generateField('id', self::ADMIN_ID));
 
         if ($result->rowsTotal == 0) {
             $result->free();

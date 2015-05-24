@@ -63,10 +63,10 @@ class PostgreSQL extends \MPF\Db\Layer
     /**
      * Fetches a model from the database
      *
-     * @param \MPF\Db\Field $field
+     * @param \MPF\Db\Field[] $fields
      * @return \MPF\Db\Result
      */
-    public function queryModelField(\MPF\Db\Field $field)
+    public function queryModelFields($fields)
     {
         
     }

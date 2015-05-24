@@ -60,7 +60,7 @@ class Status extends \MPF\Db\Model
      */
     public static function queryById($id)
     {
-        $result = self::byField(self::generateField('id', $id));
+        $result = self::byFields(self::generateField('id', $id));
 
         if ($result->rowsTotal == 0) {
             $result->free();

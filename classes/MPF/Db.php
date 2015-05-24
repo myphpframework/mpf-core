@@ -69,10 +69,11 @@ class Db extends \MPF\Base
      */
     public static function byName($name)
     {
+        $logger = new \MPF\Log\Logger();
         if (!$name) {
             $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
 
-            $this->getLogger()->warning($exception->getMessage(), array(
+            $logger->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db',
                 'exception' => $exception
@@ -87,7 +88,7 @@ class Db extends \MPF\Base
         if (!array_key_exists($name, self::$database_xmls)) {
             $exception = new \MPF\Db\Exception\InvalidDatabaseName($name);
 
-            $this->getLogger()->warning($exception->getMessage(), array(
+            $logger->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db',
                 'exception' => $exception
@@ -143,7 +144,8 @@ class Db extends \MPF\Base
         if (!class_exists($className) || !in_array('MPF\Db\\' . $prefix . '\Intheface', class_implements($className)) || !in_array('MPF\Db\\' . $prefix, class_parents($className))) {
             $exception = new Db\Exception\UnsupportedType($dbType);
 
-            $this->getLogger()->warning($exception->getMessage(), array(
+            $logger = new \MPF\Log\Logger();
+            $logger->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db',
                 'exception' => $exception
@@ -190,10 +192,11 @@ class Db extends \MPF\Base
      */
     private static function validateConfig(\SimpleXMLElement $conf, $filename)
     {
+        $logger = new \MPF\Log\Logger();
         if (!$conf->server || !$conf->name || !$conf->engine) {
             $exception = new Db\Exception\InvalidConfig($filename);
 
-            $this->getLogger()->warning($exception->getMessage(), array(
+            $logger->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db',
                 'exception' => $exception
@@ -206,7 +209,7 @@ class Db extends \MPF\Base
             if (!$server->host || !$server->port || !$server->access) {
                 $exception = new Db\Exception\InvalidConfig($filename);
 
-                $this->getLogger()->emergency($exception->getMessage(), array(
+                $logger->emergency($exception->getMessage(), array(
                     'category' => Category::FRAMEWORK | Category::DATABASE, 
                     'className' => 'Db',
                     'exception' => $exception
@@ -218,7 +221,7 @@ class Db extends \MPF\Base
                 if (!$access['type'] || !$access->login || !$access->password) {
                     $exception = new Db\Exception\InvalidConfig($filename);
 
-                    $this->getLogger()->emergency($exception->getMessage(), array(
+                    $logger->emergency($exception->getMessage(), array(
                         'category' => Category::FRAMEWORK | Category::DATABASE, 
                         'className' => 'Db',
                         'exception' => $exception

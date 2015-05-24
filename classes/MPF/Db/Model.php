@@ -23,7 +23,8 @@ abstract class Model extends \MPF\PhpDoc
             // TODO: Custom exception fromJson error
             $exception = new \Exception('Bad json, cannot instantiate model');
 
-            $this->getLogger()->emergency($exception->getMessage(), array(
+            $logger = new \MPF\Log\Logger();
+            $logger->emergency($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db/Model',
                 'exception' => $exception
@@ -74,17 +75,18 @@ abstract class Model extends \MPF\PhpDoc
 
     /**
      *
-     * @param Field $field
+     * @param Field[] $fields
      * @return \MPF\Db\ModelResult
      */
-    public static function byField(Field $field, \MPF\Db\Page $page = null)
+    public static function byFields($fields, \MPF\Db\Page $page = null)
     {
         self::generatePhpDoc(get_called_class());
+        $fields = (!is_array($fields) ? array($fields) : $fields);
 
-        $dbLayer = \MPF\Db::byName($field->getDatabase());
+        $dbLayer = \MPF\Db::byName($fields[0]->getDatabase());
 
         // no need to call generateMD5 because it ends up calling "fromDbEntry"
-        return $dbLayer->queryModelField($field, self::generateFields(), $page);
+        return $dbLayer->queryModelFields($fields, $page);
     }
 
     /**
@@ -100,7 +102,8 @@ abstract class Model extends \MPF\PhpDoc
         if (!array_key_exists(PhpDoc::CLASS_DATABASE, self::$phpdoc[$className]['class'])) {
             $exception = new Exception\ModelMissingPhpDoc($className, PhpDoc::CLASS_DATABASE);
 
-            $this->getLogger()->emergency($exception->getMessage(), array(
+            $logger = new \MPF\Log\Logger();
+            $logger->emergency($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db/Model',
                 'exception' => $exception
@@ -115,18 +118,20 @@ abstract class Model extends \MPF\PhpDoc
     /**
      * Returns the default field properties according to the phpdoc
      *
-     * @param type $fieldName
+     * @param string $className
      * @return \MPF\Db\Field
      */
-    public static function generateFields($phpdoc = array())
+    public static function generateFields($className=null)
     {
-        $className = get_called_class();
+        if (!$className) {
+            $className = get_called_class();
+        }
         self::generatePhpDoc($className);
 
         $fields = array();
         foreach (self::$phpdoc[$className]['properties'] as $fieldName => $info) {
             if (array_key_exists('type', $info)) {
-                $fields[] = new \MPF\Db\Field(array_merge(self::$phpdoc[$className]['class'], $phpdoc), $fieldName, null, self::$phpdoc[$className]['properties'][$fieldName]);
+                $fields[] = new \MPF\Db\Field(self::$phpdoc[$className]['class'], $fieldName, null, self::$phpdoc[$className]['properties'][$fieldName]);
             }
         }
 
@@ -136,7 +141,7 @@ abstract class Model extends \MPF\PhpDoc
     /**
      * Returns the default field properties according to the phpdoc
      *
-     * @param type $fieldName
+     * @param string $fieldName
      * @return \MPF\Db\Field
      */
     public static function generateField($fieldName, $value = null, $phpdoc = array())
@@ -147,7 +152,8 @@ abstract class Model extends \MPF\PhpDoc
         if (!array_key_exists($fieldName, self::$phpdoc[$className]['properties'])) {
             $exception = new Exception\InvalidFieldName($fieldName, $className);
 
-            $this->getLogger()->warning($exception->getMessage(), array(
+            $logger = new \MPF\Log\Logger();
+            $logger->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::DATABASE, 
                 'className' => 'Db/Model',
                 'exception' => $exception

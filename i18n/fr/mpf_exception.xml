@@ -9,7 +9,7 @@
         <text id="dbInvalidFieldLength">Le champ "@fieldName@" du modèle "@model@" a une longueur supérieure à celle spécifiée dans le modèle.</text>
         <text id="dbFieldNotNull">Le champ "@fieldName@" pour le modèle "@model@" ne supporte pas une valeur null.</text>
         <text id="dbFieldReadonly">Le champ "@fieldName@" pour le modèle "@model@" est défini comme en lecture seule par le modèle, donc vous ne pouvez pas le modifier.</text>
-        <text id="dbInvalidDatabaseName">Nom de base de données invalide "@name@".</text>
+        <text id="dbInvalidDatabaseName">Nom de base de données invalide "@name@". Oublié votre config/dbs/default.xml?</text>
         <text id="dbInvalidFieldName">Le nom de champ "@fieldName@" est invalide pour le modèle "@model@".</text>
         <text id="dbInvalidResultResourceType">Le type de resource est invalid, attendu "@expected@" reçu "@actual@".</text>
         <text id="dbInvalidConnectionType">Le type de connection est invalide, attendu "@expected@" reçu "@actual@".</text>

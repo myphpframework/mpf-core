@@ -18,7 +18,8 @@ class EventEmitter
 
     public function emit($event)
     {
-        $args = array_splice(func_get_args(), 1);
+        $arguments = func_get_args();
+        $args = array_splice($arguments, 1);
         foreach ($this->listeners as $evt => $callbacks) {
             if ($event == $evt || $this->isRegexMatch($event, $evt)) {
                 foreach ($callbacks as $callback) {

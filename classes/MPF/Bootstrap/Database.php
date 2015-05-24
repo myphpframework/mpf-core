@@ -58,7 +58,7 @@ class Database extends \MPF\Bootstrap implements Intheface
     public function shutdown()
     {
         $this->getLogger()->info('Shutting down databases', array(
-            'category' => Category::FRAMEWORK | Category::CATEGORY_ENVIRONMENT, 
+            'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
             'className' => 'ENV/Boostrap/Database'
         ));
     }

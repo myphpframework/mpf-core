@@ -115,7 +115,7 @@ abstract class ModelStatus extends Model
                         PhpDoc::CLASS_TABLE => $statusField->getTable(),
                         PhpDoc::CLASS_DATABASE => $statusField->getDatabase(),
             ));
-            $result = Status::byField($field);
+            $result = Status::byFields($field);
             while ($status = $result->fetch()) {
                 $this->statuses[] = $status;
             }

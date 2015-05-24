@@ -31,21 +31,21 @@ class Logger extends AbstractLogger
      * 
      * @var bit
      */
-    protected static $currentLogLevel = null;
+    public static $currentLogLevel = null;
     
     /**
      * Allows to only log specific categories and ignore the rest
      * 
      * @var bit
      */
-    protected static $currentCategoryLevel = null;
+    public static $currentCategoryLevel = null;
     
     /**
      * Specifies which media to log to
      * 
      * @var string
      */
-    protected static $storageType = null;
+    public static $storageType = null;
     
     /**
      * Storage media
@@ -146,7 +146,6 @@ class Logger extends AbstractLogger
         }
 
         $message = $this->interpolate($logMessage, $context);
-        
         $category = "";
         if (array_key_exists('category', $context)) {
             $category = $context['category'];
