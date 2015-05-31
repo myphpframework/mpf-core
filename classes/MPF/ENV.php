@@ -10,6 +10,7 @@ namespace MPF {
     use MPF\Config;
     use MPF\Text;
     use MPF\ENV\Paths;
+    use MPF\Locale;
 
     require(__DIR__ . '/Bootstrap/Intheface.php');
 
@@ -50,12 +51,27 @@ namespace MPF {
             
             $_ENV['type'] = self::$type;
             $_ENV['tld'] = self::$tld;
-
-            // This is just to initiate the paths and main settings/configs
+            
+            setcookie('mpf_locale', ENV::getLocale()->getCode(), time() + 15552000, SESSION_COOKIE_PATH, SESSION_COOKIE_DOMAIN);
+            
+            // This is just to initiate the paths
             $paths = self::Paths();
-            Config::get('settings');
 
             return $paths;
+        }
+
+        /**
+         * Returns the locale of the session
+         *
+         * @return Locale
+         */
+        public static function getLocale()
+        {
+            if (!array_key_exists('mpf_locale', $_COOKIE)) {
+                return new Locale(Config::get('settings')->default->locale);
+            }
+
+            return new Locale($_COOKIE['mpf_locale']);
         }
 
         /**

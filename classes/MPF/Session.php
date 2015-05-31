@@ -2,26 +2,10 @@
 
 namespace MPF;
 
-use MPF\Locale;
 use MPF\Config;
 
 class Session
 {
-
-    /**
-     * Returns the locale of the session
-     *
-     * @return Locale
-     */
-    public static function getLocale()
-    {
-        if (!array_key_exists('mpf_locale', $_COOKIE)) {
-            return new Locale(Config::get('settings')->default->locale);
-        }
-
-        return new Locale($_COOKIE['mpf_locale']);
-    }
-
     /**
      * Returns the user for the session if any
      *

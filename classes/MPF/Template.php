@@ -300,7 +300,7 @@ class Template extends \MPF\Base
      */
     protected function getCachePath()
     {
-        return Config::get('settings')->template->cache->dir . Session::getLocale() . '/';
+        return Config::get('settings')->template->cache->dir . ENV::getLocale() . '/';
     }
 
     /**

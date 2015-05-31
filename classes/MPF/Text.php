@@ -23,8 +23,8 @@ class Text extends \MPF\Base
         $logger = new \MPF\Log\Logger();
 
         if (!array_key_exists($filename, $files)) {
-            $currentCountryAbrv2 = Locale::bySession()->getCountryCode();
-            $lang = Locale::bySession()->getLanguageCode();
+            $currentCountryAbrv2 = Locale::byENV()->getCountryCode();
+            $lang = Locale::byENV()->getLanguageCode();
 
             $filename = $filename . '.xml';
             foreach (ENV::paths()->i18n() as $path) {

@@ -2,7 +2,7 @@
 
 namespace MPF;
 
-use MPF\Session;
+use MPF\ENV;
 
 class Locale
 {
@@ -15,13 +15,13 @@ class Locale
     protected $code = '';
 
     /**
-     * Returns the locale of the session
+     * Returns the locale of the environement
      *
      * @return Locale
      */
-    public static function bySession()
+    public static function byENV()
     {
-        return Session::getLocale();
+        return ENV::getLocale();
     }
 
     public function __construct($locale)
