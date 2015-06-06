@@ -43,5 +43,6 @@
         <text id="serviceUserNotApproved">Votre compte n'a pas encore été apprové.</text>
         <text id="serviceInvalidCredentials">Les informations d'accès sont invalide</text>
         <text id="serviceUserSuccessfulLogin">L'utilisateur (#@id@) @username@ a été logé avec succès.</text>
+        <text id="serviceJsonParser">Le json n'a pu être parsé correctement, erreur retourné: @errorNumber@</text>
     </country>
 </i18n>

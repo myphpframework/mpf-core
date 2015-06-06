@@ -9,6 +9,10 @@ class Json extends \MPF\REST\Parser
     {
         $response = (!$input ? '{}' : json_encode($input));
 
+        if (!$response) {
+            throw new \Exception(\MPF\Text::byXml('mpf_exception')->get('serviceJsonParser', array('Replace' => array('errorNumber' => json_last_error()))), 500);
+        }
+        
         header('Content-Type: application/json');
         //header('Content-Length: '.strlen($response));
 

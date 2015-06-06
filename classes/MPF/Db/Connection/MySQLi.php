@@ -21,6 +21,7 @@ class MySQLi extends \MPF\Db\Connection
     {
         if ($this->isInfoValid() && !$this->isConnected()) {
             $resource = @new \mysqli($this->host, $this->login, $this->getPassword(), $this->database, $this->port);
+            $resource->set_charset("utf8");
             if (mysqli_connect_errno() === 0) {
                 $this->setResource($resource);
                 return true;

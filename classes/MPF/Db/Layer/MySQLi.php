@@ -409,7 +409,7 @@ class MySQLi extends \MPF\Db\Layer
             $model->updatefromDbEntry($dbEntry);
         } else {
             $sql = 'UPDATE `' . $model->getTable() . '` SET ';
-            $where = '';
+            $where = array();
             foreach ($fields as $field) {
                 if ($field->isForeign()) {
                     continue;
@@ -420,14 +420,14 @@ class MySQLi extends \MPF\Db\Layer
                 }
 
                 if ($field->isPrimaryKey()) {
-                    $where = '`' . $field->getName() . '`=' . $this->formatQueryValue($field) . '';
+                    $where[] .= '`' . $field->getName() . '`=' . $this->formatQueryValue($field);
                 } else if (!$field->isReadonly()) {
                     $sql .= '`' . $field->getName() . '`=' . $this->formatQueryValue($field) . ',';
                 }
             }
 
             $sql = substr($sql, 0, -1);
-            $sql .= ' WHERE ' . $where . ' ';
+            $sql .= ' WHERE ' . implode(' AND ', $where) . ' ';
 
             $result = $this->query($sql);
             $result->free();
