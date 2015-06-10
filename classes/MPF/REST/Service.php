@@ -60,6 +60,7 @@ abstract class Service extends \MPF\Base
     abstract protected function options($id, $action);
 
     private $data = array();
+    private $action = null;
 
     /**
      *
@@ -88,7 +89,8 @@ abstract class Service extends \MPF\Base
     public function execute($id, $action)
     {
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
-
+        $this->action = $action;
+        
         $this->getLogger()->debug('{method} :: {id} :: {action}', array(
             'category' => Category::FRAMEWORK | Category::SERVICE, 
             'className' => 'Service',
@@ -270,6 +272,7 @@ abstract class Service extends \MPF\Base
         if ((int) $code >= 400) {
             self::$errors[] = array('code' => $code, "msg" => "$protocol $code $text");
         }
+        
         header('Access-Control-Allow-Origin: *');
         header($protocol . ' ' . $code . ' ' . $text, true, $code);
     }
@@ -298,9 +301,9 @@ abstract class Service extends \MPF\Base
      *
      * @param array $response
      */
-    final public function output($response = '')
+    final public function output($response = array())
     {
-        echo $this->parser->toOutput($response);
+        echo $this->parser->getOutput($response, get_class(), $this->action);
     }
 
     /**

@@ -5,15 +5,15 @@ namespace MPF\REST\Parser;
 class Xml extends \MPF\REST\Parser
 {
 
-    public function toOutput($input)
+    public function getOutput($input, $serviceName="", $actionName="")
     {
         if (!is_array($input)) {
             $input = array();
         }
 
         if (!array_key_exists('errors', $input)) {
-            if ($this->action) {
-                $input = array($this->action => $input);
+            if ($actionName) {
+                $input = array($actionName => $input);
             } else {
                 $isListOfItems = true;
                 foreach ($input as $key => $value) {
@@ -23,14 +23,15 @@ class Xml extends \MPF\REST\Parser
                 }
 
                 if ($isListOfItems) {
-                    $input = array($this->serviceName . 's' => $input);
+                    $input = array($serviceName . 's' => $input);
                 } else {
-                    $input = array($this->serviceName => $input);
+                    $input = array($serviceName => $input);
                 }
             }
         }
         $response = $this->arrayToXml($input);
-
+        
+        $this->setHeaders($input);
         header('Content-Type: text/xml');
         header('Content-Length: ' . strlen($response));
 

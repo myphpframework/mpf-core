@@ -63,7 +63,8 @@ class REST extends \MPF\Base
 
         try {
             $data = self::getData();
-            list($serviceClass, $id, $action, $parser) = self::getParts();
+            $parser = self::getParser(getallheaders());
+            list($serviceClass, $id, $action) = self::getParts();
 
             $logger->debug("Generated class: {name}\n\tREQUEST_URI: {uri}\n", array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
@@ -73,11 +74,7 @@ class REST extends \MPF\Base
             ));
 
             if (!class_exists($serviceClass)) {
-                Service::setResponseCode(Service::HTTPCODE_NOT_FOUND);
-                echo $parser->toOutput(array("errors" => array(
-                        array("code" => Service::HTTPCODE_NOT_FOUND, "msg" => "Service (" . $serviceClass . ") not found"))
-                ));
-                exit;
+                throw new \MPF\REST\Service\Exception\InvalidService($serviceClass);
             }
 
             $service = new $serviceClass($data);
@@ -102,9 +99,23 @@ class REST extends \MPF\Base
             } else {
                 $service->output($response);
             }
+        } catch (Service\Exception\InvalidService $e) {
+            $response = array('errors' => array(
+                array("code" => Service::HTTPCODE_NOT_FOUND, "msg" => $e->getMessage())
+            ));
+
+            $logger->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => print_r($response, true),
+                'exception' => $e
+            ));
+            $service = new Service\Error($data);
+            $service->setParser($parser);
+            $service->output($response);
         } catch (Exception\InvalidRequestAction $e) {
             $response = array('errors' => array(
-                    array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
+                array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
 
             $logger->warning('Response: {response}', array(
@@ -116,7 +127,7 @@ class REST extends \MPF\Base
             $service->output($response);
         } catch (Service\Exception\MissingRequestFields $e) {
             $response = array('errors' => array(
-                    array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
+                array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
             ));
 
             $logger->warning('Response: {response}', array(
@@ -128,7 +139,7 @@ class REST extends \MPF\Base
             $service->output($response);
         } catch (Service\Exception\InvalidRequestMethod $e) {
             $response = array('errors' => array(
-                    array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
+                array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
             ));
 
             $logger->warning('Response: {response}', array(
@@ -141,7 +152,7 @@ class REST extends \MPF\Base
         } catch (\MPF\REST\Service\Exception $e) {
             $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
             $response = array('errors' => array(
-                    array("code" => $errorCode, "msg" => $e->getMessage())
+                array("code" => $errorCode, "msg" => $e->getMessage())
             ));
 
             $logger->warning('Response: {response}', array(
@@ -157,8 +168,9 @@ class REST extends \MPF\Base
             if (ENV::getType() != ENV::TYPE_PRODUCTION) {
                 $msg = $e->getMessage();
             }
+
             $response = array('errors' => array(
-                    array("code" => $errorCode, "msg" => $msg)
+                array("code" => $errorCode, "msg" => $msg)
             ));
 
             $logger->warning('Response: {response}', array(
@@ -169,6 +181,32 @@ class REST extends \MPF\Base
             ));
             $service->output($response);
         }
+    }
+    
+    /**
+     * Return the proper parser for the request content-type
+     * 
+     * @return \MPF\REST\Parser
+     */
+    private static function getParser($headers)
+    {
+        $headers = array_change_key_case($headers, CASE_LOWER);
+        
+        $contentType = (array_key_exists('content-type', $headers) ? $headers['content-type'] : 'application/json');
+        switch ($contentType) {
+            case 'text/html':
+                $parser = new REST\Parser\Html();
+                break;
+            case 'text/xml':
+                $parser = new REST\Parser\Xml();
+                break;
+            default:
+            case 'application/json':
+                $parser = new REST\Parser\Json();
+                break;
+        }
+
+        return $parser;
     }
 
     private static function getData()
@@ -234,49 +272,26 @@ class REST extends \MPF\Base
         $requestUri = str_replace(self::$basePath, '', $requestUri);
         $servicePath = str_replace(array('?', $_SERVER['QUERY_STRING']), '', $requestUri);
         $options = preg_split("@\/@", $servicePath, -1, PREG_SPLIT_NO_EMPTY);
-        $serviceName = str_replace(array('.json', '.xml', '.html'), '', $options[0]);
-        $serviceClass = '\MPF\REST\Service\\' . ucfirst(@$options[0]);
+
+        if (empty($options)) {
+            throw new \MPF\REST\Service\Exception\InvalidService("");
+        }
+        
+        $serviceClass = '\MPF\REST\Service\\' . ucfirst($options[0]);
         unset($options[0]);
+        
+        if (!class_exists($serviceClass)) {
+            return array();
+        }
 
         $id = filter_var(urldecode(@$options[1]), FILTER_SANITIZE_STRING);
         $action = filter_var(urldecode(@$options[2]), FILTER_SANITIZE_STRING);
 
-        preg_match('/\.json|\.html|\.xml$/i', $id, $matches);
-        if (empty($matches)) {
-            preg_match('/\.json|\.html|\.xml$/i', $action, $matches);
-            $format = strtolower(@$matches[0]);
-            $action = str_replace(@$matches[0], '', $action);
-            if (empty($matches) && !$id) {
-                $id = null;
-                $action = null;
-                preg_match('/\.json|\.html|\.xml$/i', $serviceClass, $matches);
-                $format = strtolower(@$matches[0]);
-                $serviceClass = str_replace(@$matches[0], '', $serviceClass);
-            }
-        } elseif (!empty($matches)) {
-            $format = strtolower(@$matches[0]);
-            $id = str_replace(@$matches[0], '', $id);
-        }
-
-        switch ($format) {
-            case '.html':
-                $parser = new REST\Parser\Html($serviceName, $action);
-                break;
-            default:
-            case '.json':
-                $parser = new REST\Parser\Json($serviceName, $action);
-                break;
-            case '.xml':
-                $parser = new REST\Parser\Xml($serviceName, $action);
-                break;
-        }
-
-        return array($serviceClass, $id, $action, $parser);
+        return array($serviceClass, $id, $action);
     }
 
     private function __construct()
     {
-        
     }
 
 }

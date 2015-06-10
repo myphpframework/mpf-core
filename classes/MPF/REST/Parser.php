@@ -10,7 +10,7 @@ abstract class Parser
      * @param array $input
      * @return string
      */
-    abstract public function toOutput($input);
+    abstract public function getOutput($input, $serviceName="", $actionName="");
 
     /**
      * Converts output to proper input array
@@ -18,14 +18,13 @@ abstract class Parser
      * @return array
      */
     abstract public function toArray($output);
-
-    protected $serviceName;
-    protected $action;
-
-    public function __construct($serviceName, $action)
+    
+    protected function setHeaders($input)
     {
-        $this->serviceName = $serviceName;
-        $this->action = $action;
+        if (array_key_exists('errors', $input)) {
+            $errorCode = $input['errors'][0]['code'];
+            $message = $input['errors'][0]['msg'];
+            header("HTTP/1.0 $errorCode $message");
+        }
     }
-
 }

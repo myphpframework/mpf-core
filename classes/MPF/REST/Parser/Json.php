@@ -5,7 +5,7 @@ namespace MPF\REST\Parser;
 class Json extends \MPF\REST\Parser
 {
 
-    public function toOutput($input)
+    public function getOutput($input, $serviceName="", $actionName="")
     {
         $response = (!$input ? '{}' : json_encode($input));
 
@@ -13,6 +13,7 @@ class Json extends \MPF\REST\Parser
             throw new \Exception(\MPF\Text::byXml('mpf_exception')->get('serviceJsonParser', array('Replace' => array('errorNumber' => json_last_error()))), 500);
         }
         
+        $this->setHeaders($input);
         header('Content-Type: application/json');
         //header('Content-Length: '.strlen($response));
 
