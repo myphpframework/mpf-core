@@ -64,7 +64,7 @@ class REST extends \MPF\Base
         try {
             $data = self::getData();
             $parser = self::getParser(getallheaders());
-            list($serviceClass, $id, $action) = self::getParts();
+            @list($serviceClass, $id, $action) = self::getParts();
 
             $logger->debug("Generated class: {name}\n\tREQUEST_URI: {uri}\n", array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
