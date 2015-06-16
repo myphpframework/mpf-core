@@ -48,8 +48,31 @@ class REST extends \MPF\Base
         return true;
     }
 
+    public static function fatal_handler()
+    {
+        if(!is_null($error = error_get_last())) {
+            ob_clean();
+            $response = array('errors' => array(array("code" => HTTPCODE_INTERNAL_ERROR, "msg" => $error)));
+
+            $logger = new \MPF\Log\Logger();
+            $logger->critical('FATAL: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => str_replace(' ', '', print_r($response, true)),
+                'exception' => $e
+            ));
+
+            $service = new Service\Error(array());
+            $service->setResponseCode(Service::HTTPCODE_INTERNAL_ERROR);
+            $service->setParser(self::getParser(getallheaders()));
+            $service->output($response);
+        }
+    }
+    
     public static function execute($basePath = '')
     {
+        register_shutdown_function('\MPF\REST::fatal_handler');
+        
         $logger = new \MPF\Log\Logger();
         self::$basePath = '/' . preg_replace('/^\/|\/$/i', '', $basePath) . '/';
 
