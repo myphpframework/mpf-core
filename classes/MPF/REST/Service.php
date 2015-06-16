@@ -103,7 +103,7 @@ abstract class Service extends \MPF\Base
         // For action we cannot let the OPTIONS method go thru, it requires the headers for the CORS
         if ($action && !in_array($method, array("OPTIONS"))) {
             if (!method_exists($this, $action)) {
-                self::setResponseCode(self::HTTPCODE_BAD_REQUEST);
+                $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
                 $exception = new Service\Exception\InvalidRequestAction($action);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
@@ -173,7 +173,7 @@ abstract class Service extends \MPF\Base
                 return $options;
                 break;
             default:
-                self::setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
+                $this->setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
                 $exception = new Service\Exception\InvalidRequestMethod($method);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
@@ -191,7 +191,7 @@ abstract class Service extends \MPF\Base
      *
      * @param type $code
      */
-    public static function setResponseCode($code)
+    public function setResponseCode($code)
     {
         $protocol = (isSet($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
         $text = 'Unknown http status code';
@@ -325,7 +325,7 @@ abstract class Service extends \MPF\Base
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
         
         if (!in_array($method, $acceptedMethods)) {
-            self::setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
+            $this->setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
             $exception = new Service\Exception\InvalidRequestMethod($method);
             
             $this->getLogger()->warning($exception->getMessage(), array(
@@ -344,7 +344,7 @@ abstract class Service extends \MPF\Base
         }
 
         if (!empty($missingFields)) {
-            self::setResponseCode(self::HTTPCODE_BAD_REQUEST);
+            $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
             $exception = new Service\Exception\MissingRequestFields($missingFields);
             
             $this->getLogger()->warning($exception->getMessage(), array(

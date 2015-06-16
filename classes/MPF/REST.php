@@ -50,9 +50,9 @@ class REST extends \MPF\Base
 
     public static function fatal_handler()
     {
-        if(!is_null($error = error_get_last())) {
+        if(!is_null($error = error_get_last()) && $error['type'] === E_ERROR) {
             ob_clean();
-            $response = array('errors' => array(array("code" => HTTPCODE_INTERNAL_ERROR, "msg" => $error)));
+            $response = array('errors' => array(array("code" => Service::HTTPCODE_INTERNAL_ERROR, "msg" => $error)));
 
             $logger = new \MPF\Log\Logger();
             $logger->critical('FATAL: {response}', array(
