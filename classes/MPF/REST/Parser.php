@@ -18,13 +18,4 @@ abstract class Parser
      * @return array
      */
     abstract public function toArray($output);
-    
-    protected function setHeaders($input)
-    {
-        if (array_key_exists('errors', $input)) {
-            $errorCode = $input['errors'][0]['code'];
-            $message = $input['errors'][0]['msg'];
-            header("HTTP/1.0 $errorCode $message");
-        }
-    }
 }

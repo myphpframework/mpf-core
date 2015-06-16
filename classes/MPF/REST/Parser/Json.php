@@ -13,13 +13,13 @@ class Json extends \MPF\REST\Parser
             throw new \Exception(\MPF\Text::byXml('mpf_exception')->get('serviceJsonParser', array('Replace' => array('errorNumber' => json_last_error()))), 500);
         }
         
-        $this->setHeaders($input);
-        header('Content-Type: application/json');
-        //header('Content-Length: '.strlen($response));
-
         if (array_key_exists('callback', $_REQUEST)) {
+            header('Content-Type: application/javascript');
             return $_REQUEST['callback'] . '(' . $response . ');';
         }
+        
+        header('Content-Type: application/json');
+        //header('Content-Length: '.strlen($response));
         return $response;
     }
 

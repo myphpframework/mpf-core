@@ -21,7 +21,6 @@ class REST extends \MPF\Base
     public static function basicAuth($login, $password, $realm = 'MPF-REST')
     {
         if (!$login || !$password || !self::authenticate($login, $password)) {
-            header('Access-Control-Allow-Origin: *');
             header('WWW-Authenticate: Basic realm="' . $realm . '"');
             header('HTTP/1.0 401 Unauthorized');
             return false;

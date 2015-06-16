@@ -100,7 +100,8 @@ abstract class Service extends \MPF\Base
         ));
 
         // if we have an action we validate it and call the proper function
-        if ($action) {
+        // For action we cannot let the OPTIONS method go thru, it requires the headers for the CORS
+        if ($action && !in_array($method, array("OPTIONS"))) {
             if (!method_exists($this, $action)) {
                 self::setResponseCode(self::HTTPCODE_BAD_REQUEST);
                 $exception = new Service\Exception\InvalidRequestAction($action);
@@ -167,7 +168,9 @@ abstract class Service extends \MPF\Base
                     'calledClass' => get_called_class(),
                     'id' => $id
                 ));
-                return $this->options($id, $action);
+                $options = $this->options($id, $action);
+                header('Allow: '.implode(',', $options['allow']));
+                return $options;
                 break;
             default:
                 self::setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
@@ -274,6 +277,8 @@ abstract class Service extends \MPF\Base
         }
         
         header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type');
         header($protocol . ' ' . $code . ' ' . $text, true, $code);
     }
 
@@ -318,7 +323,7 @@ abstract class Service extends \MPF\Base
     protected function validate($acceptedMethods, $requiredFields)
     {
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
-
+        
         if (!in_array($method, $acceptedMethods)) {
             self::setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
             $exception = new Service\Exception\InvalidRequestMethod($method);

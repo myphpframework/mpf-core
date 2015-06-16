@@ -31,7 +31,11 @@ class Xml extends \MPF\REST\Parser
         }
         $response = $this->arrayToXml($input);
         
-        $this->setHeaders($input);
+        if (array_key_exists('callback', $_REQUEST)) {
+            header('Content-Type: application/javascript');
+            return $_REQUEST['callback'] . '(' . $response . ');';
+        }
+        
         header('Content-Type: text/xml');
         header('Content-Length: ' . strlen($response));
 

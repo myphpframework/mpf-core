@@ -14,10 +14,13 @@ class Html extends \MPF\REST\Parser
         $response->response = $input;
         $html = $response->parse();
         
-        $this->setHeaders($input);
-        header('Content-Type: text/html');
+        if (array_key_exists('callback', $_REQUEST)) {
+            header('Content-Type: application/javascript');
+            return $_REQUEST['callback'] . '(' . $response . ');';
+        }
+        
         header('Content-Length: ' . strlen($html));
-
+        header('Content-Type: text/html');
         return $html;
     }
 
