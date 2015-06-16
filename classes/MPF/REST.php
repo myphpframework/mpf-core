@@ -106,7 +106,7 @@ class REST extends \MPF\Base
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
-                'response' => print_r($response, true),
+                'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
             $service = new Service\Error($data);
@@ -121,7 +121,7 @@ class REST extends \MPF\Base
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
-                'response' => print_r($response, true),
+                'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
             $service->setResponseCode(Service::HTTPCODE_BAD_REQUEST);
@@ -134,7 +134,7 @@ class REST extends \MPF\Base
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
-                'response' => print_r($response, true),
+                'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
             $service->setResponseCode(Service::HTTPCODE_BAD_REQUEST);
@@ -147,7 +147,7 @@ class REST extends \MPF\Base
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
-                'response' => print_r($response, true),
+                'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
             $service->setResponseCode(Service::HTTPCODE_METHOD_NOT_ALLOWED);
@@ -161,7 +161,7 @@ class REST extends \MPF\Base
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
-                'response' => print_r($response, true),
+                'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
             $service->setResponseCode(Service::HTTPCODE_INTERNAL_ERROR);
@@ -180,7 +180,7 @@ class REST extends \MPF\Base
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
-                'response' => print_r($response, true),
+                'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
             $service->setResponseCode(Service::HTTPCODE_INTERNAL_ERROR);
