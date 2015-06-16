@@ -98,6 +98,19 @@ class REST extends \MPF\Base
             } else {
                 $service->output($response);
             }
+        } catch (Service\Exception\InvalidCredentials $e) {
+            $response = array('errors' => array(array("code" => Service::HTTPCODE_UNAUTHORIZED, "msg" => $e->getMessage())));
+            $logger->warning('Response: {response}', array(
+                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'className' => 'REST',
+                'response' => str_replace(' ', '', print_r($response, true)),
+                'exception' => $e
+            ));
+
+            $service = new Service\Error($data);
+            $service->setResponseCode(Service::HTTPCODE_UNAUTHORIZED);
+            $service->setParser($parser);
+            $service->output($response);
         } catch (Service\Exception\InvalidService $e) {
             $response = array('errors' => array(
                 array("code" => Service::HTTPCODE_NOT_FOUND, "msg" => $e->getMessage())
