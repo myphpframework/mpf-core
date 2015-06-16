@@ -150,10 +150,9 @@ namespace MPF {
          *
          * @throws Bootstrap\Exception\UnsupportedType
          * @param string $type
-         * @param string $filename
          * @return Bootstrap_Interface
          */
-        public static function bootstrap($type, $filename = '')
+        public static function bootstrap($type, $args=array())
         {
             if (!in_array($type, array(ENV::TEMPLATE, ENV::DATABASE, ENV::SESSION))) {
                 throw new Bootstrap\Exception\UnsupportedType($type);
@@ -169,8 +168,8 @@ namespace MPF {
                         'className' => 'ENV',
                         'type' => $type
                     ));
-
-                    $bootstrap->init($filename);
+                    
+                    $bootstrap->init($args);
                 }
 
                 self::$bootstraps[$type] = $bootstrap;

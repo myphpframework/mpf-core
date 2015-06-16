@@ -19,8 +19,10 @@ class Database extends \MPF\Bootstrap implements Intheface
      * @param string $filename
      * @return
      */
-    public function init($filename = '')
+    public function init($args=array())
     {
+        $filename = (array_key_exists('filename', $args) ? $args['filename'] : "");
+
         // we fetch all the potential database configs
         $paths = array_merge(array(CONFIG_PRIORITY_FOLDER), ENV::paths()->configs());
         foreach ($paths as $path) {
