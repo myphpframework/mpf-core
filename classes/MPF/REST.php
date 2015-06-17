@@ -68,13 +68,6 @@ class REST extends \MPF\Base
         }
     }
     
-    public static function setHeaders($headers)
-    {
-        foreach ($headers as $header) {
-            header($header);
-        }
-    }
-    
     public static function execute($basePath = '')
     {
         register_shutdown_function('\MPF\REST::fatal_handler');
