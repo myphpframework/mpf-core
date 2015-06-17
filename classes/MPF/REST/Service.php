@@ -275,10 +275,7 @@ abstract class Service extends \MPF\Base
         if ((int) $code >= 400) {
             self::$errors[] = array('code' => $code, "msg" => "$protocol $code $text");
         }
-        
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type');
+
         header($protocol . ' ' . $code . ' ' . $text, true, $code);
     }
 

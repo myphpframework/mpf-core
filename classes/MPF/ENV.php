@@ -259,7 +259,7 @@ namespace MPF\ENV {
                 if (array_key_exists('PWD', $_SERVER) && false !== strpos($_SERVER['PWD'], PATH_SITE)) {
                     $this->currentDir = filter_var($_SERVER['PWD'], \FILTER_SANITIZE_URL);
                 }
-
+                
                 $logger->buffer(LogLevel::INFO, 'current dir:' . $this->currentDir . ' == ' . PATH_SITE, array(
                     'category' => Category::FRAMEWORK | Category::ENVIRONMENT, 
                     'className' => 'ENV\Paths'

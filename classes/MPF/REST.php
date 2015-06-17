@@ -17,7 +17,7 @@ class REST extends \MPF\Base
      * @var \MPF\User $loggedInUser
      */
     protected static $loggedInUser;
-
+    
     public static function basicAuth($login, $password, $realm = 'MPF-REST')
     {
         if (!$login || !$password || !self::authenticate($login, $password)) {
@@ -30,7 +30,6 @@ class REST extends \MPF\Base
 
     public static function verifySignature()
     {
-        
     }
 
     protected static function authenticate($login, $password)
@@ -66,6 +65,13 @@ class REST extends \MPF\Base
             $service->setResponseCode(Service::HTTPCODE_INTERNAL_ERROR);
             $service->setParser(self::getParser(getallheaders()));
             $service->output($response);
+        }
+    }
+    
+    public static function setHeaders($headers)
+    {
+        foreach ($headers as $header) {
+            header($header);
         }
     }
     

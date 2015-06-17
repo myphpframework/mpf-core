@@ -16,8 +16,8 @@ class Session extends \MPF\Bootstrap implements Intheface
         ini_set('session.cookie_path', SESSION_COOKIE_PATH);
         ini_set('session.cookie_lifetime', (time() + (60 * 15)));
         
-        if (array_key_exists('token', $args) && $args['token']) {
-            session_id($args['token']);
+        if (array_key_exists('phpsessid', $args) && $args['phpsessid']) {
+            session_id($args['phpsessid']);
         }
         @session_start();
         $this->initialized = true;
