@@ -8,9 +8,14 @@ class Template extends \MPF\REST\Service
     protected function options($id, $action)
     {
         $this->setResponseCode(self::HTTPCODE_OK);
+        
+        $response = array('OPTIONS' => array());
+        if ($id) {
+            $response['GET'] = array();
+        }
 
-        $options = '';
-        header('Allow: ' . $options);
+        header('Allow: '.implode(',', array_keys($response)));
+        return $response;
     }
 
     protected function update($id, $data)

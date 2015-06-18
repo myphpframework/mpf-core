@@ -309,19 +309,19 @@ abstract class Service extends \MPF\Base
     }
 
     /**
-     * Validates the params and request method,
-     * also sanitize inputs
+     * Validates the params and request method
      *
      * @throws Service\Exception\InvalidRequestMethod
      * @throws Service\Exception\MissingRequestFields
-     * @param array $acceptedMethods
-     * @param array $requiredFields
+     * @param string $id
+     * @param string $action
      */
-    protected function validate($acceptedMethods, $requiredFields)
+    public function validate($id, $action)
     {
-        $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
+        $options = $this->options($id, $action);
         
-        if (!in_array($method, $acceptedMethods)) {
+        $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
+        if (!in_array($method, array_keys($options))) {
             $this->setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
             $exception = new Service\Exception\InvalidRequestMethod($method);
             
@@ -331,6 +331,15 @@ abstract class Service extends \MPF\Base
                 'exception' => $exception
             ));
             throw $exception;
+        }
+        
+        $requiredFields = array();
+        if (array_key_exists($method, $options)) {
+            foreach ($options[$method] as $fieldName => $details) {
+                if ($details['required']) {
+                    $requiredFields[] = $fieldName;
+                }
+            }
         }
 
         $missingFields = array();

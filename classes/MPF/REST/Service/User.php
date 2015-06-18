@@ -15,9 +15,23 @@ class User extends \MPF\REST\Service
     protected function options($id, $action)
     {
         $this->setResponseCode(self::HTTPCODE_OK);
+        $response = array('OPTIONS' => array());
+        if ($action == 'login') {
+            $response['PUT'] = array('password' => array('required' => true));
+        } elseif ($action == 'logout') {
+            $response['GET'] = array();
+        } elseif ($action == 'resetPassword') {
+            $response['GET'] = array();
+        } elseif ($id) {
+            $response['GET'] = array();
+            $response['PUT'] = array();
+            $response['POST'] = array(
+                'password' => array('required' => true),
+            );
+        }
 
-        $options = '';
-        header('Allow: ' . $options);
+        header('Allow: '.implode(',', array_keys($response)));
+        return $response;
     }
 
     protected function update($id, $data)
@@ -37,8 +51,6 @@ class User extends \MPF\REST\Service
 
     protected function create($id, $data)
     {
-        $this->validate(array('POST'), array('username', 'password'));
-
         try {
             $user = Usr::create($data['username']);
             $user->setPassword($data['password']);
@@ -97,9 +109,6 @@ class User extends \MPF\REST\Service
      */
     protected function resetPassword($id, $data)
     {
-        $this->validate(array('PUT'), array('reset_username'));
-        $id = filter_var($id, FILTER_SANITIZE_STRING);
-
         $user = Usr::byUsername($id);
         if (!$user) {
             $this->setResponseCode(self::HTTPCODE_NOT_FOUND);
@@ -142,9 +151,6 @@ class User extends \MPF\REST\Service
      */
     protected function login($id, $data)
     {
-        $this->validate(array('PUT'), array('username', 'password'));
-        $id = filter_var($id, FILTER_SANITIZE_STRING);
-
         $this->setResponseCode(self::HTTPCODE_OK);
 
         $user = Usr::byUsername($id);

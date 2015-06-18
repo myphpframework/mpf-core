@@ -104,7 +104,8 @@ class REST extends \MPF\Base
             if (self::$loggedInUser) {
                 $service->setUser(self::$loggedInUser);
             }
-
+            
+            $service->validate($id, $action);
             $response = $service->execute($id, $action);
 
             #ob_end_flush();
