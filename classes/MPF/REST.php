@@ -51,14 +51,13 @@ class REST extends \MPF\Base
     {
         if(!is_null($error = error_get_last()) && $error['type'] === E_ERROR) {
             ob_clean();
-            $response = array('errors' => array(array("code" => Service::HTTPCODE_INTERNAL_ERROR, "msg" => $error)));
+            $response = array('errors' => array(array("msg" => $error)));
 
             $logger = new \MPF\Log\Logger();
             $logger->critical('FATAL: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
                 'response' => str_replace(' ', '', print_r($response, true)),
-                'exception' => $e
             ));
 
             $service = new Service\Error(array());
@@ -111,18 +110,9 @@ class REST extends \MPF\Base
             #ob_end_flush();
             #$buffer = ob_get_contents();
             ob_end_clean();
-
-            if (!$response) {
-                if (!empty($service::$errors)) {
-                    $service->output(array('errors' => $service::$errors));
-                } else {
-                    $service->output();
-                }
-            } else {
-                $service->output($response);
-            }
+            $service->output($response);
         } catch (Service\Exception\InvalidCredentials $e) {
-            $response = array('errors' => array(array("code" => Service::HTTPCODE_UNAUTHORIZED, "msg" => $e->getMessage())));
+            $response = array('errors' => array(array("msg" => $e->getMessage())));
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
                 'className' => 'REST',
@@ -136,7 +126,7 @@ class REST extends \MPF\Base
             $service->output($response);
         } catch (Service\Exception\InvalidService $e) {
             $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_NOT_FOUND, "msg" => $e->getMessage())
+                array("msg" => $e->getMessage())
             ));
 
             $logger->warning('Response: {response}', array(
@@ -149,69 +139,16 @@ class REST extends \MPF\Base
             $service->setResponseCode(Service::HTTPCODE_NOT_FOUND);
             $service->setParser($parser);
             $service->output($response);
-        } catch (Exception\InvalidRequestAction $e) {
-            $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
-            ));
-
-            $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
-                'className' => 'REST',
-                'response' => str_replace(' ', '', print_r($response, true)),
-                'exception' => $e
-            ));
-            $service->setResponseCode(Service::HTTPCODE_BAD_REQUEST);
-            $service->output($response);
-        } catch (Service\Exception\MissingRequestFields $e) {
-            $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_BAD_REQUEST, "msg" => $e->getMessage())
-            ));
-
-            $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
-                'className' => 'REST',
-                'response' => str_replace(' ', '', print_r($response, true)),
-                'exception' => $e
-            ));
-            $service->setResponseCode(Service::HTTPCODE_BAD_REQUEST);
-            $service->output($response);
-        } catch (Service\Exception\InvalidRequestMethod $e) {
-            $response = array('errors' => array(
-                array("code" => Service::HTTPCODE_METHOD_NOT_ALLOWED, "msg" => $e->getMessage())
-            ));
-
-            $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
-                'className' => 'REST',
-                'response' => str_replace(' ', '', print_r($response, true)),
-                'exception' => $e
-            ));
-            $service->setResponseCode(Service::HTTPCODE_METHOD_NOT_ALLOWED);
-            $service->output($response);
-        } catch (\MPF\REST\Service\Exception $e) {
-            $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
-            $response = array('errors' => array(
-                array("code" => $errorCode, "msg" => $e->getMessage())
-            ));
-
-            $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
-                'className' => 'REST',
-                'response' => str_replace(' ', '', print_r($response, true)),
-                'exception' => $e
-            ));
-            $service->setResponseCode(Service::HTTPCODE_INTERNAL_ERROR);
-            $service->output($response);
         } catch (\Exception $e) {
-            $errorCode = (property_exists($e, 'restCode') ? $e->restCode : Service::HTTPCODE_INTERNAL_ERROR);
-            $msg = 'Internal Server Error';
-            if (ENV::getType() != ENV::TYPE_PRODUCTION) {
-                $msg = $e->getMessage();
-            }
+            $errorCode = (property_exists($e, 'httpcode') ? $e->httpcode : Service::HTTPCODE_INTERNAL_ERROR);
 
-            $response = array('errors' => array(
-                array("code" => $errorCode, "msg" => $msg)
-            ));
+            $response = array('errors' => array());
+            
+            $error = array("msg" => $e->getMessage());
+            if (property_exists($e, 'invalidFields')) {
+                $error['invalidFields'] = (array)$e->invalidFields;
+            }
+            $response['errors'][] = $error;
 
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
@@ -219,7 +156,7 @@ class REST extends \MPF\Base
                 'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
-            $service->setResponseCode(Service::HTTPCODE_INTERNAL_ERROR);
+            $service->setResponseCode($errorCode);
             $service->output($response);
         }
     }

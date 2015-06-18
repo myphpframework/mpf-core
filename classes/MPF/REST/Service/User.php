@@ -73,7 +73,7 @@ class User extends \MPF\REST\Service
         } catch (\MPF\Db\Exception\DuplicateEntry $e) {
             $this->setResponseCode(self::HTTPCODE_CONFLICT);
             return array('errors' => array(
-                    array('code' => self::HTTPCODE_CONFLICT, 'msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
+                array('msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
             ));
         }
 
@@ -101,8 +101,6 @@ class User extends \MPF\REST\Service
 
     /**
      *
-     * @throws \MPF\REST\Service\Exception\InvalidRequestMethod
-     * @throws \MPF\REST\Service\Exception\MissingRequestFields
      * @throws \MPF\REST\Service\Exception\InvalidCredentials
      * @param string $id
      * @param array $data
@@ -113,14 +111,14 @@ class User extends \MPF\REST\Service
         if (!$user) {
             $this->setResponseCode(self::HTTPCODE_NOT_FOUND);
             return array('errors' => array(
-                    array('code' => self::HTTPCODE_NOT_FOUND, 'msg' => Text::byXml('mpf_user')->get('usernameNotFound', array('Replace' => array('username' => $id))))
+                array('msg' => Text::byXml('mpf_user')->get('usernameNotFound', array('Replace' => array('username' => $id))))
             ));
         }
 
         if ($user->getPassword() !== null || $user->getId() == 1) {
             $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
             return array('errors' => array(
-                    array('code' => self::HTTPCODE_BAD_REQUEST, 'msg' => Text::byXml('mpf_user')->get('cannotResetPassword', array('Replace' => array('username' => $id))))
+                    array('msg' => Text::byXml('mpf_user')->get('cannotResetPassword', array('Replace' => array('username' => $id))))
             ));
         }
 
@@ -143,8 +141,6 @@ class User extends \MPF\REST\Service
 
     /**
      *
-     * @throws \MPF\REST\Service\Exception\InvalidRequestMethod
-     * @throws \MPF\REST\Service\Exception\MissingRequestFields
      * @throws \MPF\REST\Service\Exception\InvalidCredentials
      * @param string $id
      * @param array $data

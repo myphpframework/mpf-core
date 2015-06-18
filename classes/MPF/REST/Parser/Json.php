@@ -19,7 +19,7 @@ class Json extends \MPF\REST\Parser
         }
         
         header('Content-Type: application/json');
-        //header('Content-Length: '.strlen($response));
+        header('Content-Length: '.strlen($response));
         return $response;
     }
 

@@ -8,9 +8,6 @@ use MPF\Log\Category;
 
 abstract class Service extends \MPF\Base
 {
-
-    public static $errors = array();
-
     const HTTPCODE_CONTINUE = 100;
     const HTTPCODE_SWITCH_PROTOCOL = 101;
     const HTTPCODE_OK = 200;
@@ -61,6 +58,7 @@ abstract class Service extends \MPF\Base
 
     private $data = array();
     private $action = null;
+    private $httpcode;
 
     /**
      *
@@ -103,7 +101,6 @@ abstract class Service extends \MPF\Base
         // For action we cannot let the OPTIONS method go thru, it requires the headers for the CORS
         if ($action && !in_array($method, array("OPTIONS"))) {
             if (!method_exists($this, $action)) {
-                $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
                 $exception = new Service\Exception\InvalidRequestAction($action);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
@@ -173,7 +170,6 @@ abstract class Service extends \MPF\Base
                 return $options;
                 break;
             default:
-                $this->setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
                 $exception = new Service\Exception\InvalidRequestMethod($method);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
@@ -193,6 +189,8 @@ abstract class Service extends \MPF\Base
      */
     public function setResponseCode($code)
     {
+        $this->httpcode = (int)$code;
+
         $protocol = (isSet($_SERVER['SERVER_PROTOCOL']) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.0');
         $text = 'Unknown http status code';
         switch ((int) $code) {
@@ -272,10 +270,6 @@ abstract class Service extends \MPF\Base
                 break;
         }
 
-        if ((int) $code >= 400) {
-            self::$errors[] = array('code' => $code, "msg" => "$protocol $code $text");
-        }
-
         header($protocol . ' ' . $code . ' ' . $text, true, $code);
     }
 
@@ -322,7 +316,6 @@ abstract class Service extends \MPF\Base
         
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
         if (!in_array($method, array_keys($options))) {
-            $this->setResponseCode(self::HTTPCODE_METHOD_NOT_ALLOWED);
             $exception = new Service\Exception\InvalidRequestMethod($method);
             
             $this->getLogger()->warning($exception->getMessage(), array(
@@ -350,7 +343,6 @@ abstract class Service extends \MPF\Base
         }
 
         if (!empty($missingFields)) {
-            $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
             $exception = new Service\Exception\MissingRequestFields($missingFields);
             
             $this->getLogger()->warning($exception->getMessage(), array(
