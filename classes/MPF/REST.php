@@ -1,5 +1,4 @@
 <?php
-
 namespace MPF;
 
 use MPF\REST\Service;
@@ -171,6 +170,13 @@ class REST extends \MPF\Base
                 break;
         }
 
+        $logger = new \MPF\Log\Logger();
+        $logger->debug("Parser for request {parser}\n", array(
+            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'className' => 'REST',
+            'parser' => get_class($parser)
+        ));
+
         return $parser;
     }
 
@@ -227,6 +233,13 @@ class REST extends \MPF\Base
 
             return $data;
         }
+        
+        $logger = new \MPF\Log\Logger();
+        $logger->debug("Data recieved: {data}\n", array(
+            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'className' => 'REST',
+            'data' => print_r($a_data, true)
+        ));
 
         return sanitize($a_data);
     }
