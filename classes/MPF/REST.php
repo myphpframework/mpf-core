@@ -50,7 +50,12 @@ class REST extends \MPF\Base
     {
         if(!is_null($error = error_get_last()) && $error['type'] === E_ERROR) {
             ob_clean();
-            $response = array('errors' => array(array("msg" => $error)));
+            
+            $response = array(
+                "errorcode" => Service::HTTPCODE_INTERNAL_ERROR,
+                "message" => $error,
+                "fields" => array()
+            );
 
             $logger = new \MPF\Log\Logger();
             $logger->critical('FATAL: {response}', array(
@@ -111,9 +116,11 @@ class REST extends \MPF\Base
             ob_end_clean();
             $service->output($response);
         } catch (Service\Exception\InvalidService $e) {
-            $response = array('errors' => array(
-                array("msg" => $e->getMessage())
-            ));
+            $response = array(
+                "errorcode" => Service::HTTPCODE_NOT_FOUND,
+                "message" => $e->getMessage(),
+                "fields" => array()
+            );
 
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 
@@ -122,19 +129,21 @@ class REST extends \MPF\Base
                 'exception' => $e
             ));
             $service = new Service\Error($data);
-            $service->setResponseCode(Service::HTTPCODE_NOT_FOUND);
+            $service->setResponseCode();
             $service->setParser($parser);
             $service->output($response);
         } catch (\Exception $e) {
             $errorCode = (property_exists($e, 'httpcode') ? $e->httpcode : Service::HTTPCODE_INTERNAL_ERROR);
 
-            $response = array('errors' => array());
+            $response = array(
+                "errorcode" => $errorCode,
+                "message" => $e->getMessage(),
+                "fields" => array()
+            );
             
-            $error = array("msg" => $e->getMessage());
             if (property_exists($e, 'invalidFields')) {
-                $error['invalidFields'] = (array)$e->invalidFields;
+                $response['fields'] = (array)$e->invalidFields;
             }
-            $response['errors'][] = $error;
 
             $logger->warning('Response: {response}', array(
                 'category' => Category::FRAMEWORK | Category::SERVICE, 

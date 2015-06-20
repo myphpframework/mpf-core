@@ -72,9 +72,10 @@ class User extends \MPF\REST\Service
             return $user->toArray();
         } catch (\MPF\Db\Exception\DuplicateEntry $e) {
             $this->setResponseCode(self::HTTPCODE_CONFLICT);
-            return array('errors' => array(
-                array('msg' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))))
-            ));
+            return array('errorcode' => self::HTTPCODE_CONFLICT,
+                'messsage' => Text::byXml('mpf_exception')->get('serviceUserAlreadyExists', array('Replace' => array('username' => $data['username']))),
+                'fields' => array()
+            );
         }
 
         $_SESSION['userId'] = $user->getId();
@@ -110,16 +111,18 @@ class User extends \MPF\REST\Service
         $user = Usr::byUsername($id);
         if (!$user) {
             $this->setResponseCode(self::HTTPCODE_NOT_FOUND);
-            return array('errors' => array(
-                array('msg' => Text::byXml('mpf_user')->get('usernameNotFound', array('Replace' => array('username' => $id))))
-            ));
+            return array('errorcode' => self::HTTPCODE_CONFLICT,
+                'messsage' => Text::byXml('mpf_user')->get('usernameNotFound', array('Replace' => array('username' => $id))),
+                'fields' => array()
+            );
         }
 
         if ($user->getPassword() !== null || $user->getId() == 1) {
             $this->setResponseCode(self::HTTPCODE_BAD_REQUEST);
-            return array('errors' => array(
-                    array('msg' => Text::byXml('mpf_user')->get('cannotResetPassword', array('Replace' => array('username' => $id))))
-            ));
+            return array('errorcode' => self::HTTPCODE_CONFLICT,
+                'messsage' => Text::byXml('mpf_user')->get('cannotResetPassword', array('Replace' => array('username' => $id))),
+                'fields' => array()
+            );
         }
 
         if (!isSet($data['reset_password'])) {
