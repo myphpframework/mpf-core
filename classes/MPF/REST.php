@@ -48,7 +48,7 @@ class REST extends \MPF\Base
 
     public static function fatal_handler()
     {
-        if(!is_null($error = error_get_last()) && $error['type'] === E_ERROR) {
+        if(!is_null($error = error_get_last()) && in_array($error['type'], array(E_ERROR, E_COMPILE_ERROR, E_CORE_ERROR, E_USER_ERROR, E_PARSE))) {
             ob_clean();
             
             $response = array(
