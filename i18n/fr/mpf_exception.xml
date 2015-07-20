@@ -39,6 +39,7 @@
         <text id="serviceInvalidRequestMethod">La méthode "@method@" est invalide pour cette requête.</text>
         <text id="serviceInvalidRequestAction">L'action "@action@" est invalide pour cette requête.</text>
         <text id="serviceMissingRequestFields">La requête a certain champs manquand: "@fields@".</text>
+        <text id="serviceInvalidFieldValue">La valeur pour le champ "@field@" est invalide. La liste de choix est: "@choices@"</text>
         <text id="serviceUserAlreadyExists">Il y a déjà un compte avec cette utilisateur "@username@".</text>
         <text id="serviceUserNotApproved">Votre compte n'a pas encore été apprové.</text>
         <text id="serviceInvalidCredentials">Les informations d'accès sont invalide</text>

@@ -327,10 +327,19 @@ abstract class Service extends \MPF\Base
         }
         
         $requiredFields = array();
+        $invalidFieldValues = array();
         if (array_key_exists($method, $options)) {
             foreach ($options[$method] as $fieldName => $details) {
                 if ($details['required']) {
                     $requiredFields[] = $fieldName;
+                }
+                
+                // if we have a list we double check the value
+                if (array_key_exists('list', $details)
+                    && array_key_exists($fieldName, $this->data) 
+                    && !in_array($this->data[$fieldName], $details['list'])) {
+
+                    $invalidFieldValues[$fieldName] = $details['list'];
                 }
             }
         }
@@ -351,6 +360,19 @@ abstract class Service extends \MPF\Base
                 'exception' => $exception
             ));
             throw $exception;
+        }
+
+        if (!empty($invalidFieldValues)) {
+            foreach ($invalidFieldValues as $field => $values) {
+                $exception = new Service\Exception\InvalidFieldValue($field, $values);
+
+                $this->getLogger()->warning($exception->getMessage(), array(
+                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'className' => 'Service',
+                    'exception' => $exception
+                ));
+                throw $exception;
+            }
         }
     }
 
