@@ -129,7 +129,7 @@ class REST extends \MPF\Base
                 'exception' => $e
             ));
             $service = new Service\Error($data);
-            $service->setResponseCode();
+            $service->setResponseCode(Service::HTTPCODE_NOT_FOUND);
             $service->setParser($parser);
             $service->output($response);
         } catch (\Exception $e) {
