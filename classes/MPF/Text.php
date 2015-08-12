@@ -33,6 +33,7 @@ class Text extends \MPF\Base
                     $xmlFile = file_get_contents($file);
                     $xmlFile = preg_replace('/&/', '&amp;', $xmlFile);
                     $xml = @simplexml_load_string($xmlFile);
+
                     if (!$xml) {
                         $exception = new Exception\InvalidXml($filename);
 
@@ -46,9 +47,14 @@ class Text extends \MPF\Base
 
                     $newText = new Text();
                     $texts = array();
+                    
+                    $availableCountries = array();
                     foreach ($xml->country as $country) {
-                        // TODO: Text, must compile all the Country tags of the same languages, if it does not exists in the current we must take the alternative
-                        if ($country['code'] == $currentCountryAbrv2) {
+                        $availableCountries[] = (string)$country['code'];
+                    }
+
+                    foreach ($xml->country as $country) {
+                        if ((in_array($currentCountryAbrv2, $availableCountries) && $currentCountryAbrv2 == (string)$country['code']) || !in_array($currentCountryAbrv2, $availableCountries)) {
                             foreach ($country->text as $text) {
                                 $texts[(string) $text['id']] = (string) $text;
                             }
@@ -122,7 +128,7 @@ class Text extends \MPF\Base
     {
         if (!array_key_exists($id, $this->texts)) {
             $exception = new Text\Exception\IdNotFound($id, array_keys($this->texts));
-
+die(print_r($this->texts));
             $this->getLogger()->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::TEXT, 
                 'className' => 'Text',
