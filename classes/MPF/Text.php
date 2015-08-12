@@ -25,7 +25,7 @@ class Text extends \MPF\Base
         if (!array_key_exists($filename, $files)) {
             $currentCountryAbrv2 = Locale::byENV()->getCountryCode();
             $lang = Locale::byENV()->getLanguageCode();
-
+            
             $filename = $filename . '.xml';
             foreach (ENV::paths()->i18n() as $path) {
                 $file = $path . $lang . '/' . $filename;
