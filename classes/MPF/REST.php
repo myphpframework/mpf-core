@@ -141,6 +141,10 @@ class REST extends \MPF\Base
                 "fields" => array()
             );
             
+            if (property_exists($e, 'code')) {
+                $response['code'] = $e->code;
+            }
+            
             if (property_exists($e, 'invalidFields')) {
                 $response['fields'] = (array)$e->invalidFields;
             }
