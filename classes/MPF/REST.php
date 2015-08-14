@@ -52,7 +52,7 @@ class REST extends \MPF\Base
             ob_clean();
             
             $response = array(
-                "errorcode" => Service::HTTPCODE_INTERNAL_ERROR,
+                "httpcode" => Service::HTTPCODE_INTERNAL_ERROR,
                 "message" => $error,
                 "fields" => array()
             );
@@ -117,7 +117,7 @@ class REST extends \MPF\Base
             $service->output($response);
         } catch (Service\Exception\InvalidService $e) {
             $response = array(
-                "errorcode" => Service::HTTPCODE_NOT_FOUND,
+                "httpcode" => Service::HTTPCODE_NOT_FOUND,
                 "message" => $e->getMessage(),
                 "fields" => array()
             );
@@ -133,10 +133,10 @@ class REST extends \MPF\Base
             $service->setParser($parser);
             $service->output($response);
         } catch (\Exception $e) {
-            $errorCode = (property_exists($e, 'httpcode') ? $e->httpcode : Service::HTTPCODE_INTERNAL_ERROR);
+            $httpcode = (property_exists($e, 'httpcode') ? $e->httpcode : Service::HTTPCODE_INTERNAL_ERROR);
 
             $response = array(
-                "errorcode" => $errorCode,
+                "httpcode" => $httpcode,
                 "message" => $e->getMessage(),
                 "fields" => array()
             );
@@ -151,7 +151,7 @@ class REST extends \MPF\Base
                 'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
-            $service->setResponseCode($errorCode);
+            $service->setResponseCode($httpcode);
             $service->output($response);
         }
     }
