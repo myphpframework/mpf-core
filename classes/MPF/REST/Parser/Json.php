@@ -7,7 +7,7 @@ class Json extends \MPF\REST\Parser
 
     public function getOutput($input, $serviceName="", $actionName="")
     {
-        $response = (!$input ? '{}' : json_encode($input));
+        $response = (!$input && !is_bool($input) ? '{}' : json_encode($input));
 
         if (!$response) {
             throw new \Exception(\MPF\Text::byXml('mpf_exception')->get('serviceJsonParser', array('Replace' => array('errorNumber' => json_last_error()))), 500);
