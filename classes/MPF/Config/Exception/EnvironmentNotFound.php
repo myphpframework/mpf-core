@@ -7,9 +7,9 @@ use MPF\Text;
 class EnvironmentNotFound extends \Exception
 {
 
-    public function __construct()
+    public function __construct($type, $options)
     {
-        parent::__construct(Text::byXml('mpf_exception')->get('configUnknownEnvironment', array('Replace' => array('mpf_env' => \MPF\Env::getType()))));
-    }
+        parent::__construct('Enviroment "' . $type . '" does not exist in the config file! Must be either: '.implode(",", $options));
+}
 
 }

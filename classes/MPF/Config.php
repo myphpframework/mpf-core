@@ -102,7 +102,7 @@ class Config
     private static function getEnv(Config $config)
     {
         if (!array_key_exists(ENV::getType(), $config->configs)) {
-            throw new Config\Exception\EnvironmentNotFound('Enviroment "' . ENV::getType() . '" does not exist in the config file!');
+            throw new Config\Exception\EnvironmentNotFound(ENV::getType(), array_keys($config->configs));
         }
 
         $return = $config->configs[ENV::getType()];

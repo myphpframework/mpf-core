@@ -55,7 +55,7 @@ function mpf_parse_ini_file ($file) {
       continue;
     }
 
-    preg_match('/\[\s{0,}([a-z]{4,}\s:\s[a-z]{4,})\s{0,}\]/i', $line, $matches);
+    preg_match('/\[\s{0,}([a-z]{4,}\s{0,}:\s{0,}[a-z]{4,})\s{0,}\]/i', $line, $matches);
     if (!empty($matches) && $currentSection != $matches[1]) {
       $currentSection = trim($matches[1]);
       $config[ $currentSection ] = array();
@@ -67,7 +67,7 @@ function mpf_parse_ini_file ($file) {
       $config[ $currentSection ] = array();
     }
 
-    preg_match('/^([a-z0-9\._]*)\s\=\s(.*)$/i', $line, $matches);
+    preg_match('/^([a-z0-9\._]*)\s{0,}\=\s{0,}(.*)$/i', $line, $matches);
     if (!empty($matches)) {
       $value = trim($matches[2]);
       if (is_numeric($value)) {

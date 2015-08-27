@@ -20,16 +20,16 @@ include (PATH_MPF_CORE .'classes/Psr/Log/AbstractLogger.php');
 include (PATH_MPF_CORE .'classes/MPF/Log/Category.php');
 include (PATH_MPF_CORE .'classes/MPF/Log/Logger.php');
 
-ENV::init(get_cfg_var('mpf.env'));
-Logger::$currentLogLevel = Config::get('settings')->logger->level;
-Logger::$currentCategoryLevel = Config::get('settings')->logger->category;
-Logger::$storageType = Config::get('settings')->logger->storage;
-
 $autoloader = new Autoloader();
 foreach (ENV::paths()->classes() as $path) {
     $autoloader->addPath($path);
 }
 $autoloader->register();
+
+ENV::init(get_cfg_var('mpf.env'));
+Logger::$currentLogLevel = Config::get('settings')->logger->level;
+Logger::$currentCategoryLevel = Config::get('settings')->logger->category;
+Logger::$storageType = Config::get('settings')->logger->storage;
 
 register_shutdown_function(array('\MPF\ENV', 'shutdown'));
 
