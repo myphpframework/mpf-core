@@ -50,7 +50,7 @@ abstract class Service extends \MPF\Base
 
     abstract protected function create($id, $data);
 
-    abstract protected function delete($id);
+    abstract protected function delete($id, $data);
 
     abstract protected function retrieve($id, $data);
 
@@ -156,7 +156,7 @@ abstract class Service extends \MPF\Base
                     'calledClass' => get_called_class(),
                     'id' => $id
                 ));
-                return $this->delete($id);
+                return $this->delete($id, $this->data);
                 break;
             case 'OPTIONS':
                 $this->getLogger()->debug('{calledClass}->options({id})', array(
