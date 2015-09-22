@@ -23,7 +23,7 @@ class Text extends \MPF\REST\Service
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }
 
-    protected function delete($id)
+    protected function delete($id, $data)
     {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
     }

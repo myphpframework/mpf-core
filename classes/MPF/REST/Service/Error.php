@@ -23,7 +23,7 @@ class Error extends \MPF\REST\Service
         return array();
     }
 
-    protected function delete($id)
+    protected function delete($id, $data)
     {
         $this->setResponseCode(self::HTTPCODE_NOT_IMPLEMENTED);
         return array();
