@@ -128,7 +128,7 @@ class Text extends \MPF\Base
     {
         if (!array_key_exists($id, $this->texts)) {
             $exception = new Text\Exception\IdNotFound($id, array_keys($this->texts));
-die(print_r($this->texts));
+
             $this->getLogger()->warning($exception->getMessage(), array(
                 'category' => Category::FRAMEWORK | Category::TEXT, 
                 'className' => 'Text',
