@@ -155,6 +155,7 @@ class REST extends \MPF\Base
                 'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
             ));
+            $service = new Service\Error($data);
             $service->setResponseCode($httpcode);
             $service->output($response);
         }
