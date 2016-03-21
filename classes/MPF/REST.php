@@ -157,6 +157,7 @@ class REST extends \MPF\Base
             ));
             $service = new Service\Error($data);
             $service->setResponseCode($httpcode);
+            $service->setParser($parser);
             $service->output($response);
         }
     }
