@@ -84,13 +84,13 @@ abstract class Service extends \MPF\Base
      * @param mixed $id
      * @param string $action
      */
-    public function execute($id, $action)
+    public function execute($id, $action, $id2=null)
     {
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
         $this->action = $action;
-        
+
         $this->getLogger()->debug('{method} :: {id} :: {action}', array(
-            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'category' => Category::FRAMEWORK | Category::SERVICE,
             'className' => 'Service',
             'method' => $method,
             'id' => $id,
@@ -104,7 +104,7 @@ abstract class Service extends \MPF\Base
                 $exception = new Service\Exception\InvalidRequestAction($action);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'exception' => $exception
                 ));
@@ -112,19 +112,20 @@ abstract class Service extends \MPF\Base
             }
 
             $this->getLogger()->debug('{calledClass}->{action}({id})', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'Service',
                 'calledClass' => get_called_class(),
                 'id' => $id,
+                'id2' => $id2,
                 'action' => $action
             ));
-            return $this->$action($id, $this->data);
+            return $this->$action($id, $this->data, $id2);
         }
 
         switch ($method) {
             case 'GET':
                 $this->getLogger()->debug('{calledClass}->retrieve({id})', array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'calledClass' => get_called_class(),
                     'id' => $id
@@ -133,7 +134,7 @@ abstract class Service extends \MPF\Base
                 break;
             case 'POST':
                 $this->getLogger()->debug('{calledClass}->create({id})', array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'calledClass' => get_called_class(),
                     'id' => $id
@@ -142,7 +143,7 @@ abstract class Service extends \MPF\Base
                 break;
             case 'PUT':
                 $this->getLogger()->debug('{calledClass}->update({id})', array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'calledClass' => get_called_class(),
                     'id' => $id
@@ -151,7 +152,7 @@ abstract class Service extends \MPF\Base
                 break;
             case 'DELETE':
                 $this->getLogger()->debug('{calledClass}->delete({id})', array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'calledClass' => get_called_class(),
                     'id' => $id
@@ -160,7 +161,7 @@ abstract class Service extends \MPF\Base
                 break;
             case 'OPTIONS':
                 $this->getLogger()->debug('{calledClass}->options({id})', array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'calledClass' => get_called_class(),
                     'id' => $id
@@ -173,7 +174,7 @@ abstract class Service extends \MPF\Base
                 $exception = new Service\Exception\InvalidRequestMethod($method);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'exception' => $exception
                 ));
@@ -313,19 +314,19 @@ abstract class Service extends \MPF\Base
     public function validate($id, $action)
     {
         $options = $this->options($id, $action);
-        
+
         $method = strtoupper(filter_var($_SERVER['REQUEST_METHOD'], \FILTER_SANITIZE_STRING));
         if (!in_array($method, array_keys($options))) {
             $exception = new Service\Exception\InvalidRequestMethod($method);
-            
+
             $this->getLogger()->warning($exception->getMessage(), array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'Service',
                 'exception' => $exception
             ));
             throw $exception;
         }
-        
+
         $requiredFields = array();
         $invalidFieldValues = array();
         if (array_key_exists($method, $options)) {
@@ -333,10 +334,10 @@ abstract class Service extends \MPF\Base
                 if ($details['required']) {
                     $requiredFields[] = $fieldName;
                 }
-                
+
                 // if we have a list we double check the value
                 if (array_key_exists('list', $details)
-                    && array_key_exists($fieldName, $this->data) 
+                    && array_key_exists($fieldName, $this->data)
                     && !in_array($this->data[$fieldName], $details['list'])) {
 
                     $invalidFieldValues[$fieldName] = $details['list'];
@@ -353,9 +354,9 @@ abstract class Service extends \MPF\Base
 
         if (!empty($missingFields)) {
             $exception = new Service\Exception\MissingRequestFields($missingFields);
-            
+
             $this->getLogger()->warning($exception->getMessage(), array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'Service',
                 'exception' => $exception
             ));
@@ -367,7 +368,7 @@ abstract class Service extends \MPF\Base
                 $exception = new Service\Exception\InvalidFieldValue($field, $values);
 
                 $this->getLogger()->warning($exception->getMessage(), array(
-                    'category' => Category::FRAMEWORK | Category::SERVICE, 
+                    'category' => Category::FRAMEWORK | Category::SERVICE,
                     'className' => 'Service',
                     'exception' => $exception
                 ));

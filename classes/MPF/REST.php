@@ -16,7 +16,7 @@ class REST extends \MPF\Base
      * @var \MPF\User $loggedInUser
      */
     protected static $loggedInUser;
-    
+
     public static function basicAuth($login, $password, $realm = 'MPF-REST')
     {
         if (!$login || !$password || !self::authenticate($login, $password)) {
@@ -50,7 +50,7 @@ class REST extends \MPF\Base
     {
         if(!is_null($error = error_get_last()) && in_array($error['type'], array(E_ERROR, E_COMPILE_ERROR, E_CORE_ERROR, E_USER_ERROR, E_PARSE))) {
             ob_clean();
-            
+
             $response = array(
                 "httpcode" => Service::HTTPCODE_INTERNAL_ERROR,
                 "message" => $error,
@@ -59,7 +59,7 @@ class REST extends \MPF\Base
 
             $logger = new \MPF\Log\Logger();
             $logger->critical('FATAL: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'REST',
                 'response' => str_replace(' ', '', print_r($response, true)),
             ));
@@ -70,11 +70,11 @@ class REST extends \MPF\Base
             $service->output($response);
         }
     }
-    
+
     public static function execute($basePath = '')
     {
         register_shutdown_function('\MPF\REST::fatal_handler');
-        
+
         $logger = new \MPF\Log\Logger();
         self::$basePath = '/' . preg_replace('/^\/|\/$/i', '', $basePath) . '/';
 
@@ -88,10 +88,10 @@ class REST extends \MPF\Base
         try {
             $data = self::getData();
             $parser = self::getParser(getallheaders());
-            @list($serviceClass, $id, $action) = self::getParts();
+            @list($serviceClass, $id, $id2, $action) = self::getParts();
 
             $logger->debug("Generated class: {name}\n\tREQUEST_URI: {uri}\n", array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'REST',
                 'uri' => $_SERVER['REQUEST_URI'],
                 'name' => $serviceClass
@@ -107,9 +107,9 @@ class REST extends \MPF\Base
             if (self::$loggedInUser) {
                 $service->setUser(self::$loggedInUser);
             }
-            
+
             $service->validate($id, $action);
-            $response = $service->execute($id, $action);
+            $response = $service->execute($id, $action, $id2);
 
             #ob_end_flush();
             #$buffer = ob_get_contents();
@@ -123,7 +123,7 @@ class REST extends \MPF\Base
             );
 
             $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'REST',
                 'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
@@ -140,17 +140,17 @@ class REST extends \MPF\Base
                 "message" => $e->getMessage(),
                 "fields" => array()
             );
-            
+
             if (property_exists($e, 'errorcode')) {
                 $response['errorcode'] = $e->errorcode;
             }
-            
+
             if (property_exists($e, 'invalidFields')) {
                 $response['fields'] = (array)$e->invalidFields;
             }
 
             $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE, 
+                'category' => Category::FRAMEWORK | Category::SERVICE,
                 'className' => 'REST',
                 'response' => str_replace(' ', '', print_r($response, true)),
                 'exception' => $e
@@ -161,16 +161,16 @@ class REST extends \MPF\Base
             $service->output($response);
         }
     }
-    
+
     /**
      * Return the proper parser for the request content-type
-     * 
+     *
      * @return \MPF\REST\Parser
      */
     private static function getParser($headers)
     {
         $headers = array_change_key_case($headers, CASE_LOWER);
-        
+
         $contentType = (array_key_exists('content-type', $headers) ? $headers['content-type'] : 'application/json');
         switch ($contentType) {
             case 'text/html':
@@ -187,7 +187,7 @@ class REST extends \MPF\Base
 
         $logger = new \MPF\Log\Logger();
         $logger->debug("Parser for request {parser}\n", array(
-            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'category' => Category::FRAMEWORK | Category::SERVICE,
             'className' => 'REST',
             'parser' => get_class($parser)
         ));
@@ -248,10 +248,10 @@ class REST extends \MPF\Base
 
             return $data;
         }
-        
+
         $logger = new \MPF\Log\Logger();
         $logger->debug("Data recieved: {data}\n", array(
-            'category' => Category::FRAMEWORK | Category::SERVICE, 
+            'category' => Category::FRAMEWORK | Category::SERVICE,
             'className' => 'REST',
             'data' => print_r($a_data, true)
         ));
@@ -269,18 +269,19 @@ class REST extends \MPF\Base
         if (empty($options)) {
             throw new \MPF\REST\Service\Exception\InvalidService("");
         }
-        
+
         $serviceClass = '\MPF\REST\Service\\' . ucfirst($options[0]);
         unset($options[0]);
-        
+
         if (!class_exists($serviceClass)) {
             return array();
         }
 
         $id = filter_var(urldecode(@$options[1]), FILTER_SANITIZE_STRING);
         $action = filter_var(urldecode(@$options[2]), FILTER_SANITIZE_STRING);
+        $id2 = filter_var(urldecode(@$options[3]), FILTER_SANITIZE_STRING);
 
-        return array($serviceClass, $id, $action);
+        return array($serviceClass, $id, $id2, $action);
     }
 
     private function __construct()
