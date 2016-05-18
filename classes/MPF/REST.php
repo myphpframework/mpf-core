@@ -155,8 +155,10 @@ class REST extends \MPF\Base
             $response['fields'] = (array)$e->invalidFields;
         }
         
-        if (method_exists($e, 'getTraceAsString')) {
-            $response['trace'] = $e->getTrace();
+        if (ENV::getType() === ENV::TYPE_DEVELOPMENT) {
+            if (method_exists($e, 'getTraceAsString')) {
+                $response['trace'] = $e->getTrace();
+            }
         }
 
         $logger->warning('Response: {response}', array(
