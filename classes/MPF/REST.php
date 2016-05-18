@@ -84,7 +84,7 @@ class REST extends \MPF\Base
         }
 
         ob_start();
-
+        
         try {
             $data = self::getData();
             $parser = self::getParser(getallheaders());
@@ -111,8 +111,6 @@ class REST extends \MPF\Base
             $service->validate($id, $action);
             $response = $service->execute($id, $action, $id2);
 
-            #ob_end_flush();
-            #$buffer = ob_get_contents();
             ob_end_clean();
             $service->output($response);
         } catch (Service\Exception\InvalidService $e) {
@@ -131,37 +129,50 @@ class REST extends \MPF\Base
             $service = new Service\Error($data);
             $service->setResponseCode(Service::HTTPCODE_NOT_FOUND);
             $service->setParser($parser);
+            ob_end_clean();
             $service->output($response);
+        } catch (\Throwable $e) {
+            self::handle_fatal_errors($logger, $parser, $data, $e);
         } catch (\Exception $e) {
-            $httpcode = (property_exists($e, 'httpcode') ? $e->httpcode : Service::HTTPCODE_INTERNAL_ERROR);
-
-            $response = array(
-                "httpcode" => $httpcode,
-                "message" => $e->getMessage(),
-                "fields" => array()
-            );
-
-            if (property_exists($e, 'errorcode')) {
-                $response['errorcode'] = $e->errorcode;
-            }
-
-            if (property_exists($e, 'invalidFields')) {
-                $response['fields'] = (array)$e->invalidFields;
-            }
-
-            $logger->warning('Response: {response}', array(
-                'category' => Category::FRAMEWORK | Category::SERVICE,
-                'className' => 'REST',
-                'response' => str_replace(' ', '', print_r($response, true)),
-                'exception' => $e
-            ));
-            $service = new Service\Error($data);
-            $service->setResponseCode($httpcode);
-            $service->setParser($parser);
-            $service->output($response);
+            self::handle_fatal_errors($logger, $parser, $data, $e);
         }
     }
+    
+    private static function handle_fatal_errors($logger, $parser, $data, $e) {
+        $httpcode = (property_exists($e, 'httpcode') ? $e->httpcode : Service::HTTPCODE_INTERNAL_ERROR);
 
+        $response = array(
+            "httpcode" => $httpcode,
+            "message" => $e->getMessage(),
+            "fields" => array()
+        );
+
+        if (property_exists($e, 'errorcode')) {
+            $response['errorcode'] = $e->errorcode;
+        }
+
+        if (property_exists($e, 'invalidFields')) {
+            $response['fields'] = (array)$e->invalidFields;
+        }
+        
+        if (method_exists($e, 'getTraceAsString')) {
+            $response['trace'] = $e->getTrace();
+        }
+
+        $logger->warning('Response: {response}', array(
+            'category' => Category::FRAMEWORK | Category::SERVICE,
+            'className' => 'REST',
+            'response' => str_replace(' ', '', print_r($response, true)),
+            'exception' => $e
+        ));
+        $service = new Service\Error($data);
+        $service->setResponseCode($httpcode);
+        $service->setParser($parser);
+        
+        ob_end_clean();
+        $service->output($response);
+    }
+    
     /**
      * Return the proper parser for the request content-type
      *
