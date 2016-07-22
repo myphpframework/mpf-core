@@ -226,7 +226,7 @@ class REST extends \MPF\Base
         if (empty($a_data)) {
             preg_match('/boundary=(.*)$/', @$_SERVER['CONTENT_TYPE'], $matches);
             if (!count($matches)) {
-                parse_str(urldecode($input), $a_data);
+                parse_str($input, $a_data);
             } else {
                 $boundary = $matches[1];
                 $a_blocks = preg_split("/-+$boundary/", $input);
