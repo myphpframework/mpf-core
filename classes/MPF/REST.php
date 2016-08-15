@@ -253,7 +253,7 @@ class REST extends \MPF\Base
                 if (is_array($value)) {
                     $data[$key] = sanitize($value);
                 } else {
-                    $data[$key] = urldecode($data[$key]);
+                    $data[$key] = rawurldecode($data[$key]);
                     $data[$key] = filter_var($data[$key], FILTER_SANITIZE_SPECIAL_CHARS);
                     $data[$key] = filter_var($data[$key], FILTER_SANITIZE_STRIPPED);
                 }
@@ -290,9 +290,9 @@ class REST extends \MPF\Base
             return array();
         }
 
-        $id = filter_var(urldecode(@$options[1]), FILTER_SANITIZE_STRING);
-        $action = filter_var(urldecode(@$options[2]), FILTER_SANITIZE_STRING);
-        $id2 = filter_var(urldecode(@$options[3]), FILTER_SANITIZE_STRING);
+        $id = filter_var(rawurldecode(@$options[1]), FILTER_SANITIZE_STRING);
+        $action = filter_var(rawurldecode(@$options[2]), FILTER_SANITIZE_STRING);
+        $id2 = filter_var(rawurldecode(@$options[3]), FILTER_SANITIZE_STRING);
 
         return array($serviceClass, $id, $id2, $action);
     }
