@@ -212,7 +212,8 @@ class REST extends \MPF\Base
     {
         $a_data = array();
         $input = file_get_contents('php://input');
-
+        $GLOBALS["rawRequest"] = $input;
+        
         $json = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE) {
             $a_data = $json;
