@@ -37,7 +37,7 @@ class UserTest extends PHPUnit_Framework_TestCase {
         $newUser->save();
 
         $user = User::byUsername('test');
-        $this->assertInstanceOf('MPF\User', $user, 'A user with the username "test" should of been created.');
+        $this->assertInstanceOf('MPF\User', $user, 'A user with the username "test" should have been created.');
         $this->assertTrue(date('Y-m-d') == substr($user->getCreationDate(), 0, 10), 'The creation of the new user should be the one of today.');
         $this->assertTrue(User::STATUS_NOTAPPROVED == $user->getCurrentStatus()->getValue(), 'The status after a new user creation should be 50 (User::STATUS_NOTAPPROVED).');
         $this->assertTrue("test" == $user->getUsername(), 'The username of the new user should be "test".');
@@ -52,10 +52,10 @@ class UserTest extends PHPUnit_Framework_TestCase {
         $this->assertFalse($user->addGroup(User\Group::ADMIN()), 'Unless a user in the admin group is logged in the user group ADMIN cant be assigned to a user.');
 
         $userById = User::byId($user->getId());
-        $this->assertInstanceOf('MPF\User', $userById, 'A user with the username "test" should of been created.');
+        $this->assertInstanceOf('MPF\User', $userById, 'A user with the username "test" should have been created.');
 
         $userByUsername = User::byUsername('test');
-        $this->assertInstanceOf('MPF\User', $userByUsername, 'A user with the username "test" should of been created.');
+        $this->assertInstanceOf('MPF\User', $userByUsername, 'A user with the username "test" should have been created.');
 
     }
 }
