@@ -31,41 +31,41 @@ class TextTest extends PHPUnit_Framework_TestCase
     public function testReplaceMarker()
     {
         $text = Text::byXml('test')->get('testReplace', array('Replace'=>array('name' => 'bob')));
-        $this->assertEquals('test the bob plz!', $text, 'The marker @name@ should of been replaced by "bob" and wasnt.');
+        $this->assertEquals('test the bob plz!', $text, 'The marker @name@ should have been replaced by "bob" and wasnt.');
     }
 
     public function testGetId_validId()
     {
         $text = Text::byXml('test');
-        $this->assertEquals('test value 2', $text->get('test2'), 'The value of the id "test2" should of been "test value 2".');
+        $this->assertEquals('test value 2', $text->get('test2'), 'The value of the id "test2" should have been "test value 2".');
     }
 
     public function testBBCode_parse()
     {
         $text = Text::byXml('test');
         $test = $text->get('bbcodeTest');
-        $this->assertEquals('test the <b>name</b> plz!', $test, 'The value of the id "bbcodeTest" should of been "test the <b>name</b> plz!" not "'.$test.'".');
+        $this->assertEquals('test the <b>name</b> plz!', $test, 'The value of the id "bbcodeTest" should have been "test the <b>name</b> plz!" not "'.$test.'".');
     }
 
     public function testBBCode_parseComplexDate()
     {
         $text = Text::byXml('test');
         $test = $text->get('bbcodeTestDate');
-        $this->assertEquals('this is an 1969-12-31 date...', $test, 'The value of the id "bbcodeTestDate" should of been "this is an 1969-12-31 date..." not "'.$test.'".');
+        $this->assertEquals('this is an 1969-12-31 date...', $test, 'The value of the id "bbcodeTestDate" should have been "this is an 1969-12-31 date..." not "'.$test.'".');
     }
 
     public function testBBCode_parseComplexDiv()
     {
         $text = Text::byXml('test');
         $test = $text->get('bbcodeTestDiv');
-        $this->assertEquals('this is an <div class="bob">hullo</div> div...', $test, 'The value of the id "bbcodeTestDiv" should of been "this is an <div class="bob">hullo</div> div..." not "'.$test.'".');
+        $this->assertEquals('this is an <div class="bob">hullo</div> div...', $test, 'The value of the id "bbcodeTestDiv" should have been "this is an <div class="bob">hullo</div> div..." not "'.$test.'".');
     }
     /*
     public function testBBCode_parseComplexInception()
     {
         $text = Text::byXml('test');
         $test = $text->get('bbcodeTestInception');
-        $this->assertEquals('this is an <div class="bob">hm or<span class="inception">hullo</span>test</div> div...', $test, 'The value of the id "bbcodeTestInception" should of been "this is an <div class="bob">hm or<span class="inception">hullo</span>test</div> div..." not "'.$test.'".');
+        $this->assertEquals('this is an <div class="bob">hm or<span class="inception">hullo</span>test</div> div...', $test, 'The value of the id "bbcodeTestInception" should have been "this is an <div class="bob">hm or<span class="inception">hullo</span>test</div> div..." not "'.$test.'".');
     }
      */
 }

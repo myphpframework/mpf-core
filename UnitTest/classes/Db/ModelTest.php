@@ -87,7 +87,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $model = new ModelExample();
         $model->setField('testLength', "test");
         $json = $model->toJson();
-        $this->assertEquals('{"id":null,"integerTest":null,"creationDate":null,"mydate":"2000-01-01","mydatetime":"2000-01-01 00:00:00","lastAttempt":null,"username":"false","testLength":"test","color":"test","statuses":[]}', $json, "The function toJson should of returned the proper string for the test");
+        $this->assertEquals('{"id":null,"integerTest":null,"creationDate":null,"mydate":"2000-01-01","mydatetime":"2000-01-01 00:00:00","lastAttempt":null,"username":"false","testLength":"test","color":"test","statuses":[]}', $json, "The function toJson should have returned the proper string for the test");
     }
 
     public function testFromJson()
@@ -97,7 +97,7 @@ class ModelTest extends PHPUnit_Framework_TestCase
         $json = $model->toJson();
         $model = ModelExample::fromJson($json);
         $newJson = $model->toJson();
-        $this->assertEquals($newJson, $json, "The function fromJson should of returned the proper string for the test");
+        $this->assertEquals($newJson, $json, "The function fromJson should have returned the proper string for the test");
     }
 
     public function testGetSaltType() {
